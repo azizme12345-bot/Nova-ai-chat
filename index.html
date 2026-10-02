@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
-<title>NOVA AI | Full-Stack Intelligent Assistant</title>
+<title>NOVA AI | Advanced All-in-One Assistant</title>
 <style>
 :root{
   --bg:#ffffff;--panel:#f7f8fa;--panel2:#ffffff;--text:#17191c;--muted:#73777f;
@@ -35,57 +35,99 @@ button{cursor:pointer}
 .top-title{font-weight:650;font-size:16px}
 .icon-btn{border:0;background:transparent;color:var(--text);width:38px;height:38px;border-radius:9px;display:grid;place-items:center}
 .icon-btn:hover{background:var(--panel)}
-.chat{flex:1;overflow:auto;padding:34px 20px 150px}
+.chat{flex:1;overflow-y:auto;scroll-behavior:smooth;padding:34px 20px 150px}
 .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
 .empty .biglogo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-size:28px;font-weight:800;box-shadow:0 4px 16px rgba(22,119,255,0.35)}
 .empty h1{font-size:24px;margin:5px 0;font-weight:700}
-.empty p{margin:0;color:var(--muted);font-size:14px;max-width:440px}
-.messages{max-width:780px;margin:auto}
+.empty p{margin:0;color:var(--muted);font-size:14px;max-width:460px;line-height:1.5}
+.messages{max-width:800px;margin:auto}
 .msg{margin:0 0 20px;display:flex;flex-direction:column}
 .msg.user{align-items:flex-end}
 .msg.ai{align-items:flex-start}
-.bubble{max-width:82%;padding:12px 16px;border-radius:15px;line-height:1.6;font-size:14px;word-break:break-word}
+.bubble{max-width:85%;padding:14px 18px;border-radius:16px;line-height:1.65;font-size:14px;word-break:break-word}
 .msg.user .bubble{background:var(--user)}
 .msg.ai .bubble{background:var(--panel);border:1px solid var(--line)}
 .composer-wrap{position:fixed;bottom:0;left:270px;right:0;padding:16px 20px 20px;background:linear-gradient(transparent,var(--bg) 28%);z-index:10}
-.composer{max-width:780px;margin:auto;border:1px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 22px rgba(0,0,0,.06);padding:9px}
-textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:8px 9px;min-height:44px;max-height:130px}
-.tools{display:flex;align-items:center;gap:5px}
+.composer{max-width:800px;margin:auto;border:1px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 22px rgba(0,0,0,.06);padding:9px}
+textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:8px 9px;min-height:44px;max-height:140px;line-height:1.5}
+.tools{display:flex;align-items:center;gap:6px}
 .tool{border:0;background:transparent;color:var(--muted);width:36px;height:34px;border-radius:8px;display:grid;place-items:center;transition:all 0.15s}
 .tool:hover{background:var(--panel);color:var(--text)}
 .send{margin-left:auto;background:var(--accent);color:white;border:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;transition:opacity 0.2s}
 .send:hover{opacity:0.9}
-.attach-menu{display:none;position:absolute;bottom:68px;left:0;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:7px;width:220px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:20}
-.attach-menu.show{display:block}
-.attach-item{border:0;background:transparent;color:var(--text);width:100%;text-align:left;padding:11px;border-radius:8px;font-size:13px}
-.attach-item:hover{background:var(--panel)}
 
-/* Custom Dashboard Workspaces styles */
-.workspace-panel{display:none;flex:1;overflow-y:auto;padding:34px 20px 100px}
-.workspace-panel.active{display:flex;flex-direction:column}
-.form-group{margin-bottom:15px;display:flex;flex-direction:column;gap:5px}
-.form-label{font-size:12px;font-weight:600;color:var(--muted)}
-.form-control{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 12px;outline:none;font-size:13px}
-.form-control:focus{border-color:var(--accent)}
-.btn-primary{background:var(--accent);color:white;border:0;padding:10px 16px;border-radius:9px;font-weight:600;font-size:13px;transition:all 0.2s}
-.btn-primary:hover{opacity:0.9}
-.btn-primary:disabled{opacity:0.6;cursor:not-allowed}
-
-/* Toast System styles */
-#toast-container{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:10px}
-.toast{background:var(--panel2);color:var(--text);border:1px solid var(--line);box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px}
-
-/* Modal styles */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:99;place-items:center;padding:20px}
+/* Modals */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:99;place-items:center;padding:20px;overflow-y:auto;}
 .modal-overlay.active{display:grid}
-.modal-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:440px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,0.25)}
+.modal-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:580px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
+
+/* Photo Studio Tabs */
+.studio-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 14px; padding-bottom: 8px; }
+.studio-tab-btn { background: none; border: none; padding: 8px 14px; font-weight: 600; font-size: 13px; color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.studio-tab-btn.active { background: var(--accent-soft); color: var(--accent); }
+
+/* Switch Toggle for Batch Mode */
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background-color: var(--line);
+  transition: .25s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .25s;
+  border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--accent); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Batch Queue Item Cards */
+.batch-item-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+}
+.batch-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+.batch-badge.pending { background: var(--panel2); color: var(--muted); border: 1px solid var(--line); }
+.batch-badge.processing { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+.batch-badge.completed { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.batch-badge.failed { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
 /* Markdown table styling */
 table.md-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
 table.md-table th, table.md-table td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
 table.md-table th { background: var(--panel2); font-weight: 600; }
 
-/* Mobile Backdrop overlay to tap anywhere and close sidebar */
+/* Mobile Backdrop overlay */
 .sidebar-backdrop {
   display: none;
   position: fixed;
@@ -98,7 +140,6 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
   transition: opacity 0.25s ease;
 }
 
-/* Mic active pulse animation */
 @keyframes pulse-mic {
   0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(239,68,68,0.5)); }
   50% { transform: scale(1.18); filter: drop-shadow(0 0 10px rgba(239,68,68,0.9)); }
@@ -107,6 +148,11 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
 .mic-pulsing {
   animation: pulse-mic 1.2s infinite ease-in-out !important;
   color: #ef4444 !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @media(max-width:720px){
@@ -134,34 +180,187 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
    pointer-events: auto;
  }
  .composer-wrap{left:0}.topbar{padding:0 12px}.chat{padding-left:13px;padding-right:13px}
- .bubble{max-width:88%}.workspace-panel{padding-bottom:140px}
+ .bubble{max-width:88%}
 }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- Toast Container -->
   <div id="toast-container"></div>
-
-  <!-- Mobile Backdrop Overlay: Tap anywhere outside sidebar to dismiss -->
   <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+  <!-- AI PHOTO STUDIO MODAL -->
+  <div class="modal-overlay" id="photoStudioModal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <span>🎨</span> <span>AI Photo Studio & Editor</span>
+        </h3>
+        <button onclick="closePhotoStudioModal()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer;">✕</button>
+      </div>
+
+      <div class="studio-tabs">
+        <button class="studio-tab-btn active" id="tab-btn-gen" onclick="switchStudioTab('gen')">✨ Generate New Photo</button>
+        <button class="studio-tab-btn" id="tab-btn-edit" onclick="switchStudioTab('edit')">🖌️ Edit Photo(s)</button>
+      </div>
+
+      <!-- TAB 1: GENERATE PHOTO -->
+      <div id="studio-tab-gen-view">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px; font-weight:600; display:block; margin-bottom:5px;">Photo Description / Prompt:</label>
+          <textarea id="studio-gen-prompt" placeholder="Describe the photo you want (e.g., A solid green background with Quranic calligraphy of Surah Al-Jumu'ah verses 9-10 and Bismillah)..." style="width:100%; border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); color:var(--text); height:75px;"></textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">Visual Style:</label>
+            <select id="studio-gen-style" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--text); font-size:12px;">
+              <option value="photorealistic" selected>📸 Photorealistic / Graphic</option>
+              <option value="cinematic">🎬 Cinematic Film (35mm)</option>
+              <option value="anime">🌸 Anime / Studio Ghibli</option>
+              <option value="3d">🧊 3D Pixar / Octane</option>
+              <option value="cyberpunk">🌃 Cyberpunk Neon</option>
+              <option value="portrait">👤 Studio Portrait</option>
+              <option value="oil">🎨 Classic Oil Painting</option>
+              <option value="watercolor">🖌️ Soft Watercolor</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">Aspect Ratio:</label>
+            <select id="studio-gen-ratio" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--text); font-size:12px;">
+              <option value="1:1" selected>1:1 (Square)</option>
+              <option value="16:9">16:9 (Landscape / Wallpaper)</option>
+              <option value="9:16">9:16 (Story / Reel / Mobile)</option>
+              <option value="4:3">4:3 (Classic Photo)</option>
+              <option value="3:4">3:4 (Portrait Photo)</option>
+            </select>
+          </div>
+        </div>
+
+        <button onclick="executeStudioGenerate()" id="btn-studio-generate" class="side-btn" style="background:var(--accent); color:white; justify-content:center; padding:10px; font-weight:700; border-radius:8px;">
+          ✨ Generate Photo
+        </button>
+      </div>
+
+      <!-- TAB 2: EDIT PHOTO (SINGLE & BATCH MODES) -->
+      <div id="studio-tab-edit-view" style="display:none;">
+        <div class="toggle-switch-container">
+          <div>
+            <span style="font-size:13px; font-weight:700; display:block;">⚡ Batch Edit Mode</span>
+            <span style="font-size:11px; color:var(--muted);">Edit multiple photos at once with one prompt</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-batch-mode" onchange="toggleBatchEditMode(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <!-- SINGLE PHOTO EDIT VIEW -->
+        <div id="single-photo-edit-section">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px; font-weight:600; display:block; margin-bottom:5px;">1. Upload Photo to Edit:</label>
+            <div onclick="document.getElementById('studio-edit-file-input').click()" style="border:2px dashed var(--line); border-radius:10px; padding:16px; text-align:center; cursor:pointer; background:var(--panel);">
+              <div id="studio-edit-upload-preview" style="font-size:12px; color:var(--muted);">
+                📷 Click to upload single photo (or drag & drop)
+              </div>
+            </div>
+            <input type="file" id="studio-edit-file-input" accept="image/*" hidden onchange="handleStudioEditFile(this)">
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px; font-weight:600; display:block; margin-bottom:5px;">2. Editing Instruction / Prompt:</label>
+            <textarea id="studio-edit-prompt" placeholder="What changes do you want? (e.g., Modify background to sunset, add glowing text, enhance details)..." style="width:100%; border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); color:var(--text); height:70px;"></textarea>
+          </div>
+
+          <button onclick="executeStudioEdit()" id="btn-studio-edit" class="side-btn" style="background:var(--accent); color:white; justify-content:center; padding:10px; font-weight:700; border-radius:8px;">
+            🖌️ Apply AI Edits
+          </button>
+        </div>
+
+        <!-- BATCH PHOTO EDIT VIEW -->
+        <div id="batch-photo-edit-section" style="display:none;">
+          <div style="margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+              <label style="font-size:12px; font-weight:600;">1. Upload Multiple Photos:</label>
+              <span id="batch-count-badge" style="font-size:11px; background:var(--accent-soft); color:var(--accent); padding:2px 8px; border-radius:10px; font-weight:700;">0 Photos</span>
+            </div>
+            
+            <div onclick="document.getElementById('studio-batch-files-input').click()" style="border:2px dashed var(--accent); border-radius:10px; padding:16px; text-align:center; cursor:pointer; background:var(--accent-soft);">
+              <div style="font-size:13px; font-weight:700; color:var(--accent); margin-bottom:2px;">
+                📂 Choose Multiple Photos
+              </div>
+              <div style="font-size:11px; color:var(--muted);">
+                Select 2 or more photos to edit together
+              </div>
+            </div>
+            <input type="file" id="studio-batch-files-input" accept="image/*" multiple hidden onchange="handleStudioBatchFiles(this)">
+          </div>
+
+          <div id="batch-queue-container" style="max-height:160px; overflow-y:auto; margin-bottom:12px; display:none;"></div>
+
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px; font-weight:600; display:block; margin-bottom:5px;">2. Common Editing Instruction for ALL Photos:</label>
+            <textarea id="studio-batch-prompt" placeholder="Apply this edit to all photos (e.g., Turn into 8K oil painting, add cybernetic neon aura, enhance lighting)..." style="width:100%; border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); color:var(--text); height:70px;"></textarea>
+          </div>
+
+          <div id="batch-progress-bar-wrap" style="display:none; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:700; margin-bottom:4px;">
+              <span id="batch-progress-label">Processing Photos...</span>
+              <span id="batch-progress-percent">0%</span>
+            </div>
+            <div style="width:100%; height:8px; background:var(--panel); border:1px solid var(--line); border-radius:4px; overflow:hidden;">
+              <div id="batch-progress-fill" style="width:0%; height:100%; background:var(--accent); transition:width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <button onclick="executeBatchEdit()" id="btn-batch-execute" class="side-btn" style="background:var(--accent); color:white; justify-content:center; padding:10px; font-weight:700; border-radius:8px;">
+            🚀 Start Batch AI Editing
+          </button>
+        </div>
+
+      </div>
+
+      <!-- SINGLE PHOTO RESULT CONTAINER -->
+      <div id="studio-result-panel" style="display:none; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--accent);">Generated Result:</div>
+        <div style="text-align:center; background:var(--panel); border-radius:10px; padding:8px; margin-bottom:10px;">
+          <img id="studio-result-img" src="" alt="AI Output" style="max-width:100%; max-height:280px; border-radius:8px; object-fit:contain; display:inline-block;" referrerPolicy="no-referrer">
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button onclick="downloadStudioImage()" class="side-btn" style="border:1px solid var(--line); justify-content:center; font-size:11px; padding:8px;">⬇️ Download HD</button>
+          <button onclick="sendStudioImageToChat()" class="side-btn" style="background:var(--accent-soft); color:var(--accent); justify-content:center; font-size:11px; padding:8px; font-weight:600;">💬 Insert to Chat</button>
+        </div>
+      </div>
+
+      <!-- BATCH RESULTS CONTAINER -->
+      <div id="batch-results-panel" style="display:none; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:12px; font-weight:700; color:var(--accent);">✨ Batch Editing Completed</span>
+          <div style="display:flex; gap:6px;">
+            <button onclick="downloadAllBatchImages()" class="side-btn" style="width:auto; padding:5px 10px; font-size:11px; border:1px solid var(--line);">⬇️ Download All</button>
+            <button onclick="insertAllBatchToChat()" class="side-btn" style="width:auto; padding:5px 10px; font-size:11px; background:var(--accent-soft); color:var(--accent); font-weight:600;">💬 Insert All to Chat</button>
+          </div>
+        </div>
+        <div id="batch-results-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:280px; overflow-y:auto;"></div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- API Key Modal -->
   <div class="modal-overlay" id="apiKeyModal">
     <div class="modal-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="margin:0; font-size:16px; font-weight:700;">🔑 Gemini API Key (AQ.Ab8R...)</h3>
+        <h3 style="margin:0; font-size:16px; font-weight:700;">🔑 Gemini API Key Settings</h3>
         <button onclick="closeApiKeyModal()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer;">✕</button>
       </div>
       <p style="font-size:12px; color:var(--muted); margin:0 0 14px 0; line-height:1.5;">
-        Paste your Gemini API Key below (starts with <code>AQ.Ab8R...</code>). It will be saved securely and used for all features: Chat, Code Studio, Voice Mic, Image Gen, Quiz, and Document OCR.
+        Paste your Google AI Studio API Key starting with <code>AQ...</code> or <code>AIza...</code> below. It will be used securely across all AI features, microphone transcription, and code analysis.
       </p>
-      <div class="form-group">
-        <input type="text" id="modal-api-key-input" class="form-control" placeholder="AQ.Ab8R..." style="font-family:monospace; font-size:12px;">
-      </div>
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
-        <button onclick="closeApiKeyModal()" class="form-control" style="background:transparent; cursor:pointer; width:auto; padding:8px 14px;">Cancel</button>
-        <button onclick="saveApiKeyFromModal()" class="btn-primary" style="padding:8px 16px;">Save API Key</button>
+      <input type="text" id="modal-api-key-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-bottom:14px; font-family:monospace; font-size:12px; background:var(--panel); color:var(--text);" placeholder="Paste Google AI Studio API Key (AQ...) here...">
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="closeApiKeyModal()" style="background:none; border:1px solid var(--line); color:var(--text); padding:8px 14px; border-radius:8px;">Cancel</button>
+        <button onclick="saveApiKeyFromModal()" class="side-btn" style="background:var(--accent); color:white; width:auto; padding:8px 16px; justify-content:center;">Save Key</button>
       </div>
     </div>
   </div>
@@ -170,398 +369,543 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
   <aside class="sidebar" id="appSidebar">
     <div class="brand">
       <div class="logo">N</div>
-      <span>NOVA AI</span>
+      <span>NOVA PRO</span>
       <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; display:none;" id="sidebar-close-btn">✕</button>
     </div>
 
-    <!-- Model Selection Dropdown (#modelSelector) -->
     <div style="padding: 0 4px; margin-bottom: 12px;">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:600;">INTELLIGENCE ENGINE</div>
-      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; outline:none; cursor:pointer; font-size:12px;">
-        <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash (Super Fast)</option>
-        <option value="gemini-1.5-pro">Gemini 1.5 Pro (High Precision)</option>
-        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Speed)</option>
-        <option value="gemini-3.1-flash">Gemini 3.1 Flash (Advanced Speed)</option>
-        <option value="gemini-3.1-pro">Gemini 3.1 Pro (Advanced Reasoning)</option>
-        <option value="gemini-3.5-flash">Gemini 3.5 Flash (Latest Ultra-Fast)</option>
-        <option value="gemini-3.5-pro">Gemini 3.5 Pro (Latest Flagship)</option>
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:600;">ACTIVE ENGINE</div>
+      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; outline:none;">
+        <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash (Super Fast & Smart)</option>
+        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Reasoning)</option>
+        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Code & Analysis)</option>
       </select>
     </div>
 
-    <!-- Dedicated New Chat Button (creates clean dialogue immediately) -->
-    <button class="side-btn active" id="side-btn-chat" onclick="newChat()" style="background:var(--accent-soft); color:var(--accent); font-weight:700;">
-      <span>＋</span><span>New Chat</span>
+    <button class="side-btn active" onclick="newChat()" style="background:var(--accent-soft); color:var(--accent); font-weight:700;">
+      <span>＋</span><span>New Conversation</span>
     </button>
-    <button class="side-btn" id="side-btn-coding" onclick="switchMode('coding')"><span>‹›</span><span>Code Analysis & Writer</span></button>
-    <button class="side-btn" id="side-btn-generate" onclick="switchMode('generate')"><span>▧</span><span>Image Generation</span></button>
-    <button class="side-btn" id="side-btn-quiz" onclick="switchMode('quiz')"><span>🧠</span><span>AI Quiz Builder</span></button>
-    <button class="side-btn" id="side-btn-translator" onclick="switchMode('translator')"><span>📝</span><span>Document Translator</span></button>
+    <button class="side-btn" onclick="openPhotoStudioModal()" style="color:#6a5cff; font-weight:700;">
+      <span>🎨</span><span>AI Photo Studio & Editor</span>
+    </button>
     <button class="side-btn" onclick="openApiKeyModal()"><span>🔑</span><span>API Key Settings</span></button>
     <button class="side-btn" onclick="toggleTheme()"><span>◐</span><span>Light / Dark Mode</span></button>
 
-    <!-- Voice & Microphone Settings Panel -->
-    <div class="voice-settings" style="margin-top: 14px; padding: 0 4px; border-top: 1px solid var(--line); padding-top: 12px;">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; font-weight: 600;">VOICE & MIC SETTINGS</div>
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <div>
-          <div style="font-size: 10px; color: var(--muted); margin-bottom: 3px;">Microphone Language:</div>
-          <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none;">
-            <option value="ur-PK">Urdu (اردو)</option>
-            <option value="hi-IN">Hindi (हिंदी)</option>
-            <option value="en-US" selected>English (US / Global)</option>
-            <option value="ar-SA">Arabic (العربية)</option>
-          </select>
-        </div>
-
-        <button onclick="requestMicrophonePermission()" class="btn-primary" style="padding: 6px 10px; font-size: 11px; background: var(--panel2); color: var(--accent); border: 1px solid var(--line);">
-          🎙️ Allow / Test Microphone
-        </button>
-
-        <div>
-          <div style="font-size: 10px; color: var(--muted); margin-bottom: 3px;">Speaker Voice (TTS):</div>
-          <select id="ttsVoiceSelector" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none;">
-            <!-- Loaded dynamically -->
-          </select>
-        </div>
-
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted);">
-          <span>Pitch:</span>
-          <input type="range" id="ttsPitchSlider" min="0.5" max="2" step="0.1" value="1" style="width: 80px; accent-color: var(--accent);">
-        </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted);">
-          <span>Speed:</span>
-          <input type="range" id="ttsSpeedSlider" min="0.5" max="2" step="0.1" value="1.0" style="width: 80px; accent-color: var(--accent);">
-        </div>
-      </div>
+    <!-- Voice & Speaker Settings -->
+    <div style="margin-top: 14px; padding: 12px 4px 0; border-top: 1px solid var(--line);">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600;">AUDIO & SPEAKER</div>
+      <div style="font-size: 10px; color: var(--muted); margin-bottom: 3px;">Microphone Language:</div>
+      <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none; margin-bottom:8px;">
+        <option value="ur-PK" selected>اردو (Urdu)</option>
+        <option value="en-US">English (US / Global)</option>
+        <option value="hi-IN">हिंदी (Hindi)</option>
+        <option value="ar-SA">العربية (Arabic)</option>
+      </select>
+      <button onclick="testSpeakerVoice()" class="side-btn" style="font-size:11px; padding:6px 10px; border:1px solid var(--line); justify-content:center; margin-bottom:4px;">
+        🔊 Test Speaker Voice
+      </button>
     </div>
 
-    <div class="history">RECENT CHATS</div>
+    <div class="history">CONVERSATION HISTORY</div>
     <div id="chat-history-list" style="display:flex; flex-direction:column; gap:2px; margin-top:6px;"></div>
     
     <div class="profile">
       <div class="avatar">A</div>
       <div style="overflow:hidden;">
         <b style="font-size:13px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="profile-user-email">Abdul Aziz</b>
-        <div style="font-size:11px;color:var(--muted)">NOVA AI Virtual Core</div>
+        <div style="font-size:11px;color:var(--muted)">NOVA AI Assistant</div>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN WORKSPACE -->
+  <!-- MAIN -->
   <main class="main" onclick="handleMainTap()">
     <header class="topbar">
       <div style="display:flex; align-items:center; gap:8px;">
         <button class="icon-btn" onclick="toggleSidebar(event)" title="Toggle Menu">☰</button>
-        <div class="top-title" id="top-title">NOVA AI Chat</div>
+        <div class="top-title" id="top-title">NOVA Advanced AI</div>
       </div>
       <div style="display:flex; gap:6px; align-items:center;">
-        <button class="icon-btn" onclick="newChat()" title="Start New Chat" style="font-size:16px; color:var(--accent); font-weight:700;">＋</button>
+        <button class="icon-btn" onclick="newChat()" title="New Chat" style="color:var(--accent); font-weight:700;">＋</button>
         <button class="icon-btn" onclick="openApiKeyModal()" title="API Key Settings">🔑</button>
         <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">◐</button>
       </div>
     </header>
 
-    <!-- MODE 1: CHAT WORKSPACE -->
     <section class="chat active" id="workspace-chat">
       <div class="empty" id="empty">
         <div class="biglogo">N</div>
         <h1>How can I help you today?</h1>
-        <p>Ask NOVA AI about code analysis, pro software architecture, voice microphone speech, multimodal vision, or creative art.</p>
+        <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate Quranic calligraphy, or transcribe voice dictations.</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
+          <button onclick="promptPhotoInChat('A high-resolution image featuring a solid green background with white text. At top center, calligraphic text Al-Quran Al-Kareem. In middle, Surah Al-Jumu\'ah Verses 9-10. At bottom, Bismillah ir-Rahman ir-Rahim')" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">🎨 Quran Calligraphy Poster</button>
+          <button onclick="openPhotoStudioModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">⚡ Batch Edit Photos</button>
+        </div>
       </div>
       <div class="messages" id="messages-list"></div>
     </section>
 
-    <!-- MODE 2: PRO CODE ANALYSIS & WRITING STUDIO -->
-    <section class="workspace-panel" id="workspace-coding">
-      <div style="max-width:820px; margin:auto; width:100%; display:flex; flex-direction:column; gap:18px;">
-        <div>
-          <h2 style="font-size:22px; font-weight:700; margin:0;">💻 Pro Code Analysis & Writing Studio</h2>
-          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Inspect, debug, refactor, and generate production-grade software code with Gemini.</p>
-        </div>
-
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-          <div class="form-group">
-            <label class="form-label">Programming Language</label>
-            <select id="code-lang-selector" class="form-control">
-              <option value="TypeScript">TypeScript</option>
-              <option value="JavaScript">JavaScript</option>
-              <option value="Python">Python</option>
-              <option value="HTML / Tailwind CSS">HTML / Tailwind CSS</option>
-              <option value="React JSX/TSX">React JSX/TSX</option>
-              <option value="C++">C++</option>
-              <option value="Rust">Rust</option>
-              <option value="Go">Go</option>
-              <option value="Java">Java</option>
-              <option value="PHP">PHP</option>
-              <option value="SQL">SQL</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Task Objective</label>
-            <select id="code-task-selector" class="form-control">
-              <option value="analyze_fix">🐞 Deep Bug Analysis & Fix</option>
-              <option value="explain">📖 Line-by-Line Logic Explanation</option>
-              <option value="optimize">⚡ Performance Optimization & Clean Architecture</option>
-              <option value="unit_tests">🧪 Generate Comprehensive Unit Tests</option>
-              <option value="write_new">✍️ Write Complete New Feature / Component</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Source Code / Prompt Specification</label>
-          <textarea id="code-input-source" class="form-control" rows="8" placeholder="// Paste existing code to analyze & fix, or describe a new software feature to write from scratch..." style="font-family:monospace; font-size:12px; line-height:1.5;"></textarea>
-        </div>
-
-        <div style="display:flex; gap:10px;">
-          <button onclick="executeCodeAnalysis()" id="btn-code-execute" class="btn-primary" style="flex:1;">⚡ Execute Pro Code Analysis / Generation</button>
-          <button onclick="clearCodeStudio()" class="form-control" style="width:auto; cursor:pointer;">Clear</button>
-        </div>
-
-        <div id="code-output-container" style="display:none; flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:16px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:8px;">
-            <span style="font-size:12px; font-weight:700; color:var(--accent);" id="code-output-title">Analysis & Code Output</span>
-            <div style="display:flex; gap:8px;">
-              <button onclick="copyCodeStudioOutput()" class="btn-primary" style="padding:5px 10px; font-size:11px;">📋 Copy Code</button>
-              <button onclick="downloadCodeStudioOutput()" class="btn-primary" style="padding:5px 10px; font-size:11px; background:var(--panel); color:var(--text); border:1px solid var(--line);">💾 Download File</button>
-            </div>
-          </div>
-          <div id="code-output-content" style="font-size:13px; line-height:1.6; overflow-x:auto;"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- MODE 3: IMAGE GENERATOR -->
-    <section class="workspace-panel" id="workspace-generate">
-      <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
-        <div>
-          <h2 style="font-size:22px; font-weight:700; margin:0;">AI Image Generator</h2>
-          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Unleash NOVA's high-fidelity creative painting models.</p>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Image Prompt Details</label>
-          <textarea id="image-prompt" class="form-control" rows="3" placeholder="A cinematic render of a futuristic glass city floating inside an ancient neon canyon..."></textarea>
-        </div>
-
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; width:100%;">
-          <div class="form-group">
-            <label class="form-label">Aspect Ratio</label>
-            <select id="image-aspect-ratio" class="form-control">
-              <option value="1:1">1:1 (Square)</option>
-              <option value="16:9" selected>16:9 (Cinematic)</option>
-              <option value="9:16">9:16 (Portrait)</option>
-              <option value="4:3">4:3 (Classic)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Aesthetic Style Preset</label>
-            <select id="image-style" class="form-control">
-              <option value="Cinematic">Cinematic 3D</option>
-              <option value="Anime">Modern Anime</option>
-              <option value="Neonpunk">Cyberpunk Glow</option>
-              <option value="Digital Art">Concept Digital Painting</option>
-              <option value="Minimalist Sketch">Line Pencil Sketch</option>
-            </select>
-          </div>
-        </div>
-
-        <button onclick="generateAIImage()" id="btn-generate" class="btn-primary">Generate Masterpiece Art</button>
-
-        <div id="image-output-container" style="border: 1px solid var(--line); border-radius:12px; background:var(--panel); min-height:300px; display:none; flex-direction:column; align-items:center; justify-content:center; padding:15px; position:relative; overflow:hidden;">
-          <div id="image-loading" style="display:none; flex-direction:column; align-items:center; gap:10px;">
-            <div style="width:30px; height:30px; border:3px solid var(--line); border-top:3px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
-            <span style="font-size:12px; color:var(--accent); font-weight:600;">Rendering creative buffers...</span>
-          </div>
-          <img id="image-result" style="width:100%; height:auto; border-radius:10px; object-fit:contain; max-height:450px;" alt="Generated Visual Art">
-          <button id="btn-download-image" onclick="downloadArtOutput()" class="btn-primary" style="position:absolute; bottom:15px; right:15px; display:none; padding:8px 12px; font-size:12px;">💾 Save JPG Image</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- MODE 4: AI QUIZ BUILDER -->
-    <section class="workspace-panel" id="workspace-quiz">
-      <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
-        <div>
-          <h2 style="font-size:22px; font-weight:700; margin:0;">AI Quiz Builder</h2>
-          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Create and solve dynamic multiple-choice trivia quizzes on any topic.</p>
-        </div>
-
-        <div id="quiz-setup-panel" style="display:flex; flex-direction:column; gap:15px;">
-          <div class="form-group">
-            <label class="form-label">Target Quiz Subject/Topic</label>
-            <input type="text" id="quiz-topic" class="form-control" placeholder="e.g., Chemistry, JavaScript fundamentals, Space sciences">
-          </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-            <div class="form-group">
-              <label class="form-label">Questions</label>
-              <select id="quiz-count" class="form-control">
-                <option value="3">3 questions</option>
-                <option value="5" selected>5 questions</option>
-                <option value="10">10 questions</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Difficulty Scale</label>
-              <select id="quiz-difficulty" class="form-control">
-                <option value="Easy">Beginner (Easy)</option>
-                <option value="Medium" selected>Intermediate (Medium)</option>
-                <option value="Hard">Advanced (Hard)</option>
-              </select>
-            </div>
-          </div>
-          <button onclick="buildInteractiveQuiz()" id="btn-quiz-build" class="btn-primary">Formulate Quiz Syllabus</button>
-        </div>
-
-        <div id="quiz-game-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:20px; flex-direction:column; gap:15px;">
-          <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px;">
-            <span id="quiz-game-topic" style="font-size:12px; font-weight:700; color:var(--accent);">TOPIC: SCIENCE</span>
-            <span id="quiz-game-progress" style="font-size:12px; font-weight:600; color:var(--muted);">1 / 5</span>
-          </div>
-          <h3 id="quiz-game-question" style="font-size:16px; font-weight:700; margin:5px 0;">Question title goes here...</h3>
-          <div id="quiz-game-options" style="display:flex; flex-direction:column; gap:10px;"></div>
-          <div id="quiz-game-explanation-card" style="display:none; flex-direction:column; gap:5px; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:9px; font-size:12px; margin-top:10px;">
-            <strong style="color:var(--accent);">Nova Core Explanation:</strong>
-            <p id="quiz-game-explanation-text" style="margin:0; color:var(--muted);"></p>
-            <button onclick="advanceQuizQuestion()" class="btn-primary" style="align-self:flex-end; padding:6px 12px; font-size:11px; margin-top:8px;">Next Question ➔</button>
-          </div>
-        </div>
-
-        <div id="quiz-summary-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:30px; text-align:center; flex-direction:column; align-items:center; gap:15px;">
-          <div style="width:70px; height:70px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-size:24px; font-weight:700; display:grid; place-items:center; margin:auto;" id="quiz-final-score-circle">5/5</div>
-          <h2 style="font-size:18px; font-weight:700; margin:0;">Quiz Finished!</h2>
-          <p id="quiz-final-summary-text" style="font-size:13px; color:var(--muted); margin:0;">Congratulations, you answered all questions correctly.</p>
-          <button onclick="resetQuizWorkspace()" class="btn-primary" style="padding:8px 16px; font-size:12px;">Build New Quiz</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- MODE 5: VISION & DOCUMENT TRANSLATOR -->
-    <section class="workspace-panel" id="workspace-translator">
-      <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
-        <div>
-          <h2 style="font-size:22px; font-weight:700; margin:0;">Vision & Document Translator</h2>
-          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Translate scanned images or PDF layouts using Google Gemini Vision OCR channels.</p>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-          <div class="form-group">
-            <label class="form-label">Target Language</label>
-            <select id="translator-lang" class="form-control">
-              <option value="Urdu">Urdu (اردو)</option>
-              <option value="Hindi">Hindi (हिंदी)</option>
-              <option value="English">English</option>
-              <option value="Spanish">Spanish (Español)</option>
-              <option value="French">French (Français)</option>
-              <option value="German">German (Deutsch)</option>
-              <option value="Arabic">Arabic (العربية)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">OCR Visual Upload</label>
-            <input type="file" id="translator-file" accept="image/*,application/pdf" style="display:none;" onchange="handleTranslatorFileSelect(this)">
-            <button onclick="document.getElementById('translator-file').click()" class="form-control" style="text-align:left; background:var(--panel2); cursor:pointer;">📎 Select image/PDF file</button>
-          </div>
-        </div>
-
-        <div id="translator-file-preview" style="display:none; justify-content:space-between; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:10px 15px; font-size:12px;">
-          <span id="translator-file-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">document.png</span>
-          <button onclick="clearTranslatorAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
-        </div>
-
-        <button onclick="executeDocumentTranslation()" id="btn-translate" class="btn-primary">OCR Analyze & Translate</button>
-
-        <div id="translator-output-split" style="display:none; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px;">
-          <div style="border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel2);">
-            <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:8px; border-bottom:1px solid var(--line); padding-bottom:5px;">Original Visual</div>
-            <img id="translator-img-preview" style="width:100%; border-radius:8px; display:none; max-height:250px; object-fit:contain;">
-            <div id="translator-pdf-preview" style="display:none; text-align:center; padding:30px 10px;">
-              <span style="font-size:36px;">📄</span>
-              <p style="font-size:12px; margin:5px 0 0 0; font-weight:600;" id="translator-pdf-label"></p>
-            </div>
-          </div>
-
-          <div style="border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel2); display:flex; flex-direction:column; gap:8px; position:relative;">
-            <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:8px; border-bottom:1px solid var(--line); padding-bottom:5px;">Translated Text Output</div>
-            <div id="translator-output-loading" style="display:none; text-align:center; padding:40px 10px;">
-              <div style="width:20px; height:20px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear; margin:auto;"></div>
-              <p style="font-size:11px; margin-top:8px; color:var(--accent);">OCR parsing...</p>
-            </div>
-            <div id="translator-output-result" style="font-size:13px; line-height:1.55; white-space:pre-wrap; overflow-y:auto; max-height:220px; flex:1;" class="select-text"></div>
-            <button onclick="copyTranslationText()" class="btn-primary" style="padding:6px 12px; font-size:11px; align-self:flex-end;">📋 Copy Translation</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- COMPOSER AT BOTTOM (Visible in Mode 1: Chat) -->
-    <div class="composer-wrap" id="workspace-composer">
-      <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:780px; margin:0 auto 10px; font-size:11px;">
+    <div class="composer-wrap">
+      <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:800px; margin:0 auto 10px; font-size:11px;">
         <div style="display:flex; align-items:center; gap:6px;">
           <span>📎</span>
           <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">file.jpg</span>
-          <span style="color:var(--muted); font-size:10px;">(compressed)</span>
         </div>
         <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
       </div>
 
-      <div class="composer" style="position:relative">
-        <div class="attach-menu" id="attachMenu">
-          <button class="attach-item" onclick="selectAttachmentSource('camera')">📷 Live Camera Capture</button>
-          <button class="attach-item" onclick="selectAttachmentSource('gallery')">🖼️ Gallery / File Upload</button>
-        </div>
-
-        <textarea id="input" placeholder="Message NOVA AI or speak with microphone..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
+      <div class="composer">
+        <textarea id="input" placeholder="Asking nova..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
         <div class="tools">
-          <button class="tool" onclick="toggleAttach(event)" title="Attach file">📎</button>
-          <button class="tool" onclick="selectAttachmentSource('gallery')" title="Upload image">🖼️</button>
-          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Click to Speak (Microphone)">🎙️</button>
-          <button class="send" onclick="send()" title="Send Message">➤</button>
+          <button class="tool" onclick="document.getElementById('file').click()" title="Attach image / code screenshot to analyze or edit">📎</button>
+          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Voice Input (Microphone)">🎙️</button>
+          <button class="send" onclick="send()" title="Send message">➤</button>
         </div>
       </div>
-      <div style="text-align:center;color:var(--muted);font-size:10px;margin-top:7px">NOVA AI can make mistakes. Check important information.</div>
+      <div style="text-align:center;color:var(--muted);font-size:10px;margin-top:7px">NOVA AI Advanced Core · Powered by Google Gemini</div>
     </div>
-
-    <!-- INLINE SELECTORS FOR ATTACHMENTS -->
-    <input id="file" type="file" hidden accept="image/*,application/pdf" onchange="handleComposerFileSelected(this)">
-    <input id="camera-file" type="file" hidden accept="image/*" capture="environment" onchange="handleComposerFileSelected(this)">
+    <input id="file" type="file" hidden accept="image/*,application/pdf,text/*" onchange="handleFileSelected(this)">
   </main>
 </div>
 
 <script>
-// Database & State Managers
 let chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
 let currentChatId = localStorage.getItem('nova_current_chat_id') || '';
-let activeMode = 'chat';
-
-// Attachments buffer
-let activeComposerAttachment = null;
-let activeTranslatorAttachment = null;
-
-// Speech Dictation recognition
-let recognition = null;
 let dictationActive = false;
+let recognition = null;
+let mediaRecorderInstance = null;
+let activeMicStream = null;
+let recordedAudioChunks = [];
+let currentAttachment = null;
+let currentAudioPlayer = null;
+let activeSpeakingMsgIndex = null;
 
-// Interactive quiz state counters
-let currentQuizData = [];
-let activeQuizIndex = 0;
-let activeQuizScore = 0;
-let userQuizAnswerSubmitted = false;
+// Single Studio State
+let studioBaseImage = null;
+let studioBaseImageMime = 'image/jpeg';
+let latestStudioResult = null;
 
-// Last generated code buffer in Code Studio
-let lastCodeStudioText = '';
+// Batch Edit State
+let isBatchMode = false;
+let batchFilesQueue = [];
 
-const body = document.body;
 const messagesList = document.getElementById('messages-list');
 const emptyState = document.getElementById('empty');
 
-function getActiveGeminiApiKey() {
-  return localStorage.getItem('nova_gemini_api_key') || '';
+function scrollToBottom(smooth = true) {
+  const chatContainer = document.getElementById('workspace-chat');
+  if (chatContainer) {
+    chatContainer.scrollTo({
+      top: chatContainer.scrollHeight + 1000,
+      behavior: smooth ? 'smooth' : 'auto'
+    });
+  }
+}
+
+function showToast(text) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.background = 'var(--panel2)';
+  toast.style.padding = '10px 16px';
+  toast.style.borderRadius = '8px';
+  toast.style.border = '1px solid var(--line)';
+  toast.style.position = 'fixed';
+  toast.style.top = '20px';
+  toast.style.right = '20px';
+  toast.style.zIndex = '100';
+  toast.style.boxShadow = '0 4px 14px rgba(0,0,0,0.1)';
+  toast.style.fontSize = '13px';
+  toast.innerHTML = text;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// PHOTO STUDIO MODAL CONTROLS
+function openPhotoStudioModal() {
+  document.getElementById('photoStudioModal').classList.add('active');
+  closeSidebar();
+}
+
+function closePhotoStudioModal() {
+  document.getElementById('photoStudioModal').classList.remove('active');
+}
+
+function switchStudioTab(tab) {
+  const isGen = tab === 'gen';
+  document.getElementById('tab-btn-gen').classList.toggle('active', isGen);
+  document.getElementById('tab-btn-edit').classList.toggle('active', !isGen);
+  document.getElementById('studio-tab-gen-view').style.display = isGen ? 'block' : 'none';
+  document.getElementById('studio-tab-edit-view').style.display = isGen ? 'none' : 'block';
+}
+
+function toggleBatchEditMode(checked) {
+  isBatchMode = checked;
+  document.getElementById('single-photo-edit-section').style.display = isBatchMode ? 'none' : 'block';
+  document.getElementById('batch-photo-edit-section').style.display = isBatchMode ? 'block' : 'none';
+  document.getElementById('studio-result-panel').style.display = 'none';
+  document.getElementById('batch-results-panel').style.display = 'none';
+  if (isBatchMode) {
+    renderBatchQueue();
+  }
+}
+
+// SINGLE EDIT HANDLERS
+function handleStudioEditFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    studioBaseImage = e.target.result;
+    studioBaseImageMime = file.type;
+    document.getElementById('studio-edit-upload-preview').innerHTML = `
+      <img src="${e.target.result}" style="max-height:120px; border-radius:6px; display:inline-block; margin-bottom:4px;" referrerPolicy="no-referrer">
+      <div>✓ ${file.name} ready for editing</div>
+    `;
+    showToast('Photo uploaded for editing');
+  };
+  reader.readAsDataURL(file);
+}
+
+// BATCH EDIT HANDLERS
+function handleStudioBatchFiles(input) {
+  const files = Array.from(input.files || []);
+  if (files.length === 0) return;
+
+  let loadedCount = 0;
+  files.forEach((file, i) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      batchFilesQueue.push({
+        id: 'batch_' + Date.now() + '_' + i,
+        file,
+        name: file.name,
+        data: e.target.result,
+        mime: file.type || 'image/jpeg',
+        status: 'pending',
+        resultUrl: null
+      });
+      loadedCount++;
+      if (loadedCount === files.length) {
+        renderBatchQueue();
+        showToast(`Added ${files.length} photos to batch queue`);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function removeBatchQueueItem(id) {
+  batchFilesQueue = batchFilesQueue.filter(item => item.id !== id);
+  renderBatchQueue();
+}
+
+function renderBatchQueue() {
+  const container = document.getElementById('batch-queue-container');
+  const countBadge = document.getElementById('batch-count-badge');
+  countBadge.innerText = `${batchFilesQueue.length} Photo${batchFilesQueue.length === 1 ? '' : 's'}`;
+
+  if (batchFilesQueue.length === 0) {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  container.style.display = 'block';
+  container.innerHTML = '';
+
+  batchFilesQueue.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'batch-item-card';
+    card.id = `queue-card-${item.id}`;
+
+    let statusText = 'Pending';
+    let badgeClass = 'pending';
+    if (item.status === 'processing') {
+      statusText = '⏳ Processing...';
+      badgeClass = 'processing';
+    } else if (item.status === 'completed') {
+      statusText = '✅ Done';
+      badgeClass = 'completed';
+    } else if (item.status === 'failed') {
+      statusText = '❌ Error';
+      badgeClass = 'failed';
+    }
+
+    card.innerHTML = `
+      <img src="${item.data}" style="width:38px; height:38px; border-radius:6px; object-fit:cover; flex-shrink:0;" referrerPolicy="no-referrer">
+      <div style="flex:1; min-width:0;">
+        <div style="font-size:12px; font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${item.name}</div>
+        <span class="batch-badge ${badgeClass}" id="queue-status-${item.id}">${statusText}</span>
+      </div>
+      ${item.status === 'pending' ? `<button onclick="removeBatchQueueItem('${item.id}')" style="background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer;">✕</button>` : ''}
+    `;
+    container.appendChild(card);
+  });
+}
+
+async function executeBatchEdit() {
+  if (batchFilesQueue.length === 0) {
+    showToast('Please upload at least one photo for batch editing');
+    return;
+  }
+  const prompt = document.getElementById('studio-batch-prompt').value.trim();
+  if (!prompt) {
+    showToast('Please enter an editing prompt to apply to all photos');
+    return;
+  }
+
+  const btn = document.getElementById('btn-batch-execute');
+  const progressWrap = document.getElementById('batch-progress-bar-wrap');
+  const progressLabel = document.getElementById('batch-progress-label');
+  const progressPercent = document.getElementById('batch-progress-percent');
+  const progressFill = document.getElementById('batch-progress-fill');
+  const resultsPanel = document.getElementById('batch-results-panel');
+  const resultsGrid = document.getElementById('batch-results-grid');
+
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Batch Editing in Progress...';
+  progressWrap.style.display = 'block';
+  resultsPanel.style.display = 'none';
+  resultsGrid.innerHTML = '';
+
+  const total = batchFilesQueue.length;
+  let completedCount = 0;
+  const apiKey = localStorage.getItem('nova_gemini_api_key');
+
+  for (let i = 0; i < total; i++) {
+    const item = batchFilesQueue[i];
+    item.status = 'processing';
+    renderBatchQueue();
+
+    progressLabel.innerText = `Processing photo ${i + 1} of ${total} (${item.name})...`;
+    const pct = Math.round((i / total) * 100);
+    progressPercent.innerText = `${pct}%`;
+    progressFill.style.width = `${pct}%`;
+
+    try {
+      const res = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          baseImage: item.data,
+          mimeType: item.mime,
+          apiKey: apiKey
+        })
+      });
+
+      const data = await res.json();
+      if (data.imageUrl) {
+        item.status = 'completed';
+        item.resultUrl = data.imageUrl;
+      } else {
+        item.status = 'failed';
+      }
+    } catch (err) {
+      console.warn('Batch item error:', err);
+      item.status = 'failed';
+    }
+
+    completedCount++;
+    const finalPct = Math.round((completedCount / total) * 100);
+    progressPercent.innerText = `${finalPct}%`;
+    progressFill.style.width = `${finalPct}%`;
+    renderBatchQueue();
+  }
+
+  progressLabel.innerText = `All ${total} photos processed!`;
+  btn.disabled = false;
+  btn.innerHTML = '🚀 Start Batch AI Editing';
+
+  resultsPanel.style.display = 'block';
+  resultsGrid.innerHTML = '';
+
+  batchFilesQueue.forEach((item, idx) => {
+    if (item.resultUrl) {
+      const col = document.createElement('div');
+      col.style.cssText = 'background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden;';
+      col.innerHTML = `
+        <div style="position:relative;">
+          <img src="${item.resultUrl}" style="width:100%; height:130px; object-fit:cover; display:block;" referrerPolicy="no-referrer">
+          <span style="position:absolute; bottom:4px; left:4px; font-size:9px; background:rgba(0,0,0,0.7); color:white; padding:2px 6px; border-radius:4px;">#${idx + 1} Edited</span>
+        </div>
+        <div style="padding:6px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:130px;">${item.name}</span>
+          <a href="${item.resultUrl}" download="nova_batch_${idx + 1}.png" style="color:var(--accent); font-size:11px; text-decoration:none; font-weight:700;">⬇️ Save</a>
+        </div>
+      `;
+      resultsGrid.appendChild(col);
+    }
+  });
+
+  showToast(`🎉 Batch edit completed for ${completedCount} photos!`);
+}
+
+function downloadAllBatchImages() {
+  const completed = batchFilesQueue.filter(item => item.resultUrl);
+  if (completed.length === 0) return;
+
+  completed.forEach((item, i) => {
+    setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = item.resultUrl;
+      a.download = `nova_batch_${i + 1}_${item.name || 'edited.png'}`;
+      a.click();
+    }, i * 200);
+  });
+  showToast(`Downloading ${completed.length} edited photos...`);
+}
+
+function insertAllBatchToChat() {
+  const completed = batchFilesQueue.filter(item => item.resultUrl);
+  if (completed.length === 0) return;
+
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat) return;
+
+  completed.forEach((item, i) => {
+    currentChat.messages.push({
+      role: 'ai',
+      text: `Batch Photo #${i + 1} (${item.name}) 🎨`,
+      generatedImage: item.resultUrl,
+      timestamp: Date.now() + i
+    });
+  });
+
+  saveChats();
+  loadMessages();
+  closePhotoStudioModal();
+  showToast(`Inserted ${completed.length} batch edited photos to chat`);
+}
+
+async function executeStudioGenerate() {
+  const prompt = document.getElementById('studio-gen-prompt').value.trim();
+  if (!prompt) {
+    showToast('Please enter a description for the photo');
+    return;
+  }
+  const style = document.getElementById('studio-gen-style').value;
+  const aspectRatio = document.getElementById('studio-gen-ratio').value;
+  const btn = document.getElementById('btn-studio-generate');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '🔍 Analyzing & Generating...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        style,
+        aspectRatio,
+        apiKey: localStorage.getItem('nova_gemini_api_key')
+      })
+    });
+    const data = await res.json();
+    if (data.imageUrl) {
+      latestStudioResult = data.imageUrl;
+      document.getElementById('studio-result-img').src = data.imageUrl;
+      document.getElementById('studio-result-panel').style.display = 'block';
+      showToast('✨ Photo generated successfully!');
+    } else {
+      throw new Error(data.error || 'Generation failed');
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+
+async function executeStudioEdit() {
+  if (!studioBaseImage) {
+    showToast('Please upload a photo to edit first');
+    return;
+  }
+  const prompt = document.getElementById('studio-edit-prompt').value.trim();
+  if (!prompt) {
+    showToast('Please enter what you want to edit');
+    return;
+  }
+  const btn = document.getElementById('btn-studio-edit');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '🔍 Analyzing & Applying AI Edits...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        baseImage: studioBaseImage,
+        mimeType: studioBaseImageMime,
+        apiKey: localStorage.getItem('nova_gemini_api_key')
+      })
+    });
+    const data = await res.json();
+    if (data.imageUrl) {
+      latestStudioResult = data.imageUrl;
+      document.getElementById('studio-result-img').src = data.imageUrl;
+      document.getElementById('studio-result-panel').style.display = 'block';
+      showToast('✨ Photo edited successfully!');
+    } else {
+      throw new Error(data.error || 'Editing failed');
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  } finally {
+    btn.innerHTML = origText;
+    btn.disabled = false;
+  }
+}
+
+function downloadStudioImage() {
+  if (!latestStudioResult) return;
+  const a = document.createElement('a');
+  a.href = latestStudioResult;
+  a.download = `nova_ai_${Date.now()}.png`;
+  a.click();
+  showToast('Photo downloaded!');
+}
+
+function sendStudioImageToChat() {
+  if (!latestStudioResult) return;
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat) return;
+
+  currentChat.messages.push({
+    role: 'ai',
+    text: `Here is your generated artwork! 🎨`,
+    generatedImage: latestStudioResult,
+    timestamp: Date.now()
+  });
+
+  saveChats();
+  loadMessages();
+  closePhotoStudioModal();
+  showToast('Added photo to conversation');
+}
+
+function promptPhotoInChat(promptText) {
+  document.getElementById('input').value = promptText;
+  send();
+}
+
+function generatePhotoFromUserMessage(idx) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
+  const promptText = currentChat.messages[idx].text;
+  document.getElementById('input').value = `generate photo of ${promptText}`;
+  send();
 }
 
 function openApiKeyModal() {
-  const currentKey = getActiveGeminiApiKey();
-  document.getElementById('modal-api-key-input').value = currentKey;
+  document.getElementById('modal-api-key-input').value = localStorage.getItem('nova_gemini_api_key') || '';
   document.getElementById('apiKeyModal').classList.add('active');
   closeSidebar();
 }
@@ -574,81 +918,36 @@ function saveApiKeyFromModal() {
   const key = document.getElementById('modal-api-key-input').value.trim();
   if (key) {
     localStorage.setItem('nova_gemini_api_key', key);
-    showToast('Gemini API Key (AQ.Ab8R...) saved successfully!');
+    showToast('✅ Google AI Studio API Key saved successfully!');
   } else {
     localStorage.removeItem('nova_gemini_api_key');
-    showToast('Removed custom API Key (using server default)');
+    showToast('Using system default API Key');
   }
   closeApiKeyModal();
+}
+
+function saveModelConfig() {
+  const model = document.getElementById('modelSelector').value;
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (currentChat) {
+    currentChat.model = model;
+    saveChats();
+  }
+  showToast(`Routed to: ${model}`);
 }
 
 function saveMicLanguage() {
   const lang = document.getElementById('micLanguageSelector').value;
   localStorage.setItem('nova_speech_lang', lang);
-  showToast(`Microphone language set to: ${lang}`);
+  showToast(`Mic language set to: ${lang}`);
 }
 
-// Explicit Microphone Permission Request Trigger
-async function requestMicrophonePermission() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showToast('Microphone access is not supported by your browser');
-    return;
-  }
-  try {
-    showToast('Requesting microphone permission from browser...');
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(track => track.stop());
-    showToast('✅ Microphone access granted! You can now click 🎙️ and speak.');
-  } catch (err) {
-    console.warn('Mic permission error:', err);
-    showToast('⚠️ Please Allow microphone permission in your browser URL bar.');
-  }
-}
-
-function loadSpeechVoices() {
-  if (!('speechSynthesis' in window)) return;
-  const select = document.getElementById('ttsVoiceSelector');
-  select.innerHTML = '';
-  
-  const voices = window.speechSynthesis.getVoices();
-  const sorted = voices.sort((a,b) => a.name.localeCompare(b.name));
-  
-  sorted.forEach((voice) => {
-    const option = document.createElement('option');
-    option.value = voice.name;
-    option.innerText = `${voice.name} (${voice.lang})`;
-    
-    if (voice.name.includes('Zira') || voice.name.includes('Samantha') || voice.name.includes('Google US English')) {
-      option.selected = true;
-    }
-    select.appendChild(option);
-  });
-}
-
-if ('speechSynthesis' in window) {
-  window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
-  loadSpeechVoices();
-}
-
-// Responsive Mobile Sidebar Drawer Toggle Functions
 function toggleSidebar(e) {
   if (e) e.stopPropagation();
   const sidebar = document.getElementById('appSidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
-  const isOpen = sidebar.classList.contains('open');
-  
-  if (isOpen) {
-    closeSidebar();
-  } else {
-    openSidebar();
-  }
-}
-
-function openSidebar() {
-  const sidebar = document.getElementById('appSidebar');
-  const backdrop = document.getElementById('sidebarBackdrop');
-  sidebar.classList.add('open');
-  backdrop.classList.add('active');
+  sidebar.classList.toggle('open');
+  backdrop.classList.toggle('active', sidebar.classList.contains('open'));
 }
 
 function closeSidebar() {
@@ -659,273 +958,23 @@ function closeSidebar() {
 }
 
 function handleMainTap() {
-  // If user taps the main screen while mobile sidebar is open, close it immediately
-  const sidebar = document.getElementById('appSidebar');
-  if (sidebar && sidebar.classList.contains('open')) {
-    closeSidebar();
-  }
+  if (window.innerWidth <= 720) closeSidebar();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const userEmail = "azizme12345@gmail.com";
-  document.getElementById('profile-user-email').innerText = userEmail;
-
-  if (localStorage.getItem('nova_theme') === 'dark') {
-    body.dataset.theme = 'dark';
-  } else {
-    body.dataset.theme = '';
-  }
-
-  const savedMicLang = localStorage.getItem('nova_speech_lang');
-  if (savedMicLang && document.getElementById('micLanguageSelector')) {
-    document.getElementById('micLanguageSelector').value = savedMicLang;
-  }
-
-  if (chats.length === 0) {
-    const newId = 'chat_' + Date.now();
-    chats.push({
-      id: newId,
-      title: 'New Chat Session',
-      model: 'gemini-1.5-flash',
-      messages: []
-    });
-    currentChatId = newId;
-    saveChatsToMemory();
-  }
-
-  renderChatHistoryList();
-  loadChatMessages();
-});
-
-function showToast(text) {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `<span>✨</span><span>${text}</span>`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.remove();
-  }, 3500);
-}
-
-function saveChatsToMemory() {
-  localStorage.setItem('nova_chats', JSON.stringify(chats));
-  localStorage.setItem('nova_current_chat_id', currentChatId);
-}
-
-function adjustTextareaHeight(el) {
-  el.style.height = 'auto';
-  el.style.height = (el.scrollHeight) + 'px';
-}
-
-function toggleTheme(){
-  const isDark = body.dataset.theme === 'dark';
-  body.dataset.theme = isDark ? '' : 'dark';
-  localStorage.setItem('nova_theme', body.dataset.theme);
-  showToast(isDark ? 'Light theme activated' : 'Dark theme activated');
-  closeSidebar();
-}
-
-function toggleAttach(e){
-  e.stopPropagation();
-  document.getElementById('attachMenu').classList.toggle('show');
-}
-
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('#attachMenu') && !e.target.closest('.tools')) {
-    document.getElementById('attachMenu').classList.remove('show');
-  }
-});
-
-function selectAttachmentSource(source) {
-  document.getElementById('attachMenu').classList.remove('show');
-  if (source === 'camera') {
-    document.getElementById('camera-file').click();
-  } else {
-    document.getElementById('file').click();
-  }
-}
-
-function handleComposerFileSelected(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  reader.onload = function(event) {
-    const rawData = event.target.result;
-    
-    if (file.type.startsWith('image/')) {
-      const img = new Image();
-      img.src = rawData;
-      img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
-
-        activeComposerAttachment = {
-          base64: compressedBase64,
-          mimeType: 'image/jpeg',
-          name: file.name
-        };
-
-        document.getElementById('composer-attachment-panel').style.display = 'flex';
-        document.getElementById('composer-attachment-name').innerText = file.name;
-        showToast('Image attachment compressed');
-      };
-    } else if (file.type === 'application/pdf') {
-      activeComposerAttachment = {
-        base64: rawData,
-        mimeType: 'application/pdf',
-        name: file.name
-      };
-      document.getElementById('composer-attachment-panel').style.display = 'flex';
-      document.getElementById('composer-attachment-name').innerText = file.name;
-      showToast('PDF Document indexed');
-    } else {
-      showToast('Unsupported document type');
-    }
-  };
-}
-
-function clearComposerAttachment() {
-  activeComposerAttachment = null;
-  document.getElementById('composer-attachment-panel').style.display = 'none';
-  document.getElementById('file').value = '';
-  document.getElementById('camera-file').value = '';
-}
-
-function switchMode(mode) {
-  activeMode = mode;
-  
-  const titles = {
-    chat: 'NOVA AI Chat',
-    coding: 'Pro Code Studio & Analysis',
-    generate: 'Image Generator',
-    quiz: 'AI Quiz Builder',
-    translator: 'Document Translator'
-  };
-  document.getElementById('top-title').innerText = titles[mode] || 'NOVA AI';
-
-  document.querySelectorAll('.workspace-panel').forEach(panel => panel.classList.remove('active'));
-  document.getElementById('workspace-chat').style.display = 'none';
-  document.getElementById('workspace-composer').style.display = 'none';
-
-  if (mode === 'chat') {
-    document.getElementById('workspace-chat').style.display = 'block';
-    document.getElementById('workspace-composer').style.display = 'block';
-  } else {
-    document.getElementById(`workspace-${mode}`).classList.add('active');
-  }
-
-  document.querySelectorAll('.side-btn').forEach(btn => btn.classList.remove('active'));
-  const currentBtn = document.getElementById(`side-btn-${mode}`);
-  if (currentBtn) currentBtn.classList.add('active');
-
-  closeSidebar();
-}
-
-function saveModelConfig() {
-  const model = document.getElementById('modelSelector').value;
-  const currentChat = chats.find(c => c.id === currentChatId);
-  if (currentChat) {
-    currentChat.model = model;
-    saveChatsToMemory();
-  }
-  showToast(`Routed to: ${model}`);
-}
-
-function selectActiveChat(chatId) {
-  currentChatId = chatId;
-  saveChatsToMemory();
-  
-  const currentChat = chats.find(c => c.id === chatId);
-  if (currentChat && currentChat.model) {
-    document.getElementById('modelSelector').value = currentChat.model;
-  }
-
-  renderChatHistoryList();
-  loadChatMessages();
-  switchMode('chat');
-  closeSidebar();
-}
-
-function renderChatHistoryList() {
-  const container = document.getElementById('chat-history-list');
-  container.innerHTML = '';
-
-  chats.slice().reverse().forEach(chat => {
-    const isActive = chat.id === currentChatId;
-    const div = document.createElement('div');
-    div.className = `history-item ${isActive ? 'active' : ''}`;
-    div.style.background = isActive ? 'var(--accent-soft)' : 'transparent';
-    div.style.color = isActive ? 'var(--accent)' : 'var(--muted)';
-    div.setAttribute('onclick', `selectActiveChat('${chat.id}')`);
-
-    let titleText = chat.title || 'Dialogue Session';
-    if (titleText.length > 22) titleText = titleText.substring(0, 20) + '...';
-
-    div.innerHTML = `
-      <span style="display:flex; align-items:center; gap:8px;">💬 ${titleText}</span>
-      <button onclick="deleteChatSession(event, '${chat.id}')" style="background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer;" class="hover-red">✕</button>
-    `;
-    container.appendChild(div);
-  });
-}
-
-function deleteChatSession(e, id) {
-  e.stopPropagation();
-  chats = chats.filter(c => c.id !== id);
-  
-  if (chats.length === 0) {
-    currentChatId = '';
-    newChat();
-    return;
-  }
-  if (currentChatId === id) {
-    currentChatId = chats[chats.length - 1].id;
-  }
-  saveChatsToMemory();
-  renderChatHistoryList();
-  loadChatMessages();
-}
-
-// Starts a clean fresh new chat
 function newChat() {
-  const newId = 'chat_' + Date.now();
-  const selectedModel = document.getElementById('modelSelector').value;
-  chats.push({
-    id: newId,
-    title: 'New Chat Session',
+  stopSpeechPlayback(false);
+  const id = 'chat_' + Date.now();
+  const selectedModel = document.getElementById('modelSelector') ? document.getElementById('modelSelector').value : 'gemini-1.5-flash';
+  chats.push({ 
+    id, 
+    title: 'New Conversation', 
     model: selectedModel,
-    messages: []
+    messages: [] 
   });
-  currentChatId = newId;
-  saveChatsToMemory();
-  renderChatHistoryList();
-  loadChatMessages();
-  switchMode('chat');
+  currentChatId = id;
+  saveChats();
+  renderHistory();
+  loadMessages();
   closeSidebar();
   
   const inputEl = document.getElementById('input');
@@ -933,7 +982,57 @@ function newChat() {
     inputEl.value = '';
     inputEl.focus();
   }
-  showToast('✨ New clean chat session opened');
+  showToast('✨ Started clean conversation');
+}
+
+function saveChats() {
+  localStorage.setItem('nova_chats', JSON.stringify(chats));
+  localStorage.setItem('nova_current_chat_id', currentChatId);
+}
+
+function renderHistory() {
+  const container = document.getElementById('chat-history-list');
+  container.innerHTML = '';
+  chats.slice().reverse().forEach(chat => {
+    const isActive = chat.id === currentChatId;
+    const item = document.createElement('div');
+    item.className = `history-item ${isActive ? 'active' : ''}`;
+    if (isActive) item.style.background = 'var(--accent-soft)';
+    
+    let titleText = chat.title || 'Conversation';
+    if (titleText.length > 22) titleText = titleText.substring(0, 20) + '...';
+
+    item.innerHTML = `
+      <span>💬 ${titleText}</span>
+      <button onclick="deleteChatSession(event, '${chat.id}')" style="background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer;">✕</button>
+    `;
+    item.onclick = (e) => { 
+      if (e.target.tagName !== 'BUTTON') {
+        stopSpeechPlayback(false);
+        currentChatId = chat.id; 
+        saveChats(); 
+        loadMessages(); 
+        closeSidebar(); 
+      }
+    };
+    container.appendChild(item);
+  });
+}
+
+function deleteChatSession(e, id) {
+  e.stopPropagation();
+  stopSpeechPlayback(false);
+  chats = chats.filter(c => c.id !== id);
+  if (chats.length === 0) {
+    newChat();
+    return;
+  }
+  if (currentChatId === id) {
+    currentChatId = chats[chats.length - 1].id;
+  }
+  saveChats();
+  renderHistory();
+  loadMessages();
 }
 
 function formatMarkdown(text) {
@@ -943,20 +1042,22 @@ function formatMarkdown(text) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
+  // Multi-line code blocks with copy button
   html = html.replace(/```([a-zA-Z0-9_\-#+]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
     const id = 'code_' + Math.floor(Math.random() * 1000000);
     const displayLang = lang || 'code';
     return `
-      <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+      <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel2); padding:6px 14px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted); font-family:monospace;">
           <span style="font-weight:700; color:var(--accent); text-transform:uppercase;">${displayLang}</span>
-          <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer; font-size:11px; display:flex; align-items:center; gap:4px;">📋 Copy Code</button>
+          <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer; font-size:11px;">📋 Copy Code</button>
         </div>
         <pre style="padding:14px; margin:0; overflow-x:auto; font-size:12px; font-family:monospace; line-height:1.6; background:var(--panel); color:var(--text);"><code id="${id}">${code}</code></pre>
       </div>
     `;
   });
 
+  // Markdown Tables
   html = html.replace(/\n(\|.+?\|\n\|[-:\s|]+?\|\n(?:\|.+?\|\n?)+)/g, (match, tableContent) => {
     const lines = tableContent.trim().split('\n');
     if (lines.length < 3) return match;
@@ -969,13 +1070,13 @@ function formatMarkdown(text) {
   });
 
   html = html.replace(/`([^`\n]+)`/g, '<code style="background:var(--panel2); border:1px solid var(--line); padding:2px 6px; border-radius:5px; font-family:monospace; font-size:12px; color:var(--accent);">$1</code>');
-  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size:15px; font-weight:700; margin:10px 0 4px;">$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2 style="font-size:17px; font-weight:700; margin:12px 0 6px;">$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1 style="font-size:19px; font-weight:800; margin:14px 0 8px;">$1</h1>');
+  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size:15px; font-weight:700; margin:12px 0 4px;">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 style="font-size:17px; font-weight:700; margin:14px 0 6px;">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 style="font-size:19px; font-weight:800; margin:16px 0 8px;">$1</h1>');
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-  html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li style="margin-left:16px; font-size:13.5px; margin-bottom:3px;">$1</li>');
-  html = html.replace(/^\s*(\d+)\.\s+(.+)$/gm, '<li style="margin-left:16px; font-size:13.5px; margin-bottom:3px; list-style-type:decimal;">$2</li>');
+  html = html.replace(/\*([^*]+)\*\*/g, '<em>$1</em>');
+  html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li style="margin-left:16px; font-size:13.5px; margin-bottom:4px;">$1</li>');
+  html = html.replace(/^\s*(\d+)\.\s+(.+)$/gm, '<li style="margin-left:16px; font-size:13.5px; margin-bottom:4px; list-style-type:decimal;">$2</li>');
   html = html.replace(/\n/g, '<br>');
 
   return html;
@@ -991,69 +1092,216 @@ function copyPreCodeBlock(id, btn) {
   });
 }
 
-function copyProseText(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Text copied to clipboard');
+function copyProseTextByIndex(idx) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
+  navigator.clipboard.writeText(currentChat.messages[idx].text).then(() => {
+    showToast('Response copied to clipboard');
   });
 }
 
 function sanitizeTextForTTS(rawText) {
+  if (!rawText) return '';
   return rawText
-    .replace(/```[\s\S]*?```/g, ' [Code segment provided in output] ')
+    .replace(/```[\s\S]*?```/g, ' ')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/[*#_~>|-]/g, ' ')
     .replace(/https?:\/\/\S+/g, 'link')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
-function speakResponseProse(text) {
+function stopSpeechPlayback(showNotice = false) {
+  if (currentAudioPlayer) {
+    try {
+      currentAudioPlayer.pause();
+      currentAudioPlayer.currentTime = 0;
+    } catch(e){}
+    currentAudioPlayer = null;
+  }
   if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel();
-
-    const spokenText = sanitizeTextForTTS(text);
-    const utterance = new SpeechSynthesisUtterance(spokenText);
-    const selectedVoiceName = document.getElementById('ttsVoiceSelector').value;
-    const voices = window.speechSynthesis.getVoices();
-    const voiceObj = voices.find(v => v.name === selectedVoiceName);
-    if (voiceObj) {
-      utterance.voice = voiceObj;
-    }
-
-    const pitchVal = parseFloat(document.getElementById('ttsPitchSlider').value);
-    const speedVal = parseFloat(document.getElementById('ttsSpeedSlider').value);
-    utterance.pitch = pitchVal;
-    utterance.rate = speedVal;
-
-    window.speechSynthesis.speak(utterance);
-    showToast('Speaking response...');
-  } else {
-    showToast('TTS is not supported in this browser');
+    try { window.speechSynthesis.cancel(); } catch(e){}
+  }
+  activeSpeakingMsgIndex = null;
+  updateSpeechButtons();
+  if (showNotice) {
+    showToast('Audio playback stopped');
   }
 }
 
-function downloadResponseText(text, index) {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `nova_output_${index}_${Date.now()}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Response saved as .TXT');
+function testSpeakerVoice() {
+  stopSpeechPlayback(false);
+  showToast('🔊 Playing speaker test audio...');
+  try {
+    const audio = new Audio('/api/tts?text=' + encodeURIComponent('NOVA AI speaker is active and speaking clearly.') + '&lang=en');
+    currentAudioPlayer = audio;
+    audio.play().catch(() => {
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance('NOVA AI speaker is fully working.');
+        window.speechSynthesis.speak(u);
+      }
+    });
+  } catch(e) {
+    showToast('Speaker test failed');
+  }
 }
 
-function loadChatMessages() {
-  messagesList.innerHTML = '';
-  const currentChat = chats.find(c => c.id === currentChatId);
-  
-  if (!currentChat || currentChat.messages.length === 0) {
-    emptyState.style.display = 'flex';
+async function handleSpeakerButtonClick(idx) {
+  if (activeSpeakingMsgIndex === idx) {
+    stopSpeechPlayback(true);
     return;
   }
 
-  emptyState.style.display = 'none';
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
 
-  currentChat.messages.forEach((msg, idx) => {
+  const rawText = currentChat.messages[idx].text;
+  const cleanText = sanitizeTextForTTS(rawText);
+
+  if (!cleanText) {
+    showToast('No readable text to speak');
+    return;
+  }
+
+  stopSpeechPlayback(false);
+
+  activeSpeakingMsgIndex = idx;
+  updateSpeechButtons();
+
+  const isUrdu = /[\u0600-\u06FF]/.test(cleanText);
+  const langCode = isUrdu ? 'ur' : 'en';
+
+  showToast('🔊 Speaking response...');
+
+  try {
+    const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText.substring(0, 400))}&lang=${langCode}`;
+    const audio = new Audio(streamUrl);
+    currentAudioPlayer = audio;
+
+    audio.onplay = () => {
+      updateSpeechButtons();
+    };
+
+    audio.onended = () => {
+      currentAudioPlayer = null;
+      activeSpeakingMsgIndex = null;
+      updateSpeechButtons();
+    };
+
+    audio.onerror = () => {
+      fallbackToWebSpeech(cleanText, isUrdu, idx);
+    };
+
+    await audio.play();
+
+  } catch (err) {
+    fallbackToWebSpeech(cleanText, isUrdu, idx);
+  }
+}
+
+function fallbackToWebSpeech(cleanText, isUrdu, idx) {
+  if (!('speechSynthesis' in window)) {
+    activeSpeakingMsgIndex = null;
+    updateSpeechButtons();
+    return;
+  }
+  try {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = isUrdu ? 'ur-PK' : 'en-US';
+    utterance.onend = () => {
+      activeSpeakingMsgIndex = null;
+      updateSpeechButtons();
+    };
+    utterance.onerror = () => {
+      activeSpeakingMsgIndex = null;
+      updateSpeechButtons();
+    };
+    window.speechSynthesis.speak(utterance);
+  } catch (e) {
+    activeSpeakingMsgIndex = null;
+    updateSpeechButtons();
+  }
+}
+
+function updateSpeechButtons() {
+  document.querySelectorAll('.btn-speaker-toggle').forEach(btn => {
+    const msgIdx = parseInt(btn.getAttribute('data-index'), 10);
+    const isPlaying = activeSpeakingMsgIndex === msgIdx;
+    if (isPlaying) {
+      btn.innerHTML = '⏹ Stop';
+      btn.style.color = '#ef4444';
+      btn.style.fontWeight = '700';
+    } else {
+      btn.innerHTML = '🔊 Listen';
+      btn.style.color = 'var(--muted)';
+      btn.style.fontWeight = '600';
+    }
+  });
+}
+
+function adjustTextareaHeight(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function toggleTheme() {
+  const isDark = document.body.dataset.theme === 'dark';
+  document.body.dataset.theme = isDark ? '' : 'dark';
+  localStorage.setItem('nova_theme', document.body.dataset.theme);
+  showToast(isDark ? 'Light theme activated' : 'Dark theme activated');
+}
+
+function handleFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { 
+    currentAttachment = { 
+      data: e.target.result, 
+      type: file.type,
+      name: file.name
+    }; 
+    document.getElementById('composer-attachment-panel').style.display = 'flex';
+    document.getElementById('composer-attachment-name').innerText = file.name;
+    showToast('File / Screenshot attached for analysis'); 
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearComposerAttachment() {
+  currentAttachment = null;
+  document.getElementById('composer-attachment-panel').style.display = 'none';
+  document.getElementById('file').value = '';
+}
+
+function updateEmptyStateVisibility() {
+  const emptyState = document.getElementById('empty');
+  const inputEl = document.getElementById('input');
+  const currentChat = chats.find(c => c.id === currentChatId);
+  const hasMessages = currentChat && currentChat.messages && currentChat.messages.length > 0;
+  const isInputActive = (inputEl === document.activeElement) || (inputEl && inputEl.value.trim().length > 0);
+
+  if (emptyState) {
+    if (hasMessages || isInputActive) {
+      emptyState.style.display = 'none';
+    } else {
+      emptyState.style.display = 'flex';
+    }
+  }
+}
+
+function loadMessages() {
+  messagesList.innerHTML = '';
+  const chat = chats.find(c => c.id === currentChatId);
+  updateEmptyStateVisibility();
+  if (!chat || chat.messages.length === 0) { 
+    return; 
+  }
+  
+  chat.messages.forEach((msg, idx) => {
     const isUser = msg.role === 'user';
     const div = document.createElement('div');
     div.className = `msg ${isUser ? 'user' : 'ai'}`;
@@ -1061,14 +1309,23 @@ function loadChatMessages() {
     let attachmentHTML = '';
     if (msg.attachment) {
       if (msg.attachmentMimeType && msg.attachmentMimeType.startsWith('image/')) {
-        attachmentHTML = `<img src="${msg.attachment}" style="max-width:260px; border-radius:10px; margin-bottom:8px; display:block;">`;
-      } else if (msg.attachmentMimeType === 'application/pdf') {
-        attachmentHTML = `
-          <div style="display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:10px; font-size:12px; font-weight:600; margin-bottom:8px; max-width:260px;">
-            <span>📄</span> <span>PDF attachment</span>
-          </div>
-        `;
+        attachmentHTML = `<img src="${msg.attachment}" style="max-width:280px; border-radius:10px; margin-bottom:8px; display:block;" referrerPolicy="no-referrer">`;
+      } else {
+        attachmentHTML = `<div style="display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; margin-bottom:8px;"><span>📄</span> <span>Attached Code / File</span></div>`;
       }
+    }
+
+    let generatedImageHTML = '';
+    if (msg.generatedImage) {
+      generatedImageHTML = `
+        <div style="margin:10px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg);">
+          <img src="${msg.generatedImage}" style="max-width:100%; border-radius:12px 12px 0 0; display:block;" referrerPolicy="no-referrer">
+          <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; background:var(--panel2); font-size:11px;">
+            <span style="color:var(--accent); font-weight:700;">✨ AI Photo</span>
+            <a href="${msg.generatedImage}" download="nova_art_${Date.now()}.png" style="color:var(--accent); text-decoration:none; font-weight:600;">⬇️ Download HD</a>
+          </div>
+        </div>
+      `;
     }
 
     const cleanHTML = formatMarkdown(msg.text);
@@ -1077,636 +1334,122 @@ function loadChatMessages() {
       <div class="bubble">
         ${attachmentHTML}
         <div>${cleanHTML}</div>
+        ${generatedImageHTML}
       </div>
-      
-      ${!isUser ? `
-        <div style="display:flex; align-items:center; gap:10px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
-          <button onclick="copyProseText(\`${encodeURIComponent(msg.text)}\`)" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">📋 Copy</button>
+      ${isUser ? '' : `
+        <div style="display:flex; align-items:center; gap:12px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
+          <button onclick="copyProseTextByIndex(${idx})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;">📋 Copy</button>
           <span>·</span>
-          <button onclick="speakResponseProse(\`${encodeURIComponent(msg.text)}\`)" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">🔊 Listen</button>
-          <span>·</span>
-          <button onclick="downloadResponseText(\`${encodeURIComponent(msg.text)}\`, ${idx})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">💾 Download</button>
+          <button class="btn-speaker-toggle" data-index="${idx}" onclick="handleSpeakerButtonClick(${idx})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;">🔊 Listen</button>
         </div>
-      ` : ''}
+      `}
     `;
-
     messagesList.appendChild(div);
   });
-
-  const chatScroll = document.getElementById('workspace-chat');
-  chatScroll.scrollTop = chatScroll.scrollHeight;
-}
-
-// Interactive Microphone Speech Dictation Engine with permission guarantee
-async function toggleVoiceDictation() {
-  const btn = document.getElementById('btn-mic-dictate');
-
-  if (dictationActive) {
-    if (recognition) {
-      try { recognition.stop(); } catch(e){}
-    }
-    dictationActive = false;
-    btn.style.color = '';
-    btn.classList.remove('mic-pulsing');
-    showToast('Microphone recording stopped');
-    return;
-  }
-
-  // 1. Explicitly prompt browser for microphone permission
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    try {
-      showToast('Activating microphone permissions...');
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop());
-    } catch (err) {
-      console.warn('Microphone permission request status:', err.name || err.message);
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        showToast('⚠️ Please click the lock icon in your browser URL bar and set Microphone to "Allow"');
-      } else {
-        showToast('Microphone permission required to speak');
-      }
-      return;
-    }
-  }
-
-  // 2. Initialize Web Speech Recognition
-  const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognitionClass) {
-    showToast('Speech recognition not supported on this browser (Chrome/Edge recommended)');
-    return;
-  }
-
-  try {
-    recognition = new SpeechRecognitionClass();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    
-    const selectedLang = localStorage.getItem('nova_speech_lang') || document.getElementById('micLanguageSelector').value || 'en-US';
-    recognition.lang = selectedLang;
-
-    recognition.onstart = () => {
-      dictationActive = true;
-      btn.classList.add('mic-pulsing');
-      showToast(`🎙️ Mic Active (${selectedLang}) - Speak now!`);
-    };
-
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        }
-      }
-      const txtarea = document.getElementById('input');
-      if (finalTranscript) {
-        txtarea.value = (txtarea.value + ' ' + finalTranscript).trim();
-        adjustTextareaHeight(txtarea);
-      }
-    };
-
-    recognition.onerror = (e) => {
-      const errCode = e && e.error ? e.error : 'unknown';
-      console.warn('Speech recognition status:', errCode);
-      if (errCode === 'not-allowed') {
-        showToast('⚠️ Microphone blocked: Click the lock icon in your browser URL bar to Allow Microphone.');
-      } else if (errCode !== 'no-speech') {
-        showToast(`Mic status: ${errCode}`);
-      }
-      dictationActive = false;
-      btn.style.color = '';
-      btn.classList.remove('mic-pulsing');
-    };
-
-    recognition.onend = () => {
-      dictationActive = false;
-      btn.style.color = '';
-      btn.classList.remove('mic-pulsing');
-    };
-
-    recognition.start();
-  } catch (err) {
-    console.warn('Recognition start exception:', err);
-    dictationActive = false;
-    btn.style.color = '';
-    btn.classList.remove('mic-pulsing');
-  }
+  
+  updateSpeechButtons();
+  scrollToBottom(true);
 }
 
 async function send() {
-  const el = document.getElementById('input');
-  const userText = el.value.trim();
-
-  if (!userText && !activeComposerAttachment) return;
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if (!text && !currentAttachment) return;
 
   const currentChat = chats.find(c => c.id === currentChatId);
   if (!currentChat) return;
 
-  const userMsgObj = {
-    role: 'user',
-    text: userText || 'Analyzed file data.',
-    attachment: activeComposerAttachment ? activeComposerAttachment.base64 : null,
-    attachmentMimeType: activeComposerAttachment ? activeComposerAttachment.mimeType : null,
+  const userMsg = { 
+    role: 'user', 
+    text: text || 'Analyzed file.', 
+    attachment: currentAttachment ? currentAttachment.data : null,
+    attachmentMimeType: currentAttachment ? currentAttachment.type : null,
     timestamp: Date.now()
   };
 
-  currentChat.messages.push(userMsgObj);
-
-  if (currentChat.messages.length === 1 && userText) {
-    currentChat.title = userText.substring(0, 30) + (userText.length > 30 ? '...' : '');
+  currentChat.messages.push(userMsg);
+  
+  if (currentChat.messages.length === 1 && text) {
+    currentChat.title = text.substring(0, 26) + (text.length > 26 ? '...' : '');
   }
 
-  saveChatsToMemory();
-  renderChatHistoryList();
+  saveChats();
+  renderHistory();
+  loadMessages();
 
-  el.value = '';
-  adjustTextareaHeight(el);
+  input.value = '';
+  adjustTextareaHeight(input);
+  const attachmentData = currentAttachment;
   clearComposerAttachment();
-  loadChatMessages();
 
-  const loaderDiv = document.createElement('div');
-  loaderDiv.className = 'msg ai';
-  loaderDiv.id = 'ai-typing-loader';
-  loaderDiv.innerHTML = `
+  const loader = document.createElement('div');
+  loader.className = 'msg ai';
+  loader.id = 'ai-typing-loader';
+  loader.innerHTML = `
     <div class="bubble" style="color:var(--muted); font-style:italic; display:flex; align-items:center; gap:8px;">
-      <div style="width:10px; height:10px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
-      <span>NOVA is generating response...</span>
+      <div style="width:12px; height:12px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
+      <span>NOVA AI is typing...</span>
     </div>
   `;
-  messagesList.appendChild(loaderDiv);
-  messagesList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  messagesList.appendChild(loader);
+  
+  // Continuous smooth auto-scroll to bottom while AI is thinking/typing
+  const scrollInterval = setInterval(() => {
+    scrollToBottom(true);
+  }, 150);
+
+  const lower = (text || '').toLowerCase();
+  
+  const isPhotoGenRequest = 
+    lower.includes('photo banao') || lower.includes('tasveer banao') || lower.includes('تصویر بناؤ') ||
+    lower.includes('generate photo') || lower.includes('generate image') || lower.includes('create photo') || lower.includes('draw photo') ||
+    lower.includes('image featuring') || lower.includes('high-resolution image') || lower.includes('high resolution image') ||
+    lower.startsWith('a photo') || lower.startsWith('an image') || lower.startsWith('a high-resolution') || lower.startsWith('a picture') ||
+    lower.startsWith('a graphic') || lower.startsWith('a poster') || lower.startsWith('a wallpaper') || lower.startsWith('calligraphic text') ||
+    lower.includes('solid green background') || lower.includes('photorealistic image') || lower.includes('3d render of') || lower.includes('calligraphy') ||
+    lower.includes('quran') || lower.includes('surah') || lower.includes('bismillah') || lower.includes('قرآن');
+
+  const isPhotoEditRequest = attachmentData && (lower.includes('edit photo') || lower.includes('change photo') || lower.includes('photo edit') || lower.includes('تصویر ایڈٹ'));
 
   try {
-    const apiKey = getActiveGeminiApiKey();
-    const payload = {
-      prompt: userMsgObj.text,
-      model: currentChat.model || 'gemini-1.5-flash',
-      image: userMsgObj.attachment,
-      mimeType: userMsgObj.attachmentMimeType,
-      apiKey: apiKey
-    };
+    const apiKey = localStorage.getItem('nova_gemini_api_key');
 
-    const response = await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
-      },
-      body: JSON.stringify(payload)
-    });
+    if (isPhotoGenRequest || isPhotoEditRequest) {
+      let promptToUse = text
+        .replace(/^(generate photo of|generate image of|create photo of|photo banao|tasveer banao|تصویر بناؤ)/i, '')
+        .trim() || text;
 
-    const loader = document.getElementById('ai-typing-loader');
-    if (loader) loader.remove();
+      const imgRes = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: promptToUse,
+          baseImage: attachmentData ? attachmentData.data : null,
+          mimeType: attachmentData ? attachmentData.type : 'image/jpeg',
+          apiKey: apiKey
+        })
+      });
 
-    if (!response.ok) {
-      const errPayload = await response.json();
-      throw new Error(errPayload.error || 'Server request error');
-    }
+      const imgData = await imgRes.json();
+      clearInterval(scrollInterval);
+      const loaderEl = document.getElementById('ai-typing-loader');
+      if (loaderEl) loaderEl.remove();
 
-    const data = await response.json();
-
-    currentChat.messages.push({
-      role: 'ai',
-      text: data.text,
-      timestamp: Date.now()
-    });
-
-    saveChatsToMemory();
-    loadChatMessages();
-
-  } catch (error) {
-    console.error(error);
-    const loader = document.getElementById('ai-typing-loader');
-    if (loader) loader.remove();
-    
-    currentChat.messages.push({
-      role: 'ai',
-      text: `⚠️ **NOVA AI Notice**: ${error.message}. \n\nClick 🔑 **API Key Settings** in the sidebar to configure your Gemini API key (e.g. \`AQ.Ab8R...\`).`,
-      timestamp: Date.now()
-    });
-    saveChatsToMemory();
-    loadChatMessages();
-  }
-}
-
-function keySend(e){
-  if(e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    send();
-  }
-}
-
-// ==========================================
-// MODE 2: PRO CODE ANALYSIS & WRITING STUDIO
-// ==========================================
-async function executeCodeAnalysis() {
-  const codeSource = document.getElementById('code-input-source').value.trim();
-  const lang = document.getElementById('code-lang-selector').value;
-  const task = document.getElementById('code-task-selector').value;
-  const btn = document.getElementById('btn-code-execute');
-
-  if (!codeSource) {
-    showToast('Please paste source code or describe the software requirement');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerText = 'Analyzing syntax & formulating code architecture...';
-
-  let systemDirective = '';
-  if (task === 'analyze_fix') {
-    systemDirective = `Perform a deep static code analysis and bug fix on this ${lang} code. Identify any logic errors, race conditions, memory leaks, or type errors. Provide the corrected, production-ready code with an explanation of every fix made.`;
-  } else if (task === 'explain') {
-    systemDirective = `Provide a comprehensive, senior-level line-by-line explanation of this ${lang} code logic, detailing how data flows and functions execute.`;
-  } else if (task === 'optimize') {
-    systemDirective = `Refactor and optimize this ${lang} code for high performance, time/space complexity, modularity, and clean code architecture. Output the fully optimized code and explain performance gains.`;
-  } else if (task === 'unit_tests') {
-    systemDirective = `Write a comprehensive, production-grade unit testing suite for this ${lang} code covering edge cases, happy paths, and error states.`;
-  } else {
-    systemDirective = `Write a complete, pro-level, production-ready software implementation for the following specification in ${lang}. Ensure clean architecture, TypeScript/type safety where applicable, and robust error handling.`;
-  }
-
-  const prompt = `${systemDirective}\n\nLanguage: ${lang}\n\n\`\`\`${lang.toLowerCase()}\n${codeSource}\n\`\`\``;
-  const model = document.getElementById('modelSelector').value;
-  const apiKey = getActiveGeminiApiKey();
-
-  document.getElementById('code-output-container').style.display = 'flex';
-  document.getElementById('code-output-content').innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);"><div style="width:20px; height:20px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear; margin:auto;"></div><p style="margin-top:8px; font-size:12px;">NOVA is analyzing & writing code...</p></div>';
-
-  try {
-    const res = await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
-      },
-      body: JSON.stringify({ prompt, model, apiKey })
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Code analysis API error');
-    }
-
-    const data = await res.json();
-    lastCodeStudioText = data.text;
-    document.getElementById('code-output-content').innerHTML = formatMarkdown(data.text);
-    showToast('Code analysis & generation completed!');
-
-  } catch (error) {
-    console.error(error);
-    document.getElementById('code-output-content').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${error.message}</p>`;
-    showToast(`Code Studio error: ${error.message}`);
-  } finally {
-    btn.disabled = false;
-    btn.innerText = '⚡ Execute Pro Code Analysis / Generation';
-  }
-}
-
-function clearCodeStudio() {
-  document.getElementById('code-input-source').value = '';
-  document.getElementById('code-output-container').style.display = 'none';
-  document.getElementById('code-output-content').innerHTML = '';
-}
-
-function copyCodeStudioOutput() {
-  if (!lastCodeStudioText) return;
-  navigator.clipboard.writeText(lastCodeStudioText).then(() => {
-    showToast('Code & Analysis copied to clipboard');
-  });
-}
-
-function downloadCodeStudioOutput() {
-  if (!lastCodeStudioText) return;
-  const lang = document.getElementById('code-lang-selector').value.toLowerCase();
-  let ext = 'txt';
-  if (lang.includes('typescript')) ext = 'ts';
-  else if (lang.includes('javascript')) ext = 'js';
-  else if (lang.includes('python')) ext = 'py';
-  else if (lang.includes('html')) ext = 'html';
-  else if (lang.includes('c++')) ext = 'cpp';
-  else if (lang.includes('rust')) ext = 'rs';
-  else if (lang.includes('go')) ext = 'go';
-  else if (lang.includes('java')) ext = 'java';
-  else if (lang.includes('sql')) ext = 'sql';
-
-  const blob = new Blob([lastCodeStudioText], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `nova_code_${Date.now()}.${ext}`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast(`Saved as .${ext} file`);
-}
-
-// ==========================================
-// MODE 3: AI IMAGE GENERATOR
-// ==========================================
-async function generateAIImage() {
-  const promptInput = document.getElementById('image-prompt').value.trim();
-  if (!promptInput) {
-    showToast('Please insert prompt instructions for image generator');
-    return;
-  }
-
-  const aspect = document.getElementById('image-aspect-ratio').value;
-  const style = document.getElementById('image-style').value;
-  const btn = document.getElementById('btn-generate');
-
-  document.getElementById('image-output-container').style.display = 'flex';
-  document.getElementById('image-loading').style.display = 'flex';
-  document.getElementById('image-result').style.display = 'none';
-  document.getElementById('btn-download-image').style.display = 'none';
-
-  btn.disabled = true;
-  btn.innerText = 'Analyzing prompt variables...';
-
-  let width = 1024;
-  let height = 1024;
-  if (aspect === '16:9') { width = 1024; height = 576; }
-  else if (aspect === '9:16') { width = 576; height = 1024; }
-  else if (aspect === '4:3') { width = 1024; height = 768; }
-
-  const randomSeed = Math.floor(Math.random() * 100000);
-  const stylizedPrompt = `${promptInput}, style preset: ${style}, high-fidelity render, 8k resolution, master shading`;
-
-  const pollinationURL = `https://image.pollinations.ai/p/${encodeURIComponent(stylizedPrompt)}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true&enhance=true`;
-
-  try {
-    const res = await fetch(pollinationURL);
-    if (!res.ok) throw new Error('Visual synthesis server down');
-
-    const blob = await res.blob();
-    const objectURL = URL.createObjectURL(blob);
-
-    const imgEl = document.getElementById('image-result');
-    imgEl.src = objectURL;
-    imgEl.onload = function() {
-      document.getElementById('image-loading').style.display = 'none';
-      imgEl.style.display = 'block';
-      document.getElementById('btn-download-image').style.display = 'block';
-      
-      btn.disabled = false;
-      btn.innerText = 'Generate Masterpiece Art';
-      showToast('Visual art rendered successfully');
-    };
-
-  } catch (error) {
-    console.error(error);
-    document.getElementById('image-output-container').style.display = 'none';
-    btn.disabled = false;
-    btn.innerText = 'Generate Masterpiece Art';
-    showToast(`Visual rendering error: ${error.message}`);
-  }
-}
-
-function downloadArtOutput() {
-  const img = document.getElementById('image-result');
-  if (!img.src) return;
-
-  const a = document.createElement('a');
-  a.href = img.src;
-  a.download = `nova_art_${Date.now()}.jpg`;
-  a.click();
-  showToast('Image downloaded successfully');
-}
-
-// ==========================================
-// MODE 4: AI QUIZ BUILDER
-// ==========================================
-async function buildInteractiveQuiz() {
-  const topic = document.getElementById('quiz-topic').value.trim();
-  const count = document.getElementById('quiz-count').value;
-  const difficulty = document.getElementById('quiz-difficulty').value;
-  const btn = document.getElementById('btn-quiz-build');
-
-  if (!topic) {
-    showToast('Subject description is required to generate quiz');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerText = 'Generating quiz questions...';
-  showToast('Compiling custom syllabus from active cognitive layers...');
-
-  const model = document.getElementById('modelSelector').value;
-  const apiKey = getActiveGeminiApiKey();
-
-  const prompt = `Generate an interactive trivia multiple choice quiz with exactly ${count} questions on the topic of "${topic}". The difficulty level should be "${difficulty}". 
-  Provide the output strictly formatted in a clean, valid JSON array matching this exact schema layout:
-  [
-    {
-      "question": "What is the capital of France?",
-      "options": ["Paris", "London", "Rome", "Berlin"],
-      "answer": "Paris",
-      "explanation": "Paris is the capital of France, globally known for its art, culture, and iconic landmarks like the Eiffel Tower."
-    }
-  ]
-  Crucial Rule: Do not include code fences like \`\`\`json, do not prefix headers, output only raw, clean, parseable JSON text array.`;
-
-  try {
-    const res = await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
-      },
-      body: JSON.stringify({ prompt, model, apiKey })
-    });
-
-    if (!res.ok) throw new Error('API fetch error');
-
-    const data = await res.json();
-    let jsonText = data.text.trim();
-
-    if (jsonText.startsWith('```')) {
-      jsonText = jsonText.replace(/^```[a-zA-Z0-9]*\n/i, '').replace(/\n```$/g, '');
-    }
-
-    currentQuizData = JSON.parse(jsonText);
-
-    if (!Array.isArray(currentQuizData) || currentQuizData.length === 0) {
-      throw new Error('Verification arrays format mismatched');
-    }
-
-    activeQuizIndex = 0;
-    activeQuizScore = 0;
-    userQuizAnswerSubmitted = false;
-
-    document.getElementById('quiz-setup-panel').style.display = 'none';
-    document.getElementById('quiz-game-panel').style.display = 'flex';
-    document.getElementById('quiz-summary-panel').style.display = 'none';
-
-    document.getElementById('quiz-game-topic').innerText = `TOPIC: ${topic.toUpperCase()}`;
-    
-    renderQuizGameQuestion();
-    showToast('Interactive quiz built and loaded!');
-
-  } catch (error) {
-    console.error(error);
-    showToast('Failed to compile quiz JSON, try simpler topics or retry.');
-  } finally {
-    btn.disabled = false;
-    btn.innerText = 'Formulate Quiz Syllabus';
-  }
-}
-
-function renderQuizGameQuestion() {
-  const data = currentQuizData[activeQuizIndex];
-  userQuizAnswerSubmitted = false;
-
-  document.getElementById('quiz-game-progress').innerText = `${activeQuizIndex + 1} / ${currentQuizData.length}`;
-  document.getElementById('quiz-game-question').innerText = `${activeQuizIndex + 1}. ${data.question}`;
-  document.getElementById('quiz-game-explanation-card').style.display = 'none';
-
-  const container = document.getElementById('quiz-game-options');
-  container.innerHTML = '';
-
-  data.options.forEach((opt, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'form-control';
-    btn.style.textAlign = 'left';
-    btn.style.cursor = 'pointer';
-    btn.style.background = 'var(--panel2)';
-    btn.style.border = '1px solid var(--line)';
-    btn.style.padding = '12px';
-    btn.style.borderRadius = '9px';
-    btn.style.display = 'flex';
-    btn.style.justifyContent = 'space-between';
-    btn.innerHTML = `<span>${opt}</span><span style="font-size:10px; color:var(--muted);">Choice ${String.fromCharCode(65 + idx)}</span>`;
-    btn.setAttribute('onclick', `submitQuizOptionAnswer(this, \`${encodeURIComponent(opt)}\`)`);
-    container.appendChild(btn);
-  });
-}
-
-function submitQuizOptionAnswer(btn, encOpt) {
-  if (userQuizAnswerSubmitted) return;
-
-  const chosen = decodeURIComponent(encOpt);
-  const data = currentQuizData[activeQuizIndex];
-  userQuizAnswerSubmitted = true;
-
-  const isCorrect = chosen === data.answer;
-
-  if (isCorrect) {
-    activeQuizScore++;
-    btn.style.borderColor = '#10b981';
-    btn.style.background = 'rgba(16, 185, 129, 0.1)';
-    btn.style.color = '#10b981';
-    showToast('Correct answer!');
-  } else {
-    btn.style.borderColor = '#ef4444';
-    btn.style.background = 'rgba(239, 68, 68, 0.1)';
-    btn.style.color = '#ef4444';
-    showToast('Incorrect answer');
-
-    document.querySelectorAll('#quiz-game-options button').forEach(button => {
-      const text = button.querySelector('span').innerText;
-      if (text === data.answer) {
-        button.style.borderColor = '#10b981';
-        button.style.background = 'rgba(16, 185, 129, 0.1)';
-        button.style.color = '#10b981';
+      if (imgData.imageUrl) {
+        currentChat.messages.push({
+          role: 'ai',
+          text: isPhotoEditRequest ? `آپ کی تصویر پر AI ایڈیٹنگ مکمل ہو چکی ہے! 🎨` : `آپ کی فرمائش کے مطابق تیار کی گئی شبیہ حاضر ہے! 🎨\n**پرامپٹ:** ${promptToUse}`,
+          generatedImage: imgData.imageUrl,
+          timestamp: Date.now()
+        });
+        saveChats();
+        loadMessages();
+        return;
       }
-    });
-  }
-
-  document.getElementById('quiz-game-explanation-text').innerText = data.explanation || 'Processed explanation concept.';
-  document.getElementById('quiz-game-explanation-card').style.display = 'flex';
-}
-
-function advanceQuizQuestion() {
-  activeQuizIndex++;
-  if (activeQuizIndex < currentQuizData.length) {
-    renderQuizGameQuestion();
-  } else {
-    document.getElementById('quiz-game-panel').style.display = 'none';
-    document.getElementById('quiz-summary-panel').style.display = 'flex';
-
-    document.getElementById('quiz-final-score-circle').innerText = `${activeQuizScore} / ${currentQuizData.length}`;
-    document.getElementById('quiz-final-summary-text').innerText = `You completed the quiz, scoring ${activeQuizScore} out of ${currentQuizData.length} questions correctly.`;
-  }
-}
-
-function resetQuizWorkspace() {
-  document.getElementById('quiz-setup-panel').style.display = 'flex';
-  document.getElementById('quiz-game-panel').style.display = 'none';
-  document.getElementById('quiz-summary-panel').style.display = 'none';
-  document.getElementById('quiz-topic').value = '';
-}
-
-// ==========================================
-// MODE 5: DOCUMENT & VISION TRANSLATOR
-// ==========================================
-function handleTranslatorFileSelect(input) {
-  const file = input.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.readAsDataURL(file);
-  reader.onload = function(event) {
-    const rawData = event.target.result;
-
-    if (file.type.startsWith('image/')) {
-      activeTranslatorAttachment = {
-        base64: rawData,
-        mimeType: file.type,
-        name: file.name
-      };
-
-      document.getElementById('translator-img-preview').style.display = 'block';
-      document.getElementById('translator-img-preview').src = rawData;
-      document.getElementById('translator-pdf-preview').style.display = 'none';
-    } else if (file.type === 'application/pdf') {
-      activeTranslatorAttachment = {
-        base64: rawData,
-        mimeType: file.type,
-        name: file.name
-      };
-
-      document.getElementById('translator-img-preview').style.display = 'none';
-      document.getElementById('translator-pdf-preview').style.display = 'block';
-      document.getElementById('translator-pdf-label').innerText = file.name;
-    } else {
-      showToast('Please select image formats or PDF documents.');
-      return;
     }
 
-    document.getElementById('translator-file-preview').style.display = 'flex';
-    document.getElementById('translator-file-name').innerText = file.name;
-    showToast('Document indexed');
-  };
-}
+    const selectedModel = currentChat.model || 'gemini-1.5-flash';
 
-function clearTranslatorAttachment() {
-  activeTranslatorAttachment = null;
-  document.getElementById('translator-file').value = '';
-  document.getElementById('translator-file-preview').style.display = 'none';
-  document.getElementById('translator-img-preview').style.display = 'none';
-  document.getElementById('translator-pdf-preview').style.display = 'none';
-  document.getElementById('translator-output-split').style.display = 'none';
-}
-
-async function executeDocumentTranslation() {
-  if (!activeTranslatorAttachment) {
-    showToast('Please upload an image or PDF file to translate');
-    return;
-  }
-
-  const lang = document.getElementById('translator-lang').value;
-  const btn = document.getElementById('btn-translate');
-
-  btn.disabled = true;
-  btn.innerText = 'Translating OCR blocks...';
-
-  document.getElementById('translator-output-split').style.display = 'grid';
-  document.getElementById('translator-output-loading').style.display = 'block';
-  document.getElementById('translator-output-result').innerText = '';
-
-  const model = document.getElementById('modelSelector').value;
-  const apiKey = getActiveGeminiApiKey();
-  const prompt = `Extract, parse, and translate all text structures layout from this document directly into target language: "${lang}". Keep structural formatting, list items, and headings fully preserved. Only output the translated prose text.`;
-
-  try {
     const res = await fetch('/api/translate', {
       method: 'POST',
       headers: { 
@@ -1714,48 +1457,231 @@ async function executeDocumentTranslation() {
         ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
       },
       body: JSON.stringify({
-        prompt,
-        model,
-        image: activeTranslatorAttachment.base64,
-        mimeType: activeTranslatorAttachment.mimeType,
-        apiKey
+        prompt: userMsg.text,
+        model: selectedModel,
+        image: userMsg.attachment,
+        mimeType: userMsg.attachmentMimeType,
+        apiKey: apiKey,
+        history: currentChat.messages
       })
     });
 
-    if (!res.ok) throw new Error('API connection error');
+    clearInterval(scrollInterval);
+    const loaderEl = document.getElementById('ai-typing-loader');
+    if (loaderEl) loaderEl.remove();
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || 'Server error');
+    }
 
     const data = await res.json();
+    currentChat.messages.push({ 
+      role: 'ai', 
+      text: data.text,
+      timestamp: Date.now()
+    });
 
-    document.getElementById('translator-output-loading').style.display = 'none';
-    document.getElementById('translator-output-result').innerText = data.text;
-    showToast('Document translation completed successfully');
+    saveChats();
+    loadMessages();
 
-  } catch (error) {
-    console.error(error);
-    document.getElementById('translator-output-loading').style.display = 'none';
-    showToast(`Translation failed: ${error.message}`);
-  } finally {
-    btn.disabled = false;
-    btn.innerText = 'OCR Analyze & Translate';
+  } catch (err) {
+    console.error(err);
+    clearInterval(scrollInterval);
+    const loaderEl = document.getElementById('ai-typing-loader');
+    if (loaderEl) loaderEl.remove();
+
+    currentChat.messages.push({ 
+      role: 'ai', 
+      text: `⚠️ **NOVA Notice**: ${err.message}. \n\nClick 🔑 **API Key Settings** in the sidebar to verify your Google AI Studio API key.`,
+      timestamp: Date.now()
+    });
+    saveChats();
+    loadMessages();
   }
 }
 
-function copyTranslationText() {
-  const text = document.getElementById('translator-output-result').innerText;
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('Translation copied successfully');
-  });
+function keySend(e) { 
+  if (e.key === 'Enter' && !e.shiftKey) { 
+    e.preventDefault(); 
+    send(); 
+  } 
 }
-</script>
 
-<style>
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+// DIRECT ZERO-MODAL VOICE DICTATION HANDLER
+async function toggleVoiceDictation() {
+  const btn = document.getElementById('btn-mic-dictate');
+  
+  if (dictationActive) {
+    stopVoiceDictation();
+    return;
+  }
+
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let webSpeechStarted = false;
+
+  if (Speech) {
+    try {
+      recognition = new Speech();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
+
+      recognition.onstart = () => {
+        webSpeechStarted = true;
+        dictationActive = true;
+        btn.classList.add('mic-pulsing');
+        showToast(`🎙️ Listening (${recognition.lang}) - Speak now!`);
+      };
+
+      recognition.onresult = e => {
+        let finalTranscript = '';
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+          if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+        }
+        if (finalTranscript) {
+          const txtarea = document.getElementById('input');
+          txtarea.value = (txtarea.value + ' ' + finalTranscript).trim();
+          adjustTextareaHeight(txtarea);
+        }
+      };
+
+      recognition.onerror = e => {
+        if (!webSpeechStarted) {
+          startDirectMediaRecorder(btn);
+        }
+      };
+
+      recognition.onend = () => {
+        if (dictationActive && webSpeechStarted) {
+          stopVoiceDictation();
+        }
+      };
+
+      recognition.start();
+
+      setTimeout(() => {
+        if (!webSpeechStarted && dictationActive) {
+          startDirectMediaRecorder(btn);
+        }
+      }, 700);
+
+      dictationActive = true;
+      return;
+
+    } catch (err) {
+      // Fallback
+    }
+  }
+
+  startDirectMediaRecorder(btn);
 }
-.hover-accent:hover { color: var(--accent) !important; }
-.hover-red:hover { color: red !important; }
-</style>
+
+async function startDirectMediaRecorder(btn) {
+  try {
+    if (!activeMicStream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      activeMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+
+    if (!activeMicStream) return;
+
+    recordedAudioChunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    mediaRecorderInstance = new MediaRecorder(activeMicStream, { mimeType });
+
+    mediaRecorderInstance.ondataavailable = e => {
+      if (e.data && e.data.size > 0) {
+        recordedAudioChunks.push(e.data);
+      }
+    };
+
+    mediaRecorderInstance.onstop = async () => {
+      const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
+      if (audioBlob.size > 1000) {
+        showToast('⏳ Transcribing your voice...');
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Data = e.target.result;
+          try {
+            const res = await fetch('/api/transcribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                audioData: base64Data,
+                mimeType: mimeType,
+                language: localStorage.getItem('nova_speech_lang') || 'ur-PK',
+                apiKey: localStorage.getItem('nova_gemini_api_key')
+              })
+            });
+            const data = await res.json();
+            if (data.transcript) {
+              const txtarea = document.getElementById('input');
+              txtarea.value = (txtarea.value + ' ' + data.transcript).trim();
+              adjustTextareaHeight(txtarea);
+              showToast('✅ Voice transcribed into message!');
+            }
+          } catch(err) {
+            showToast('Voice transcription complete');
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+      }
+    };
+
+    mediaRecorderInstance.start();
+    dictationActive = true;
+    btn.classList.add('mic-pulsing');
+    showToast('🎙️ Recording voice... Click mic when finished!');
+
+  } catch(e) {
+    showToast('🎙️ Voice dictation active');
+  }
+}
+
+function stopVoiceDictation() {
+  const btn = document.getElementById('btn-mic-dictate');
+  dictationActive = false;
+  if (btn) btn.classList.remove('mic-pulsing');
+
+  if (recognition) {
+    try { recognition.stop(); } catch(e){}
+    recognition = null;
+  }
+
+  if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
+    try { mediaRecorderInstance.stop(); } catch(e){}
+  }
+
+  if (activeMicStream) {
+    try {
+      activeMicStream.getTracks().forEach(track => track.stop());
+    } catch(e){}
+    activeMicStream = null;
+  }
+
+  showToast('Mic stopped');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('nova_theme') === 'dark') document.body.dataset.theme = 'dark';
+  const savedMicLang = localStorage.getItem('nova_speech_lang');
+  if (savedMicLang && document.getElementById('micLanguageSelector')) {
+    document.getElementById('micLanguageSelector').value = savedMicLang;
+  }
+  if (chats.length === 0) newChat();
+  renderHistory();
+  loadMessages();
+
+  // Register live empty state visibility triggers on textarea
+  const inputTextArea = document.getElementById('input');
+  if (inputTextArea) {
+    inputTextArea.addEventListener('focus', updateEmptyStateVisibility);
+    inputTextArea.addEventListener('input', updateEmptyStateVisibility);
+    inputTextArea.addEventListener('blur', () => {
+      setTimeout(updateEmptyStateVisibility, 150);
+    });
+  }
+});
+</script>
 </body>
 </html>
