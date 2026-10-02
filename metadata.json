@@ -1,0 +1,6 @@
+{
+  "name": "NOVA AI",
+  "description": "A gorgeous glassmorphic full-stack AI Assistant supporting Multimodal Chat, Text-to-Image Generation, Quiz Building, and Document/Vision Translation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

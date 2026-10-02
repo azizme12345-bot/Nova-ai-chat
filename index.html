@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>NOVA AI | Full-Stack Intelligent Assistant</title>
+<style>
+:root{
+  --bg:#ffffff;--panel:#f7f8fa;--panel2:#ffffff;--text:#17191c;--muted:#73777f;
+  --line:#e6e8eb;--accent:#1677ff;--accent-soft:#eaf3ff;--user:#eef5ff;
+}
+[data-theme="dark"]{
+  --bg:#101214;--panel:#171a1e;--panel2:#14171a;--text:#f3f4f6;--muted:#969ba3;
+  --line:#292d33;--accent:#3d8bff;--accent-soft:#172945;--user:#18283e;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100vh;overflow:hidden}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{height:100vh;display:flex}
+.sidebar{width:270px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:9px 8px 18px}
+.logo{width:31px;height:31px;border-radius:9px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-weight:800}
+.side-btn{width:100%;border:0;background:transparent;color:var(--text);padding:11px 12px;border-radius:9px;text-align:left;display:flex;gap:12px;align-items:center;margin:2px 0;transition:all 0.2s}
+.side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent)}
+.side-btn span:first-child{width:20px;text-align:center}
+.history{margin-top:18px;color:var(--muted);font-size:12px;padding:0 12px}
+.history-item{margin-top:8px;padding:9px 12px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:between;align-items:center}
+.history-item:hover{background:var(--accent-soft);color:var(--text)}
+.profile{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:#dce8f8;display:grid;place-items:center;color:#31557d;font-weight:700}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;justify-content:space-between}
+.top-title{font-weight:650}
+.icon-btn{border:0;background:transparent;color:var(--text);width:38px;height:38px;border-radius:9px;display:grid;place-items:center}
+.icon-btn:hover{background:var(--panel)}
+.chat{flex:1;overflow:auto;padding:34px 20px 150px}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.empty .biglogo{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-size:27px;font-weight:800}
+.empty h1{font-size:25px;margin:5px 0}
+.empty p{margin:0;color:var(--muted);font-size:14px}
+.messages{max-width:780px;margin:auto}
+.msg{margin:0 0 22px;display:flex;flex-direction:column}
+.msg.user{align-items:flex-end}
+.msg.ai{align-items:flex-start}
+.bubble{max-width:75%;padding:12px 15px;border-radius:15px;line-height:1.55;font-size:14px;word-break:break-word}
+.msg.user .bubble{background:var(--user)}
+.msg.ai .bubble{background:var(--panel);border:1px solid var(--line)}
+.composer-wrap{position:fixed;bottom:0;left:270px;right:0;padding:16px 20px 20px;background:linear-gradient(transparent,var(--bg) 28%);z-index:10}
+.composer{max-width:780px;margin:auto;border:1px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 22px rgba(0,0,0,.06);padding:9px}
+textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:8px 9px;min-height:44px;max-height:130px}
+.tools{display:flex;align-items:center;gap:5px}
+.tool{border:0;background:transparent;color:var(--muted);width:36px;height:34px;border-radius:8px;display:grid;place-items:center}
+.tool:hover{background:var(--panel);color:var(--text)}
+.send{margin-left:auto;background:var(--accent);color:white;border:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.attach-menu{display:none;position:absolute;bottom:68px;left:0;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:7px;width:220px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:20}
+.attach-menu.show{display:block}
+.attach-item{border:0;background:transparent;color:var(--text);width:100%;text-align:left;padding:11px;border-radius:8px}
+.attach-item:hover{background:var(--panel)}
+
+/* Custom Dashboard Workspaces styles */
+.workspace-panel{display:none;flex:1;overflow-y:auto;padding:34px 20px 100px}
+.workspace-panel.active{display:flex;flex-direction:column}
+.form-group{margin-bottom:15px;display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:600;color:var(--muted)}
+.form-control{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 12px;outline:none}
+.form-control:focus{border-color:var(--accent)}
+.btn-primary{background:var(--accent);color:white;border:0;padding:10px 16px;border-radius:9px;font-weight:600;transition:all 0.2s}
+.btn-primary:hover{opacity:0.9}
+.btn-primary:disabled{opacity:0.6;cursor:not-allowed}
+
+/* Toast System styles */
+#toast-container{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--panel2);color:var(--text);border:1px solid var(--line);box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px}
+
+@media(max-width:720px){
+ .sidebar{display:none}.composer-wrap{left:0}.topbar{padding:0 12px}.chat{padding-left:13px;padding-right:13px}
+ .bubble{max-width:88%}.workspace-panel{padding-bottom:140px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Toast Index Container -->
+  <div id="toast-container"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">N</div>
+      <span>NOVA AI</span>
+    </div>
+
+    <!-- Model Selection Dropdown (with requested identifier #modelSelector) -->
+    <div style="padding: 0 12px; margin-bottom: 12px;">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:600;">INTELLIGENCE ENGINE</div>
+      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:7px 10px; outline:none; cursor:pointer; font-size:12px;">
+        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Super Fast)</option>
+        <option value="gemini-1.5-pro">Gemini 1.5 Pro (High Precision)</option>
+        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Speed)</option>
+        <option value="gemini-3.1-flash" selected>Gemini 3.1 Flash (Advanced Speed)</option>
+        <option value="gemini-3.1-pro">Gemini 3.1 Pro (Advanced Reasoning)</option>
+        <option value="gemini-3.5-flash">Gemini 3.5 Flash (Latest Ultra-Fast)</option>
+        <option value="gemini-3.5-pro">Gemini 3.5 Pro (Latest Flagship)</option>
+      </select>
+    </div>
+
+    <button class="side-btn active" id="side-btn-chat" onclick="switchMode('chat')"><span>＋</span><span>New Chat</span></button>
+    <button class="side-btn" id="side-btn-generate" onclick="switchMode('generate')"><span>▧</span><span>Image Generation</span></button>
+    <button class="side-btn" id="side-btn-quiz" onclick="switchMode('quiz')"><span>🧠</span><span>AI Quiz Builder</span></button>
+    <button class="side-btn" id="side-btn-translator" onclick="switchMode('translator')"><span>📝</span><span>Document Translator</span></button>
+    <button class="side-btn" onclick="toggleTheme()"><span>◐</span><span>Light / Dark Mode</span></button>
+
+    <!-- Sound/TTS Pitch settings panel to address user's specific request -->
+    <div class="voice-settings" style="margin-top: 15px; padding: 0 12px; border-top: 1px solid var(--line); padding-top: 15px;">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; font-weight: 600;">VOICE PITCH SETTINGS</div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <select id="ttsVoiceSelector" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none;">
+          <!-- Loaded dynamically -->
+        </select>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted);">
+          <span>Pitch:</span>
+          <input type="range" id="ttsPitchSlider" min="0.5" max="2" step="0.1" value="1" style="width: 80px; accent-color: var(--accent);">
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted);">
+          <span>Speed:</span>
+          <input type="range" id="ttsSpeedSlider" min="0.5" max="2" step="0.1" value="1.0" style="width: 80px; accent-color: var(--accent);">
+        </div>
+      </div>
+    </div>
+
+    <div class="history">RECENT CHATS</div>
+    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:2px; margin-top:8px;"></div>
+    
+    <div class="profile">
+      <div class="avatar">A</div>
+      <div>
+        <b style="font-size:13px" id="profile-user-email">Abdul Aziz</b>
+        <div style="font-size:11px;color:var(--muted)">NOVA AI Agent</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+      <div class="top-title" id="top-title">NOVA AI Chat</div>
+      <button class="icon-btn" onclick="toggleTheme()">◐</button>
+    </header>
+
+    <!-- MODE 1: CHAT WORKSPACE -->
+    <section class="chat active" id="workspace-chat">
+      <div class="empty" id="empty">
+        <div class="biglogo">N</div>
+        <h1>How can I help you today?</h1>
+        <p>Ask NOVA AI about text, images, videos, audio, coding or anything else.</p>
+      </div>
+      <div class="messages" id="messages-list"></div>
+    </section>
+
+    <!-- MODE 2: IMAGE GENERATOR -->
+    <section class="workspace-panel" id="workspace-generate">
+      <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
+        <div>
+          <h2 style="font-size:22px; font-weight:700; margin:0;">AI Image Generator</h2>
+          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Unleash NOVA's high-fidelity creative painting models.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Image Prompts Details</label>
+          <textarea id="image-prompt" class="form-control" rows="3" placeholder="A cinematic render of a futuristic glass city floating inside an ancient neon canyon..."></textarea>
+        </div>
+
+        <div style="display:grid; grid-template-cols: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; width:100%;">
+          <div class="form-group">
+            <label class="form-label">Aspect Ratio</label>
+            <select id="image-aspect-ratio" class="form-control">
+              <option value="1:1">1:1 (Square)</option>
+              <option value="16:9" selected>16:9 (Cinematic)</option>
+              <option value="9:16">9:16 (Portrait)</option>
+              <option value="4:3">4:3 (Classic)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Aesthetic Style Preset</label>
+            <select id="image-style" class="form-control">
+              <option value="Cinematic">Cinematic 3D</option>
+              <option value="Anime">Modern Anime</option>
+              <option value="Neonpunk">Cyberpunk Glow</option>
+              <option value="Digital Art">Concept Digital Painting</option>
+              <option value="Minimalist Sketch">Line Pencil Sketch</option>
+            </select>
+          </div>
+        </div>
+
+        <button onclick="generateAIImage()" id="btn-generate" class="btn-primary">Generate Masterpiece Art</button>
+
+        <!-- Output display frame -->
+        <div id="image-output-container" style="border: 1px solid var(--line); border-radius:12px; background:var(--panel); min-height:300px; display:none; flex-direction:column; items-center:center; justify-content:center; padding:15px; position:relative; overflow:hidden;">
+          <div id="image-loading" style="display:none; flex-direction:column; align-items:center; gap:10px;">
+            <div style="width:30px; height:30px; border:3px solid var(--line); border-top:3px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
+            <span style="font-size:12px; color:var(--accent); font-weight:600;">Rendering creative buffers...</span>
+          </div>
+          <img id="image-result" style="width:100%; height:auto; border-radius:10px; object-contain:contain; max-height:450px;" alt="Generated Visual Art">
+          <button id="btn-download-image" onclick="downloadArtOutput()" class="btn-primary" style="position:absolute; bottom:15px; right:15px; display:none; padding:8px 12px; font-size:12px;">💾 Save JPG Image</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODE 3: AI QUIZ BUILDER -->
+    <section class="workspace-panel" id="workspace-quiz">
+      <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
+        <div>
+          <h2 style="font-size:22px; font-weight:700; margin:0;">AI Quiz Builder</h2>
+          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Create and solve dynamic multiple-choice trivia quizes on any topic.</p>
+        </div>
+
+        <!-- Setup Form -->
+        <div id="quiz-setup-panel" style="display:flex; flex-direction:column; gap:15px;">
+          <div class="form-group">
+            <label class="form-label">Target Quiz Subject/Topic</label>
+            <input type="text" id="quiz-topic" class="form-control" placeholder="e.g., Chemistry, JavaScript fundamentals, Space sciences">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="form-group">
+              <label class="form-label">Questions</label>
+              <select id="quiz-count" class="form-control">
+                <option value="3">3 questions</option>
+                <option value="5" selected>5 questions</option>
+                <option value="10">10 questions</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Difficulty Scale</label>
+              <select id="quiz-difficulty" class="form-control">
+                <option value="Easy">Beginner (Easy)</option>
+                <option value="Medium" selected>Intermediate (Medium)</option>
+                <option value="Hard">Advanced (Hard)</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="buildInteractiveQuiz()" id="btn-quiz-build" class="btn-primary">Formulate Quiz Syllabus</button>
+        </div>
+
+        <!-- Quiz Gameplay Board -->
+        <div id="quiz-game-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:20px; flex-direction:column; gap:15px;">
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px;">
+            <span id="quiz-game-topic" style="font-size:12px; font-weight:700; color:var(--accent);">TOPIC: SCIENCE</span>
+            <span id="quiz-game-progress" style="font-size:12px; font-weight:600; color:var(--muted);">1 / 5</span>
+          </div>
+          <h3 id="quiz-game-question" style="font-size:16px; font-weight:700; margin:5px 0;">Question title goes here...</h3>
+          <div id="quiz-game-options" style="display:flex; flex-direction:column; gap:10px;">
+            <!-- Rendered choices dynamically -->
+          </div>
+          <div id="quiz-game-explanation-card" style="display:none; flex-direction:column; gap:5px; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:9px; font-size:12px; margin-top:10px;">
+            <strong style="color:var(--accent);">Nova Core Explanation:</strong>
+            <p id="quiz-game-explanation-text" style="margin:0; color:var(--muted);"></p>
+            <button onclick="advanceQuizQuestion()" class="btn-primary" style="align-self:flex-end; padding:6px 12px; font-size:11px; margin-top:8px;">Next Question ➔</button>
+          </div>
+        </div>
+
+        <!-- Quiz Score Summary Screen -->
+        <div id="quiz-summary-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:30px; text-align:center; flex-direction:column; items-center:center; gap:15px;">
+          <div style="width:70px; height:70px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-size:24px; font-weight:700; display:grid; place-items:center; margin:auto;" id="quiz-final-score-circle">5/5</div>
+          <h2 style="font-size:18px; font-weight:700; margin:0;">Quiz Finished!</h2>
+          <p id="quiz-final-summary-text" style="font-size:13px; color:var(--muted); margin:0;">Congratulations, you answered all questions correctly.</p>
+          <button onclick="resetQuizWorkspace()" class="btn-primary" style="padding:8px 16px; font-size:12px;">Build New Quiz</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODE 4: VISION & DOCUMENT TRANSLATOR -->
+    <section class="workspace-panel" id="workspace-translator">
+      <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
+        <div>
+          <h2 style="font-size:22px; font-weight:700; margin:0;">Vision & Document Translator</h2>
+          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Translate scanned images or PDF layouts using Google Gemini Vision OCR channels.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+          <div class="form-group">
+            <label class="form-label">Target Language</label>
+            <select id="translator-lang" class="form-control">
+              <option value="Urdu">Urdu (اردو)</option>
+              <option value="Hindi">Hindi (हिंदी)</option>
+              <option value="English">English</option>
+              <option value="Spanish">Spanish (Español)</option>
+              <option value="French">French (Français)</option>
+              <option value="German">German (Deutsch)</option>
+              <option value="Arabic">Arabic (العربية)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">OCR Visual Upload</label>
+            <input type="file" id="translator-file" accept="image/*,application/pdf" style="display:none;" onchange="handleTranslatorFileSelect(this)">
+            <button onclick="document.getElementById('translator-file').click()" class="form-control" style="text-align:left; background:var(--panel2); cursor:pointer;">📎 Select image/PDF file</button>
+          </div>
+        </div>
+
+        <!-- File attachment feedback -->
+        <div id="translator-file-preview" style="display:none; justify-content:space-between; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:10px 15px; font-size:12px;">
+          <span id="translator-file-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">document.png</span>
+          <button onclick="clearTranslatorAttachment()" style="color:red; background:none; border:none; text-decoration:underline;">Remove</button>
+        </div>
+
+        <button onclick="executeDocumentTranslation()" id="btn-translate" class="btn-primary">OCR Analyze & Translate</button>
+
+        <!-- Translation split layout panels -->
+        <div id="translator-output-split" style="display:none; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px;">
+          <!-- Left: original preview -->
+          <div style="border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel2);">
+            <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:8px; border-bottom:1px solid var(--line); padding-bottom:5px;">Original Visual</div>
+            <img id="translator-img-preview" style="width:100%; border-radius:8px; display:none; max-height:250px; object-fit:contain;">
+            <div id="translator-pdf-preview" style="display:none; text-align:center; padding:30px 10px;">
+              <span style="font-size:36px;">📄</span>
+              <p style="font-size:12px; margin:5px 0 0 0; font-weight:600;" id="translator-pdf-label"></p>
+            </div>
+          </div>
+
+          <!-- Right: translation prose text -->
+          <div style="border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel2); display:flex; flex-direction:column; gap:8px; position:relative;">
+            <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:8px; border-bottom:1px solid var(--line); padding-bottom:5px;">Translated Text Output</div>
+            <div id="translator-output-loading" style="display:none; text-align:center; padding:40px 10px;">
+              <div style="width:20px; height:20px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear; margin:auto;"></div>
+              <p style="font-size:11px; margin-top:8px; color:var(--accent);">OCR parsing...</p>
+            </div>
+            <div id="translator-output-result" style="font-size:13px; line-height:1.55; white-space:pre-wrap; overflow-y:auto; max-height:220px; flex:1;" class="select-text"></div>
+            <button onclick="copyTranslationText()" class="btn-primary" style="padding:6px 12px; font-size:11px; align-self:flex-end;">📋 Copy Translation</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPOSER AT BOTTOM (Visible in Mode 1: Chat) -->
+    <div class="composer-wrap" id="workspace-composer">
+      <!-- Upload preview panel inside composer -->
+      <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:780px; margin:0 auto 10px; font-size:11px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span>📎</span>
+          <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">file.jpg</span>
+          <span style="color:var(--muted); font-size:10px;">(compressed)</span>
+        </div>
+        <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline;">Remove</button>
+      </div>
+
+      <div class="composer" style="position:relative">
+        <!-- Attachments Dropdown Menu -->
+        <div class="attach-menu" id="attachMenu">
+          <button class="attach-item" onclick="selectAttachmentSource('camera')">📷 Live Camera Capture</button>
+          <button class="attach-item" onclick="selectAttachmentSource('gallery')">🖼️ Gallery / File Upload</button>
+        </div>
+
+        <textarea id="input" placeholder="Message NOVA AI..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
+        <div class="tools">
+          <button class="tool" onclick="toggleAttach(event)">📎</button>
+          <button class="tool" onclick="selectAttachmentSource('gallery')">🖼️</button>
+          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()">🎙️</button>
+          <button class="send" onclick="send()">➤</button>
+        </div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:10px;margin-top:7px">NOVA AI can make mistakes. Check important information.</div>
+    </div>
+
+    <!-- INLINE SELECTORS FOR ATTACHMENTS -->
+    <input id="file" type="file" hidden accept="image/*,application/pdf" onchange="handleComposerFileSelected(this)">
+    <input id="camera-file" type="file" hidden accept="image/*" capture="environment" onchange="handleComposerFileSelected(this)">
+  </main>
+</div>
+
+<script>
+// Database & State Managers
+let chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
+let currentChatId = localStorage.getItem('nova_current_chat_id') || '';
+let activeMode = 'chat'; // 'chat' | 'generate' | 'quiz' | 'translator'
+
+// Attachments buffer
+let activeComposerAttachment = null; // { base64, mimeType, name }
+let activeTranslatorAttachment = null; // { base64, mimeType, name }
+
+// Speech Dictation recognition
+let recognition = null;
+let dictationActive = false;
+
+// Interactive quiz state counters
+let currentQuizData = [];
+let activeQuizIndex = 0;
+let activeQuizScore = 0;
+let userQuizAnswerSubmitted = false;
+
+// HTML layout objects
+const body = document.body;
+const messagesList = document.getElementById('messages-list');
+const emptyState = document.getElementById('empty');
+
+// Initialize Voice list in settings selector
+function loadSpeechVoices() {
+  if (!('speechSynthesis' in window)) return;
+  const select = document.getElementById('ttsVoiceSelector');
+  select.innerHTML = '';
+  
+  const voices = window.speechSynthesis.getVoices();
+  const sorted = voices.sort((a,b) => a.name.localeCompare(b.name));
+  
+  sorted.forEach((voice) => {
+    const option = document.createElement('option');
+    option.value = voice.name;
+    option.innerText = `${voice.name} (${voice.lang})`;
+    
+    // Choose clean female voices as defaults
+    if (voice.name.includes('Zira') || voice.name.includes('Samantha') || voice.name.includes('Google US English')) {
+      option.selected = true;
+    }
+    select.appendChild(option);
+  });
+}
+
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
+  loadSpeechVoices();
+}
+
+// System initialization
+window.addEventListener('DOMContentLoaded', () => {
+  // Update user initials email
+  const userEmail = "azizme12345@gmail.com";
+  document.getElementById('profile-user-email').innerText = userEmail;
+
+  // Apply default templates theme
+  if (localStorage.getItem('nova_theme') === 'dark') {
+    body.dataset.theme = 'dark';
+  } else {
+    body.dataset.theme = '';
+  }
+
+  // Seeding initial chats databases
+  if (chats.length === 0) {
+    const newId = 'chat_' + Date.now();
+    chats.push({
+      id: newId,
+      title: 'Multimodal Chat Session',
+      model: 'gemini-3.1-flash',
+      messages: []
+    });
+    currentChatId = newId;
+    saveChatsToMemory();
+  }
+
+  renderChatHistoryList();
+  loadChatMessages();
+});
+
+// Toast controller
+function showToast(text) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span>✨</span><span>${text}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// Save databases helpers
+function saveChatsToMemory() {
+  localStorage.setItem('nova_chats', JSON.stringify(chats));
+  localStorage.setItem('nova_current_chat_id', currentChatId);
+}
+
+// Auto-grow height on composer inputs
+function adjustTextareaHeight(el) {
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight) + 'px';
+}
+
+// Light & Dark theme trigger
+function toggleTheme(){
+  const isDark = body.dataset.theme === 'dark';
+  body.dataset.theme = isDark ? '' : 'dark';
+  localStorage.setItem('nova_theme', body.dataset.theme);
+  showToast(isDark ? 'Light theme activated' : 'Dark theme activated');
+}
+
+// Collapsible Mobile navigation bar drawer togglers
+function toggleSidebar(){
+  const s = document.querySelector('.sidebar');
+  s.style.display = s.style.display === 'flex' ? 'none' : 'flex';
+}
+
+// Toggle attachment selector panel
+function toggleAttach(e){
+  e.stopPropagation();
+  document.getElementById('attachMenu').classList.toggle('show');
+}
+
+// Close attachment panel dropdown clicking anywhere else
+document.addEventListener('click', () => {
+  document.getElementById('attachMenu').classList.remove('show');
+});
+
+// Attachment trigger selectors
+function selectAttachmentSource(source) {
+  document.getElementById('attachMenu').classList.remove('show');
+  if (source === 'camera') {
+    document.getElementById('camera-file').click();
+  } else {
+    document.getElementById('file').click();
+  }
+}
+
+// Compress and convert image structures
+function handleComposerFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function(event) {
+    const rawData = event.target.result;
+    
+    if (file.type.startsWith('image/')) {
+      const img = new Image();
+      img.src = rawData;
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+        activeComposerAttachment = {
+          base64: compressedBase64,
+          mimeType: 'image/jpeg',
+          name: file.name
+        };
+
+        document.getElementById('composer-attachment-panel').style.display = 'flex';
+        document.getElementById('composer-attachment-name').innerText = file.name;
+        showToast('Image attachment compressed');
+      };
+    } else if (file.type === 'application/pdf') {
+      activeComposerAttachment = {
+        base64: rawData,
+        mimeType: 'application/pdf',
+        name: file.name
+      };
+      document.getElementById('composer-attachment-panel').style.display = 'flex';
+      document.getElementById('composer-attachment-name').innerText = file.name;
+      showToast('PDF Document indexed');
+    } else {
+      showToast('Unsupported document type');
+    }
+  };
+}
+
+function clearComposerAttachment() {
+  activeComposerAttachment = null;
+  document.getElementById('composer-attachment-panel').style.display = 'none';
+  document.getElementById('file').value = '';
+  document.getElementById('camera-file').value = '';
+}
+
+// Mode workspace switcher
+function switchMode(mode) {
+  activeMode = mode;
+  
+  // Update top title titles
+  const titles = {
+    chat: 'NOVA AI Chat',
+    generate: 'Image Generator',
+    quiz: 'AI Quiz Builder',
+    translator: 'Document Translator'
+  };
+  document.getElementById('top-title').innerText = titles[mode] || 'NOVA AI';
+
+  // Toggle active workspace panels
+  document.querySelectorAll('.workspace-panel').forEach(panel => panel.classList.remove('active'));
+  document.getElementById('workspace-chat').style.display = 'none';
+  document.getElementById('workspace-composer').style.display = 'none';
+
+  if (mode === 'chat') {
+    document.getElementById('workspace-chat').style.display = 'block';
+    document.getElementById('workspace-composer').style.display = 'block';
+  } else {
+    document.getElementById(`workspace-${mode}`).classList.add('active');
+  }
+
+  // Toggle active buttons states in sidebar
+  document.querySelectorAll('.side-btn').forEach(btn => btn.classList.remove('active'));
+  const currentBtn = document.getElementById(`side-btn-${mode}`);
+  if (currentBtn) currentBtn.classList.add('active');
+
+  // Auto-hide mobile menus
+  if (innerWidth <= 720) {
+    document.querySelector('.sidebar').style.display = 'none';
+  }
+}
+
+// Dynamic Model drop-down selector save values
+function saveModelConfig() {
+  const model = document.getElementById('modelSelector').value;
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (currentChat) {
+    currentChat.model = model;
+    saveChatsToMemory();
+  }
+  showToast(`Routed to: ${model}`);
+}
+
+// Select active chat from history list
+function selectActiveChat(chatId) {
+  currentChatId = chatId;
+  saveChatsToMemory();
+  
+  const currentChat = chats.find(c => c.id === chatId);
+  if (currentChat && currentChat.model) {
+    document.getElementById('modelSelector').value = currentChat.model;
+  }
+
+  renderChatHistoryList();
+  loadChatMessages();
+  switchMode('chat');
+}
+
+// Render history list inside sidebar
+function renderChatHistoryList() {
+  const container = document.getElementById('chat-history-list');
+  container.innerHTML = '';
+
+  chats.slice().reverse().forEach(chat => {
+    const isActive = chat.id === currentChatId;
+    const div = document.createElement('div');
+    div.className = `history-item ${isActive ? 'active' : ''}`;
+    div.style.background = isActive ? 'var(--accent-soft)' : 'transparent';
+    div.style.color = isActive ? 'var(--accent)' : 'var(--muted)';
+    div.setAttribute('onclick', `selectActiveChat('${chat.id}')`);
+
+    let titleText = chat.title || 'Dialogue Session';
+    if (titleText.length > 22) titleText = titleText.substring(0, 20) + '...';
+
+    div.innerHTML = `
+      <span style="display:flex; align-items:center; gap:8px;">💬 ${titleText}</span>
+      <button onclick="deleteChatSession(event, '${chat.id}')" style="background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer;" class="hover-red">✕</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function deleteChatSession(e, id) {
+  e.stopPropagation();
+  chats = chats.filter(c => c.id !== id);
+  
+  if (chats.length === 0) {
+    currentChatId = '';
+    newChat();
+    return;
+  }
+  if (currentChatId === id) {
+    currentChatId = chats[chats.length - 1].id;
+  }
+  saveChatsToMemory();
+  renderChatHistoryList();
+  loadChatMessages();
+}
+
+function newChat() {
+  const newId = 'chat_' + Date.now();
+  const selectedModel = document.getElementById('modelSelector').value;
+  chats.push({
+    id: newId,
+    title: 'New Dialogue Session',
+    model: selectedModel,
+    messages: []
+  });
+  currentChatId = newId;
+  saveChatsToMemory();
+  renderChatHistoryList();
+  loadChatMessages();
+  switchMode('chat');
+  showToast('New clean chat link initialized');
+}
+
+// Process rendering formatting
+function formatMarkdown(text) {
+  if (!text) return '';
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Formatting code blocks
+  html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
+    const id = 'code_' + Math.floor(Math.random() * 100000);
+    return `
+      <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden;">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel); padding:5px 12px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted);">
+          <span>${lang || 'code'}</span>
+          <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer;">Copy</button>
+        </div>
+        <pre style="padding:12px; margin:0; overflow-x:auto; font-size:12px; font-family:monospace; background:var(--panel2); color:var(--text);"><code id="${id}">${code}</code></pre>
+      </div>
+    `;
+  });
+
+  // Formatting inline bold tags
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Formatting bullet lists
+  html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li style="margin-left:15px; font-size:13px;">$1</li>');
+
+  // Line breaks
+  html = html.replace(/\n/g, '<br>');
+
+  return html;
+}
+
+function copyPreCodeBlock(id, btn) {
+  const code = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const original = btn.innerText;
+    btn.innerText = 'Copied!';
+    setTimeout(() => { btn.innerText = original; }, 2000);
+    showToast('Code block copied');
+  });
+}
+
+function copyProseText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Prose copied successfully');
+  });
+}
+
+// Speak response TTS
+function speakResponseProse(text) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel(); // Stop any previous voice output
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // Read voice selector values
+    const selectedVoiceName = document.getElementById('ttsVoiceSelector').value;
+    const voices = window.speechSynthesis.getVoices();
+    const voiceObj = voices.find(v => v.name === selectedVoiceName);
+    if (voiceObj) {
+      utterance.voice = voiceObj;
+    }
+
+    // Set pitch & speed settings dynamically to directly resolve "Sound को चेंज करो"
+    const pitchVal = parseFloat(document.getElementById('ttsPitchSlider').value);
+    const speedVal = parseFloat(document.getElementById('ttsSpeedSlider').value);
+    utterance.pitch = pitchVal;
+    utterance.rate = speedVal;
+
+    window.speechSynthesis.speak(utterance);
+    showToast('Speaking response...');
+  } else {
+    showToast('TTS is not supported in this browser');
+  }
+}
+
+function downloadResponseText(text, index) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nova_message_block_${index}_${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Response saved as .TXT');
+}
+
+// Load current active messages in UI
+function loadChatMessages() {
+  messagesList.innerHTML = '';
+  const currentChat = chats.find(c => c.id === currentChatId);
+  
+  if (!currentChat || currentChat.messages.length === 0) {
+    emptyState.style.display = 'flex';
+    return;
+  }
+
+  emptyState.style.display = 'none';
+
+  currentChat.messages.forEach((msg, idx) => {
+    const isUser = msg.role === 'user';
+    const div = document.createElement('div');
+    div.className = `msg ${isUser ? 'user' : 'ai'}`;
+
+    let attachmentHTML = '';
+    if (msg.attachment) {
+      if (msg.attachmentMimeType && msg.attachmentMimeType.startsWith('image/')) {
+        attachmentHTML = `<img src="${msg.attachment}" style="max-width:260px; border-radius:10px; margin-bottom:8px; display:block;">`;
+      } else if (msg.attachmentMimeType === 'application/pdf') {
+        attachmentHTML = `
+          <div style="display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--line); border-radius:9px; padding:10px; font-size:12px; font-weight:600; margin-bottom:8px; max-width:260px;">
+            <span>📄</span> <span>PDF attachment</span>
+          </div>
+        `;
+      }
+    }
+
+    const cleanHTML = formatMarkdown(msg.text);
+
+    div.innerHTML = `
+      <div class="bubble">
+        ${attachmentHTML}
+        <div>${cleanHTML}</div>
+      </div>
+      
+      <!-- Sleek Action bar under each AI response block -->
+      ${!isUser ? `
+        <div style="display:flex; items-center:center; gap:10px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
+          <button onclick="copyProseText(\`${encodeURIComponent(msg.text)}\`)" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">📋 Copy</button>
+          <span>·</span>
+          <button onclick="speakResponseProse(\`${encodeURIComponent(msg.text)}\`)" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">🔊 Listen</button>
+          <span>·</span>
+          <button onclick="downloadResponseText(\`${encodeURIComponent(msg.text)}\`, ${idx})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">💾 Download</button>
+        </div>
+      ` : ''}
+    `;
+
+    messagesList.appendChild(div);
+  });
+
+  const chatScroll = document.getElementById('workspace-chat');
+  chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+
+// Trigger speech dictation microphone STT
+function toggleVoiceDictation() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Speech Recognition not supported in this browser');
+    return;
+  }
+
+  if (dictationActive) {
+    recognition.stop();
+    return;
+  }
+
+  const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognitionClass();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US'; // Supports English dictation as default
+
+  recognition.onstart = () => {
+    dictationActive = true;
+    document.getElementById('btn-mic-dictate').style.color = 'red';
+    showToast('Microphone active, start dictating...');
+  };
+
+  recognition.onresult = (event) => {
+    const resultText = event.results[0][0].transcript;
+    const txtarea = document.getElementById('input');
+    txtarea.value = (txtarea.value + ' ' + resultText).trim();
+    adjustTextareaHeight(txtarea);
+  };
+
+  recognition.onerror = (e) => {
+    const errCode = e && e.error ? e.error : 'unknown';
+    console.warn('Speech recognition status:', errCode);
+    showToast(`Mic timed out or permission error: ${errCode}`);
+    dictationActive = false;
+    document.getElementById('btn-mic-dictate').style.color = '';
+  };
+
+  recognition.onend = () => {
+    dictationActive = false;
+    document.getElementById('btn-mic-dictate').style.color = '';
+  };
+
+  recognition.start();
+}
+
+// Trigger text processing inputs
+async function send() {
+  const el = document.getElementById('input');
+  const userText = el.value.trim();
+
+  if (!userText && !activeComposerAttachment) return;
+
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat) return;
+
+  // Append user message block
+  const userMsgObj = {
+    role: 'user',
+    text: userText || 'Analyzed file data.',
+    attachment: activeComposerAttachment ? activeComposerAttachment.base64 : null,
+    attachmentMimeType: activeComposerAttachment ? activeComposerAttachment.mimeType : null,
+    timestamp: Date.now()
+  };
+
+  currentChat.messages.push(userMsgObj);
+
+  // Auto Rename title on first query
+  if (currentChat.messages.length === 1 && userText) {
+    currentChat.title = userText.substring(0, 30) + (userText.length > 30 ? '...' : '');
+  }
+
+  saveChatsToMemory();
+  renderChatHistoryList();
+
+  // Reset UI components
+  el.value = '';
+  adjustTextareaHeight(el);
+  clearComposerAttachment();
+  loadChatMessages();
+
+  // Create loading typing indicators
+  const loaderDiv = document.createElement('div');
+  loaderDiv.className = 'msg ai';
+  loaderDiv.id = 'ai-typing-loader';
+  loaderDiv.innerHTML = `
+    <div class="bubble" style="color:var(--muted); font-style:italic; display:flex; align-items:center; gap:8px;">
+      <div style="width:10px; height:10px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
+      <span>Nova is generating response...</span>
+    </div>
+  `;
+  messagesList.appendChild(loaderDiv);
+  messagesList.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+  try {
+    const payload = {
+      prompt: userMsgObj.text,
+      model: currentChat.model || 'gemini-3.1-flash',
+      image: userMsgObj.attachment,
+      mimeType: userMsgObj.attachmentMimeType
+    };
+
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    // Remove typing indicators
+    document.getElementById('ai-typing-loader').remove();
+
+    if (!response.ok) {
+      const errPayload = await response.json();
+      throw new Error(errPayload.error || 'Server pipeline error');
+    }
+
+    const data = await response.json();
+
+    currentChat.messages.push({
+      role: 'ai',
+      text: data.text,
+      timestamp: Date.now()
+    });
+
+    saveChatsToMemory();
+    loadChatMessages();
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById('ai-typing-loader').remove();
+    currentChat.messages.push({
+      role: 'ai',
+      text: `⚠️ **NOVA System Connection Error**: ${error.message}. Verify that the Google Gemini API key is configured inside your AI Studio Secrets panel.`,
+      timestamp: Date.now()
+    });
+    saveChatsToMemory();
+    loadChatMessages();
+  }
+}
+
+function keySend(e){
+  if(e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+}
+
+
+// ==========================================
+// MODE 2: AI IMAGE GENERATOR
+// ==========================================
+async function generateAIImage() {
+  const promptInput = document.getElementById('image-prompt').value.trim();
+  if (!promptInput) {
+    showToast('Please insert prompt instructions for image generator');
+    return;
+  }
+
+  const aspect = document.getElementById('image-aspect-ratio').value;
+  const style = document.getElementById('image-style').value;
+  const btn = document.getElementById('btn-generate');
+
+  // Toggle visual containers
+  document.getElementById('image-output-container').style.display = 'flex';
+  document.getElementById('image-loading').style.display = 'flex';
+  document.getElementById('image-result').style.display = 'none';
+  document.getElementById('btn-download-image').style.display = 'none';
+
+  btn.disabled = true;
+  btn.innerText = 'Analyzing prompt variables...';
+
+  let width = 1024;
+  let height = 1024;
+  if (aspect === '16:9') { width = 1024; height = 576; }
+  else if (aspect === '9:16') { width = 576; height = 1024; }
+  else if (aspect === '4:3') { width = 1024; height = 768; }
+
+  const randomSeed = Math.floor(Math.random() * 100000);
+  const stylizedPrompt = `${promptInput}, style preset: ${style}, high-fidelity render, 8k resolution, master shading`;
+
+  // Free Pollinations visual synthesis APIs fallback
+  const pollinationURL = `https://image.pollinations.ai/p/${encodeURIComponent(stylizedPrompt)}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true&enhance=true`;
+
+  try {
+    const res = await fetch(pollinationURL);
+    if (!res.ok) throw new Error('Visual synthesis server down');
+
+    const blob = await res.blob();
+    const objectURL = URL.createObjectURL(blob);
+
+    const imgEl = document.getElementById('image-result');
+    imgEl.src = objectURL;
+    imgEl.onload = function() {
+      document.getElementById('image-loading').style.display = 'none';
+      imgEl.style.display = 'block';
+      document.getElementById('btn-download-image').style.display = 'block';
+      
+      btn.disabled = false;
+      btn.innerText = 'Generate Masterpiece Art';
+      showToast('Visual art rendered successfully');
+    };
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById('image-output-container').style.display = 'none';
+    btn.disabled = false;
+    btn.innerText = 'Generate Masterpiece Art';
+    showToast(`Visual rendering crashed: ${error.message}`);
+  }
+}
+
+function downloadArtOutput() {
+  const img = document.getElementById('image-result');
+  if (!img.src) return;
+
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.download = `nova_art_preset_${Date.now()}.jpg`;
+  a.click();
+  showToast('Image downloaded successfully');
+}
+
+
+// ==========================================
+// MODE 3: AI QUIZ BUILDER
+// ==========================================
+async function buildInteractiveQuiz() {
+  const topic = document.getElementById('quiz-topic').value.trim();
+  const count = document.getElementById('quiz-count').value;
+  const difficulty = document.getElementById('quiz-difficulty').value;
+  const btn = document.getElementById('btn-quiz-build');
+
+  if (!topic) {
+    showToast('Subject description is required to generate quiz');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = 'Generating quiz questions...';
+  showToast('Compiling custom syllabus from active cognitive layers...');
+
+  const model = document.getElementById('modelSelector').value;
+
+  const prompt = `Generate an interactive trivia multiple choice quiz with exactly ${count} questions on the topic of "${topic}". The difficulty level should be "${difficulty}". 
+  Provide the output strictly formatted in a clean, valid JSON array matching this exact schema layout:
+  [
+    {
+      "question": "What is the capital of France?",
+      "options": ["Paris", "London", "Rome", "Berlin"],
+      "answer": "Paris",
+      "explanation": "Paris is the capital of France, globally known for its art, culture, and iconic landmarks like the Eiffel Tower."
+    }
+  ]
+  Crucial Rule: Do not include code fences like \`\`\`json, do not prefix headers, output only raw, clean, parseable JSON text array.`;
+
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model })
+    });
+
+    if (!res.ok) throw new Error('API fetch error');
+
+    const data = await res.json();
+    let jsonText = data.text.trim();
+
+    // RegEx string filters
+    if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```[a-zA-Z0-9]*\n/i, '').replace(/\n```$/g, '');
+    }
+
+    currentQuizData = JSON.parse(jsonText);
+
+    if (!Array.isArray(currentQuizData) || currentQuizData.length === 0) {
+      throw new Error('Verification arrays format mismatched');
+    }
+
+    // Launch Quiz gameplay board
+    activeQuizIndex = 0;
+    activeQuizScore = 0;
+    userQuizAnswerSubmitted = false;
+
+    document.getElementById('quiz-setup-panel').style.display = 'none';
+    document.getElementById('quiz-game-panel').style.display = 'flex';
+    document.getElementById('quiz-summary-panel').style.display = 'none';
+
+    document.getElementById('quiz-game-topic').innerText = `TOPIC: ${topic.toUpperCase()}`;
+    
+    renderQuizGameQuestion();
+    showToast('Interactive quiz built and loaded!');
+
+  } catch (error) {
+    console.error(error);
+    showToast('Failed to compile quiz JSON, try simpler topics or retry.');
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'Formulate Quiz Syllabus';
+  }
+}
+
+function renderQuizGameQuestion() {
+  const data = currentQuizData[activeQuizIndex];
+  userQuizAnswerSubmitted = false;
+
+  document.getElementById('quiz-game-progress').innerText = `${activeQuizIndex + 1} / ${currentQuizData.length}`;
+  document.getElementById('quiz-game-question').innerText = `${activeQuizIndex + 1}. ${data.question}`;
+  document.getElementById('quiz-game-explanation-card').style.display = 'none';
+
+  const container = document.getElementById('quiz-game-options');
+  container.innerHTML = '';
+
+  data.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'form-control';
+    btn.style.textAlign = 'left';
+    btn.style.cursor = 'pointer';
+    btn.style.background = 'var(--panel2)';
+    btn.style.border = '1px solid var(--line)';
+    btn.style.padding = '12px';
+    btn.style.borderRadius = '9px';
+    btn.style.display = 'flex';
+    btn.style.justifyContent = 'space-between';
+    btn.innerHTML = `<span>${opt}</span><span style="font-size:10px; color:var(--muted);">Choice ${String.fromCharCode(65 + idx)}</span>`;
+    btn.setAttribute('onclick', `submitQuizOptionAnswer(this, \`${encodeURIComponent(opt)}\`)`);
+    container.appendChild(btn);
+  });
+}
+
+function submitQuizOptionAnswer(btn, encOpt) {
+  if (userQuizAnswerSubmitted) return;
+
+  const chosen = decodeURIComponent(encOpt);
+  const data = currentQuizData[activeQuizIndex];
+  userQuizAnswerSubmitted = true;
+
+  const isCorrect = chosen === data.answer;
+
+  if (isCorrect) {
+    activeQuizScore++;
+    btn.style.borderColor = '#10b981';
+    btn.style.background = 'rgba(16, 185, 129, 0.1)';
+    btn.style.color = '#10b981';
+    showToast('Correct answer!');
+  } else {
+    btn.style.borderColor = '#ef4444';
+    btn.style.background = 'rgba(239, 68, 68, 0.1)';
+    btn.style.color = '#ef4444';
+    showToast('Incorrect answer');
+
+    // Highlight correct response
+    document.querySelectorAll('#quiz-game-options button').forEach(button => {
+      const text = button.querySelector('span').innerText;
+      if (text === data.answer) {
+        button.style.borderColor = '#10b981';
+        button.style.background = 'rgba(16, 185, 129, 0.1)';
+        button.style.color = '#10b981';
+      }
+    });
+  }
+
+  document.getElementById('quiz-game-explanation-text').innerText = data.explanation || 'Processed explanation concept.';
+  document.getElementById('quiz-game-explanation-card').style.display = 'flex';
+}
+
+function advanceQuizQuestion() {
+  activeQuizIndex++;
+  if (activeQuizIndex < currentQuizData.length) {
+    renderQuizGameQuestion();
+  } else {
+    // Show summary screen
+    document.getElementById('quiz-game-panel').style.display = 'none';
+    document.getElementById('quiz-summary-panel').style.display = 'flex';
+
+    document.getElementById('quiz-final-score-circle').innerText = `${activeQuizScore} / ${currentQuizData.length}`;
+    document.getElementById('quiz-final-summary-text').innerText = `You completed the knowledge run, scoring ${activeQuizScore} out of ${currentQuizData.length} questions correctly.`;
+  }
+}
+
+function resetQuizWorkspace() {
+  document.getElementById('quiz-setup-panel').style.display = 'flex';
+  document.getElementById('quiz-game-panel').style.display = 'none';
+  document.getElementById('quiz-summary-panel').style.display = 'none';
+  document.getElementById('quiz-topic').value = '';
+}
+
+
+// ==========================================
+// MODE 4: DOCUMENT & VISION TRANSLATOR
+// ==========================================
+function handleTranslatorFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function(event) {
+    const rawData = event.target.result;
+
+    if (file.type.startsWith('image/')) {
+      activeTranslatorAttachment = {
+        base64: rawData,
+        mimeType: file.type,
+        name: file.name
+      };
+
+      document.getElementById('translator-img-preview').style.display = 'block';
+      document.getElementById('translator-img-preview').src = rawData;
+      document.getElementById('translator-pdf-preview').style.display = 'none';
+    } else if (file.type === 'application/pdf') {
+      activeTranslatorAttachment = {
+        base64: rawData,
+        mimeType: file.type,
+        name: file.name
+      };
+
+      document.getElementById('translator-img-preview').style.display = 'none';
+      document.getElementById('translator-pdf-preview').style.display = 'block';
+      document.getElementById('translator-pdf-label').innerText = file.name;
+    } else {
+      showToast('Please select image formats or PDF documents.');
+      return;
+    }
+
+    document.getElementById('translator-file-preview').style.display = 'flex';
+    document.getElementById('translator-file-name').innerText = file.name;
+    showToast('Document indexed');
+  };
+}
+
+function clearTranslatorAttachment() {
+  activeTranslatorAttachment = null;
+  document.getElementById('translator-file').value = '';
+  document.getElementById('translator-file-preview').style.display = 'none';
+  document.getElementById('translator-img-preview').style.display = 'none';
+  document.getElementById('translator-pdf-preview').style.display = 'none';
+  document.getElementById('translator-output-split').style.display = 'none';
+}
+
+async function executeDocumentTranslation() {
+  if (!activeTranslatorAttachment) {
+    showToast('Please upload an image or PDF file to translate');
+    return;
+  }
+
+  const lang = document.getElementById('translator-lang').value;
+  const btn = document.getElementById('btn-translate');
+
+  btn.disabled = true;
+  btn.innerText = 'Translating OCR blocks...';
+
+  document.getElementById('translator-output-split').style.display = 'grid';
+  document.getElementById('translator-output-loading').style.display = 'block';
+  document.getElementById('translator-output-result').innerText = '';
+
+  const model = document.getElementById('modelSelector').value;
+  const prompt = `Extract, parse, and translate all text structures layout from this document directly into target language: "${lang}". Keep structural formatting, list items, and headings fully preserved. Only output the translated prose text.`;
+
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        model,
+        image: activeTranslatorAttachment.base64,
+        mimeType: activeTranslatorAttachment.mimeType
+      })
+    });
+
+    if (!res.ok) throw new Error('API connection error');
+
+    const data = await res.json();
+
+    document.getElementById('translator-output-loading').style.display = 'none';
+    document.getElementById('translator-output-result').innerText = data.text;
+    showToast('Document translation completed successfully');
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById('translator-output-loading').style.display = 'none';
+    showToast(`Translation failed: ${error.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = 'OCR Analyze & Translate';
+  }
+}
+
+function copyTranslationText() {
+  const text = document.getElementById('translator-output-result').innerText;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Translation copied successfully');
+  });
+}
+</script>
+
+<style>
+/* Smooth spinner animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.hover-accent:hover { color: var(--accent) !important; }
+.hover-red:hover { color: red !important; }
+</style>
+</body>
+</html>
