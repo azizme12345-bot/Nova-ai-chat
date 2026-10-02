@@ -18,45 +18,46 @@
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100vh;overflow:hidden}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-.app{height:100vh;display:flex}
-.sidebar{width:270px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:9px 8px 18px}
-.logo{width:31px;height:31px;border-radius:9px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-weight:800}
-.side-btn{width:100%;border:0;background:transparent;color:var(--text);padding:11px 12px;border-radius:9px;text-align:left;display:flex;gap:12px;align-items:center;margin:2px 0;transition:all 0.2s}
-.side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent)}
+.app{height:100vh;display:flex;position:relative}
+.sidebar{width:270px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto;z-index:50}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:9px 8px 14px}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-weight:800;font-size:16px;box-shadow:0 2px 8px rgba(22,119,255,0.3)}
+.side-btn{width:100%;border:0;background:transparent;color:var(--text);padding:10px 12px;border-radius:9px;text-align:left;display:flex;gap:12px;align-items:center;margin:2px 0;transition:all 0.2s;font-size:13px}
+.side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .side-btn span:first-child{width:20px;text-align:center}
-.history{margin-top:18px;color:var(--muted);font-size:12px;padding:0 12px}
-.history-item{margin-top:8px;padding:9px 12px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:between;align-items:center}
+.history{margin-top:14px;color:var(--muted);font-size:11px;padding:0 12px;font-weight:700;letter-spacing:0.5px}
+.history-item{margin-top:4px;padding:8px 12px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s}
 .history-item:hover{background:var(--accent-soft);color:var(--text)}
 .profile{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:10px}
 .avatar{width:34px;height:34px;border-radius:50%;background:#dce8f8;display:grid;place-items:center;color:#31557d;font-weight:700}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
-.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;justify-content:space-between}
-.top-title{font-weight:650}
+.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;justify-content:space-between;background:var(--panel2);z-index:20}
+.top-title{font-weight:650;font-size:16px}
 .icon-btn{border:0;background:transparent;color:var(--text);width:38px;height:38px;border-radius:9px;display:grid;place-items:center}
 .icon-btn:hover{background:var(--panel)}
 .chat{flex:1;overflow:auto;padding:34px 20px 150px}
 .empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
-.empty .biglogo{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-size:27px;font-weight:800}
-.empty h1{font-size:25px;margin:5px 0}
-.empty p{margin:0;color:var(--muted);font-size:14px}
+.empty .biglogo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-size:28px;font-weight:800;box-shadow:0 4px 16px rgba(22,119,255,0.35)}
+.empty h1{font-size:24px;margin:5px 0;font-weight:700}
+.empty p{margin:0;color:var(--muted);font-size:14px;max-width:440px}
 .messages{max-width:780px;margin:auto}
-.msg{margin:0 0 22px;display:flex;flex-direction:column}
+.msg{margin:0 0 20px;display:flex;flex-direction:column}
 .msg.user{align-items:flex-end}
 .msg.ai{align-items:flex-start}
-.bubble{max-width:75%;padding:12px 15px;border-radius:15px;line-height:1.55;font-size:14px;word-break:break-word}
+.bubble{max-width:82%;padding:12px 16px;border-radius:15px;line-height:1.6;font-size:14px;word-break:break-word}
 .msg.user .bubble{background:var(--user)}
 .msg.ai .bubble{background:var(--panel);border:1px solid var(--line)}
 .composer-wrap{position:fixed;bottom:0;left:270px;right:0;padding:16px 20px 20px;background:linear-gradient(transparent,var(--bg) 28%);z-index:10}
 .composer{max-width:780px;margin:auto;border:1px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 22px rgba(0,0,0,.06);padding:9px}
 textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:8px 9px;min-height:44px;max-height:130px}
 .tools{display:flex;align-items:center;gap:5px}
-.tool{border:0;background:transparent;color:var(--muted);width:36px;height:34px;border-radius:8px;display:grid;place-items:center}
+.tool{border:0;background:transparent;color:var(--muted);width:36px;height:34px;border-radius:8px;display:grid;place-items:center;transition:all 0.15s}
 .tool:hover{background:var(--panel);color:var(--text)}
-.send{margin-left:auto;background:var(--accent);color:white;border:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.send{margin-left:auto;background:var(--accent);color:white;border:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;transition:opacity 0.2s}
+.send:hover{opacity:0.9}
 .attach-menu{display:none;position:absolute;bottom:68px;left:0;background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:7px;width:220px;box-shadow:0 10px 30px rgba(0,0,0,.12);z-index:20}
 .attach-menu.show{display:block}
-.attach-item{border:0;background:transparent;color:var(--text);width:100%;text-align:left;padding:11px;border-radius:8px}
+.attach-item{border:0;background:transparent;color:var(--text);width:100%;text-align:left;padding:11px;border-radius:8px;font-size:13px}
 .attach-item:hover{background:var(--panel)}
 
 /* Custom Dashboard Workspaces styles */
@@ -64,9 +65,9 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
 .workspace-panel.active{display:flex;flex-direction:column}
 .form-group{margin-bottom:15px;display:flex;flex-direction:column;gap:5px}
 .form-label{font-size:12px;font-weight:600;color:var(--muted)}
-.form-control{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 12px;outline:none}
+.form-control{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px 12px;outline:none;font-size:13px}
 .form-control:focus{border-color:var(--accent)}
-.btn-primary{background:var(--accent);color:white;border:0;padding:10px 16px;border-radius:9px;font-weight:600;transition:all 0.2s}
+.btn-primary{background:var(--accent);color:white;border:0;padding:10px 16px;border-radius:9px;font-weight:600;font-size:13px;transition:all 0.2s}
 .btn-primary:hover{opacity:0.9}
 .btn-primary:disabled{opacity:0.6;cursor:not-allowed}
 
@@ -74,51 +75,155 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
 #toast-container{position:fixed;top:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:10px}
 .toast{background:var(--panel2);color:var(--text);border:1px solid var(--line);box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px}
 
+/* Modal styles */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:99;place-items:center;padding:20px}
+.modal-overlay.active{display:grid}
+.modal-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:440px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,0.25)}
+
+/* Markdown table styling */
+table.md-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+table.md-table th, table.md-table td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+table.md-table th { background: var(--panel2); font-weight: 600; }
+
+/* Mobile Backdrop overlay to tap anywhere and close sidebar */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+/* Mic active pulse animation */
+@keyframes pulse-mic {
+  0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(239,68,68,0.5)); }
+  50% { transform: scale(1.18); filter: drop-shadow(0 0 10px rgba(239,68,68,0.9)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(239,68,68,0.5)); }
+}
+.mic-pulsing {
+  animation: pulse-mic 1.2s infinite ease-in-out !important;
+  color: #ef4444 !important;
+}
+
 @media(max-width:720px){
- .sidebar{display:none}.composer-wrap{left:0}.topbar{padding:0 12px}.chat{padding-left:13px;padding-right:13px}
+ .sidebar{
+   position: fixed;
+   top: 0;
+   bottom: 0;
+   left: 0;
+   width: 280px;
+   max-width: 82vw;
+   z-index: 50;
+   transform: translateX(-100%);
+   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+   box-shadow: 4px 0 25px rgba(0,0,0,0.2);
+   display: flex !important;
+ }
+ .sidebar.open {
+   transform: translateX(0);
+ }
+ .sidebar-backdrop {
+   display: block;
+ }
+ .sidebar-backdrop.active {
+   opacity: 1;
+   pointer-events: auto;
+ }
+ .composer-wrap{left:0}.topbar{padding:0 12px}.chat{padding-left:13px;padding-right:13px}
  .bubble{max-width:88%}.workspace-panel{padding-bottom:140px}
 }
 </style>
 </head>
 <body>
 <div class="app">
-  <!-- Toast Index Container -->
+  <!-- Toast Container -->
   <div id="toast-container"></div>
 
+  <!-- Mobile Backdrop Overlay: Tap anywhere outside sidebar to dismiss -->
+  <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+  <!-- API Key Modal -->
+  <div class="modal-overlay" id="apiKeyModal">
+    <div class="modal-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="margin:0; font-size:16px; font-weight:700;">🔑 Gemini API Key (AQ.Ab8R...)</h3>
+        <button onclick="closeApiKeyModal()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer;">✕</button>
+      </div>
+      <p style="font-size:12px; color:var(--muted); margin:0 0 14px 0; line-height:1.5;">
+        Paste your Gemini API Key below (starts with <code>AQ.Ab8R...</code>). It will be saved securely and used for all features: Chat, Code Studio, Voice Mic, Image Gen, Quiz, and Document OCR.
+      </p>
+      <div class="form-group">
+        <input type="text" id="modal-api-key-input" class="form-control" placeholder="AQ.Ab8R..." style="font-family:monospace; font-size:12px;">
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+        <button onclick="closeApiKeyModal()" class="form-control" style="background:transparent; cursor:pointer; width:auto; padding:8px 14px;">Cancel</button>
+        <button onclick="saveApiKeyFromModal()" class="btn-primary" style="padding:8px 16px;">Save API Key</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="appSidebar">
     <div class="brand">
       <div class="logo">N</div>
       <span>NOVA AI</span>
+      <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; display:none;" id="sidebar-close-btn">✕</button>
     </div>
 
-    <!-- Model Selection Dropdown (with requested identifier #modelSelector) -->
-    <div style="padding: 0 12px; margin-bottom: 12px;">
+    <!-- Model Selection Dropdown (#modelSelector) -->
+    <div style="padding: 0 4px; margin-bottom: 12px;">
       <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:600;">INTELLIGENCE ENGINE</div>
-      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:7px 10px; outline:none; cursor:pointer; font-size:12px;">
-        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Super Fast)</option>
+      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; outline:none; cursor:pointer; font-size:12px;">
+        <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash (Super Fast)</option>
         <option value="gemini-1.5-pro">Gemini 1.5 Pro (High Precision)</option>
         <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Speed)</option>
-        <option value="gemini-3.1-flash" selected>Gemini 3.1 Flash (Advanced Speed)</option>
+        <option value="gemini-3.1-flash">Gemini 3.1 Flash (Advanced Speed)</option>
         <option value="gemini-3.1-pro">Gemini 3.1 Pro (Advanced Reasoning)</option>
         <option value="gemini-3.5-flash">Gemini 3.5 Flash (Latest Ultra-Fast)</option>
         <option value="gemini-3.5-pro">Gemini 3.5 Pro (Latest Flagship)</option>
       </select>
     </div>
 
-    <button class="side-btn active" id="side-btn-chat" onclick="switchMode('chat')"><span>＋</span><span>New Chat</span></button>
+    <!-- Dedicated New Chat Button (creates clean dialogue immediately) -->
+    <button class="side-btn active" id="side-btn-chat" onclick="newChat()" style="background:var(--accent-soft); color:var(--accent); font-weight:700;">
+      <span>＋</span><span>New Chat</span>
+    </button>
+    <button class="side-btn" id="side-btn-coding" onclick="switchMode('coding')"><span>‹›</span><span>Code Analysis & Writer</span></button>
     <button class="side-btn" id="side-btn-generate" onclick="switchMode('generate')"><span>▧</span><span>Image Generation</span></button>
     <button class="side-btn" id="side-btn-quiz" onclick="switchMode('quiz')"><span>🧠</span><span>AI Quiz Builder</span></button>
     <button class="side-btn" id="side-btn-translator" onclick="switchMode('translator')"><span>📝</span><span>Document Translator</span></button>
+    <button class="side-btn" onclick="openApiKeyModal()"><span>🔑</span><span>API Key Settings</span></button>
     <button class="side-btn" onclick="toggleTheme()"><span>◐</span><span>Light / Dark Mode</span></button>
 
-    <!-- Sound/TTS Pitch settings panel to address user's specific request -->
-    <div class="voice-settings" style="margin-top: 15px; padding: 0 12px; border-top: 1px solid var(--line); padding-top: 15px;">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; font-weight: 600;">VOICE PITCH SETTINGS</div>
+    <!-- Voice & Microphone Settings Panel -->
+    <div class="voice-settings" style="margin-top: 14px; padding: 0 4px; border-top: 1px solid var(--line); padding-top: 12px;">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 8px; font-weight: 600;">VOICE & MIC SETTINGS</div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
-        <select id="ttsVoiceSelector" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none;">
-          <!-- Loaded dynamically -->
-        </select>
+        <div>
+          <div style="font-size: 10px; color: var(--muted); margin-bottom: 3px;">Microphone Language:</div>
+          <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none;">
+            <option value="ur-PK">Urdu (اردو)</option>
+            <option value="hi-IN">Hindi (हिंदी)</option>
+            <option value="en-US" selected>English (US / Global)</option>
+            <option value="ar-SA">Arabic (العربية)</option>
+          </select>
+        </div>
+
+        <button onclick="requestMicrophonePermission()" class="btn-primary" style="padding: 6px 10px; font-size: 11px; background: var(--panel2); color: var(--accent); border: 1px solid var(--line);">
+          🎙️ Allow / Test Microphone
+        </button>
+
+        <div>
+          <div style="font-size: 10px; color: var(--muted); margin-bottom: 3px;">Speaker Voice (TTS):</div>
+          <select id="ttsVoiceSelector" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none;">
+            <!-- Loaded dynamically -->
+          </select>
+        </div>
+
         <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--muted);">
           <span>Pitch:</span>
           <input type="range" id="ttsPitchSlider" min="0.5" max="2" step="0.1" value="1" style="width: 80px; accent-color: var(--accent);">
@@ -131,23 +236,29 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
     </div>
 
     <div class="history">RECENT CHATS</div>
-    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:2px; margin-top:8px;"></div>
+    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:2px; margin-top:6px;"></div>
     
     <div class="profile">
       <div class="avatar">A</div>
-      <div>
-        <b style="font-size:13px" id="profile-user-email">Abdul Aziz</b>
-        <div style="font-size:11px;color:var(--muted)">NOVA AI Agent</div>
+      <div style="overflow:hidden;">
+        <b style="font-size:13px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="profile-user-email">Abdul Aziz</b>
+        <div style="font-size:11px;color:var(--muted)">NOVA AI Virtual Core</div>
       </div>
     </div>
   </aside>
 
   <!-- MAIN WORKSPACE -->
-  <main class="main">
+  <main class="main" onclick="handleMainTap()">
     <header class="topbar">
-      <button class="icon-btn" onclick="toggleSidebar()">☰</button>
-      <div class="top-title" id="top-title">NOVA AI Chat</div>
-      <button class="icon-btn" onclick="toggleTheme()">◐</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="icon-btn" onclick="toggleSidebar(event)" title="Toggle Menu">☰</button>
+        <div class="top-title" id="top-title">NOVA AI Chat</div>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="icon-btn" onclick="newChat()" title="Start New Chat" style="font-size:16px; color:var(--accent); font-weight:700;">＋</button>
+        <button class="icon-btn" onclick="openApiKeyModal()" title="API Key Settings">🔑</button>
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">◐</button>
+      </div>
     </header>
 
     <!-- MODE 1: CHAT WORKSPACE -->
@@ -155,12 +266,72 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
       <div class="empty" id="empty">
         <div class="biglogo">N</div>
         <h1>How can I help you today?</h1>
-        <p>Ask NOVA AI about text, images, videos, audio, coding or anything else.</p>
+        <p>Ask NOVA AI about code analysis, pro software architecture, voice microphone speech, multimodal vision, or creative art.</p>
       </div>
       <div class="messages" id="messages-list"></div>
     </section>
 
-    <!-- MODE 2: IMAGE GENERATOR -->
+    <!-- MODE 2: PRO CODE ANALYSIS & WRITING STUDIO -->
+    <section class="workspace-panel" id="workspace-coding">
+      <div style="max-width:820px; margin:auto; width:100%; display:flex; flex-direction:column; gap:18px;">
+        <div>
+          <h2 style="font-size:22px; font-weight:700; margin:0;">💻 Pro Code Analysis & Writing Studio</h2>
+          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Inspect, debug, refactor, and generate production-grade software code with Gemini.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Programming Language</label>
+            <select id="code-lang-selector" class="form-control">
+              <option value="TypeScript">TypeScript</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Python">Python</option>
+              <option value="HTML / Tailwind CSS">HTML / Tailwind CSS</option>
+              <option value="React JSX/TSX">React JSX/TSX</option>
+              <option value="C++">C++</option>
+              <option value="Rust">Rust</option>
+              <option value="Go">Go</option>
+              <option value="Java">Java</option>
+              <option value="PHP">PHP</option>
+              <option value="SQL">SQL</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Task Objective</label>
+            <select id="code-task-selector" class="form-control">
+              <option value="analyze_fix">🐞 Deep Bug Analysis & Fix</option>
+              <option value="explain">📖 Line-by-Line Logic Explanation</option>
+              <option value="optimize">⚡ Performance Optimization & Clean Architecture</option>
+              <option value="unit_tests">🧪 Generate Comprehensive Unit Tests</option>
+              <option value="write_new">✍️ Write Complete New Feature / Component</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Source Code / Prompt Specification</label>
+          <textarea id="code-input-source" class="form-control" rows="8" placeholder="// Paste existing code to analyze & fix, or describe a new software feature to write from scratch..." style="font-family:monospace; font-size:12px; line-height:1.5;"></textarea>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button onclick="executeCodeAnalysis()" id="btn-code-execute" class="btn-primary" style="flex:1;">⚡ Execute Pro Code Analysis / Generation</button>
+          <button onclick="clearCodeStudio()" class="form-control" style="width:auto; cursor:pointer;">Clear</button>
+        </div>
+
+        <div id="code-output-container" style="display:none; flex-direction:column; gap:10px; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:8px;">
+            <span style="font-size:12px; font-weight:700; color:var(--accent);" id="code-output-title">Analysis & Code Output</span>
+            <div style="display:flex; gap:8px;">
+              <button onclick="copyCodeStudioOutput()" class="btn-primary" style="padding:5px 10px; font-size:11px;">📋 Copy Code</button>
+              <button onclick="downloadCodeStudioOutput()" class="btn-primary" style="padding:5px 10px; font-size:11px; background:var(--panel); color:var(--text); border:1px solid var(--line);">💾 Download File</button>
+            </div>
+          </div>
+          <div id="code-output-content" style="font-size:13px; line-height:1.6; overflow-x:auto;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODE 3: IMAGE GENERATOR -->
     <section class="workspace-panel" id="workspace-generate">
       <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
         <div>
@@ -169,11 +340,11 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
         </div>
 
         <div class="form-group">
-          <label class="form-label">Image Prompts Details</label>
+          <label class="form-label">Image Prompt Details</label>
           <textarea id="image-prompt" class="form-control" rows="3" placeholder="A cinematic render of a futuristic glass city floating inside an ancient neon canyon..."></textarea>
         </div>
 
-        <div style="display:grid; grid-template-cols: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; width:100%;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; width:100%;">
           <div class="form-group">
             <label class="form-label">Aspect Ratio</label>
             <select id="image-aspect-ratio" class="form-control">
@@ -197,27 +368,25 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
 
         <button onclick="generateAIImage()" id="btn-generate" class="btn-primary">Generate Masterpiece Art</button>
 
-        <!-- Output display frame -->
-        <div id="image-output-container" style="border: 1px solid var(--line); border-radius:12px; background:var(--panel); min-height:300px; display:none; flex-direction:column; items-center:center; justify-content:center; padding:15px; position:relative; overflow:hidden;">
+        <div id="image-output-container" style="border: 1px solid var(--line); border-radius:12px; background:var(--panel); min-height:300px; display:none; flex-direction:column; align-items:center; justify-content:center; padding:15px; position:relative; overflow:hidden;">
           <div id="image-loading" style="display:none; flex-direction:column; align-items:center; gap:10px;">
             <div style="width:30px; height:30px; border:3px solid var(--line); border-top:3px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
             <span style="font-size:12px; color:var(--accent); font-weight:600;">Rendering creative buffers...</span>
           </div>
-          <img id="image-result" style="width:100%; height:auto; border-radius:10px; object-contain:contain; max-height:450px;" alt="Generated Visual Art">
+          <img id="image-result" style="width:100%; height:auto; border-radius:10px; object-fit:contain; max-height:450px;" alt="Generated Visual Art">
           <button id="btn-download-image" onclick="downloadArtOutput()" class="btn-primary" style="position:absolute; bottom:15px; right:15px; display:none; padding:8px 12px; font-size:12px;">💾 Save JPG Image</button>
         </div>
       </div>
     </section>
 
-    <!-- MODE 3: AI QUIZ BUILDER -->
+    <!-- MODE 4: AI QUIZ BUILDER -->
     <section class="workspace-panel" id="workspace-quiz">
       <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
         <div>
           <h2 style="font-size:22px; font-weight:700; margin:0;">AI Quiz Builder</h2>
-          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Create and solve dynamic multiple-choice trivia quizes on any topic.</p>
+          <p style="font-size:13px; color:var(--muted); margin:4px 0 0 0;">Create and solve dynamic multiple-choice trivia quizzes on any topic.</p>
         </div>
 
-        <!-- Setup Form -->
         <div id="quiz-setup-panel" style="display:flex; flex-direction:column; gap:15px;">
           <div class="form-group">
             <label class="form-label">Target Quiz Subject/Topic</label>
@@ -244,16 +413,13 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
           <button onclick="buildInteractiveQuiz()" id="btn-quiz-build" class="btn-primary">Formulate Quiz Syllabus</button>
         </div>
 
-        <!-- Quiz Gameplay Board -->
         <div id="quiz-game-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:20px; flex-direction:column; gap:15px;">
           <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding-bottom:10px;">
             <span id="quiz-game-topic" style="font-size:12px; font-weight:700; color:var(--accent);">TOPIC: SCIENCE</span>
             <span id="quiz-game-progress" style="font-size:12px; font-weight:600; color:var(--muted);">1 / 5</span>
           </div>
           <h3 id="quiz-game-question" style="font-size:16px; font-weight:700; margin:5px 0;">Question title goes here...</h3>
-          <div id="quiz-game-options" style="display:flex; flex-direction:column; gap:10px;">
-            <!-- Rendered choices dynamically -->
-          </div>
+          <div id="quiz-game-options" style="display:flex; flex-direction:column; gap:10px;"></div>
           <div id="quiz-game-explanation-card" style="display:none; flex-direction:column; gap:5px; background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:9px; font-size:12px; margin-top:10px;">
             <strong style="color:var(--accent);">Nova Core Explanation:</strong>
             <p id="quiz-game-explanation-text" style="margin:0; color:var(--muted);"></p>
@@ -261,8 +427,7 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
           </div>
         </div>
 
-        <!-- Quiz Score Summary Screen -->
-        <div id="quiz-summary-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:30px; text-align:center; flex-direction:column; items-center:center; gap:15px;">
+        <div id="quiz-summary-panel" style="display:none; border:1px solid var(--line); border-radius:12px; background:var(--panel2); padding:30px; text-align:center; flex-direction:column; align-items:center; gap:15px;">
           <div style="width:70px; height:70px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-size:24px; font-weight:700; display:grid; place-items:center; margin:auto;" id="quiz-final-score-circle">5/5</div>
           <h2 style="font-size:18px; font-weight:700; margin:0;">Quiz Finished!</h2>
           <p id="quiz-final-summary-text" style="font-size:13px; color:var(--muted); margin:0;">Congratulations, you answered all questions correctly.</p>
@@ -271,7 +436,7 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
       </div>
     </section>
 
-    <!-- MODE 4: VISION & DOCUMENT TRANSLATOR -->
+    <!-- MODE 5: VISION & DOCUMENT TRANSLATOR -->
     <section class="workspace-panel" id="workspace-translator">
       <div style="max-width:780px; margin:auto; width:100%; display:flex; flex-direction:column; gap:20px;">
         <div>
@@ -299,17 +464,14 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
           </div>
         </div>
 
-        <!-- File attachment feedback -->
         <div id="translator-file-preview" style="display:none; justify-content:space-between; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:10px 15px; font-size:12px;">
           <span id="translator-file-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">document.png</span>
-          <button onclick="clearTranslatorAttachment()" style="color:red; background:none; border:none; text-decoration:underline;">Remove</button>
+          <button onclick="clearTranslatorAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
         </div>
 
         <button onclick="executeDocumentTranslation()" id="btn-translate" class="btn-primary">OCR Analyze & Translate</button>
 
-        <!-- Translation split layout panels -->
         <div id="translator-output-split" style="display:none; grid-template-columns:1fr 1fr; gap:15px; margin-top:10px;">
-          <!-- Left: original preview -->
           <div style="border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel2);">
             <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:8px; border-bottom:1px solid var(--line); padding-bottom:5px;">Original Visual</div>
             <img id="translator-img-preview" style="width:100%; border-radius:8px; display:none; max-height:250px; object-fit:contain;">
@@ -319,7 +481,6 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
             </div>
           </div>
 
-          <!-- Right: translation prose text -->
           <div style="border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel2); display:flex; flex-direction:column; gap:8px; position:relative;">
             <div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:8px; border-bottom:1px solid var(--line); padding-bottom:5px;">Translated Text Output</div>
             <div id="translator-output-loading" style="display:none; text-align:center; padding:40px 10px;">
@@ -335,29 +496,27 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
 
     <!-- COMPOSER AT BOTTOM (Visible in Mode 1: Chat) -->
     <div class="composer-wrap" id="workspace-composer">
-      <!-- Upload preview panel inside composer -->
       <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:780px; margin:0 auto 10px; font-size:11px;">
         <div style="display:flex; align-items:center; gap:6px;">
           <span>📎</span>
           <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">file.jpg</span>
           <span style="color:var(--muted); font-size:10px;">(compressed)</span>
         </div>
-        <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline;">Remove</button>
+        <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
       </div>
 
       <div class="composer" style="position:relative">
-        <!-- Attachments Dropdown Menu -->
         <div class="attach-menu" id="attachMenu">
           <button class="attach-item" onclick="selectAttachmentSource('camera')">📷 Live Camera Capture</button>
           <button class="attach-item" onclick="selectAttachmentSource('gallery')">🖼️ Gallery / File Upload</button>
         </div>
 
-        <textarea id="input" placeholder="Message NOVA AI..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
+        <textarea id="input" placeholder="Message NOVA AI or speak with microphone..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
         <div class="tools">
-          <button class="tool" onclick="toggleAttach(event)">📎</button>
-          <button class="tool" onclick="selectAttachmentSource('gallery')">🖼️</button>
-          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()">🎙️</button>
-          <button class="send" onclick="send()">➤</button>
+          <button class="tool" onclick="toggleAttach(event)" title="Attach file">📎</button>
+          <button class="tool" onclick="selectAttachmentSource('gallery')" title="Upload image">🖼️</button>
+          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Click to Speak (Microphone)">🎙️</button>
+          <button class="send" onclick="send()" title="Send Message">➤</button>
         </div>
       </div>
       <div style="text-align:center;color:var(--muted);font-size:10px;margin-top:7px">NOVA AI can make mistakes. Check important information.</div>
@@ -373,11 +532,11 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
 // Database & State Managers
 let chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
 let currentChatId = localStorage.getItem('nova_current_chat_id') || '';
-let activeMode = 'chat'; // 'chat' | 'generate' | 'quiz' | 'translator'
+let activeMode = 'chat';
 
 // Attachments buffer
-let activeComposerAttachment = null; // { base64, mimeType, name }
-let activeTranslatorAttachment = null; // { base64, mimeType, name }
+let activeComposerAttachment = null;
+let activeTranslatorAttachment = null;
 
 // Speech Dictation recognition
 let recognition = null;
@@ -389,12 +548,63 @@ let activeQuizIndex = 0;
 let activeQuizScore = 0;
 let userQuizAnswerSubmitted = false;
 
-// HTML layout objects
+// Last generated code buffer in Code Studio
+let lastCodeStudioText = '';
+
 const body = document.body;
 const messagesList = document.getElementById('messages-list');
 const emptyState = document.getElementById('empty');
 
-// Initialize Voice list in settings selector
+function getActiveGeminiApiKey() {
+  return localStorage.getItem('nova_gemini_api_key') || '';
+}
+
+function openApiKeyModal() {
+  const currentKey = getActiveGeminiApiKey();
+  document.getElementById('modal-api-key-input').value = currentKey;
+  document.getElementById('apiKeyModal').classList.add('active');
+  closeSidebar();
+}
+
+function closeApiKeyModal() {
+  document.getElementById('apiKeyModal').classList.remove('active');
+}
+
+function saveApiKeyFromModal() {
+  const key = document.getElementById('modal-api-key-input').value.trim();
+  if (key) {
+    localStorage.setItem('nova_gemini_api_key', key);
+    showToast('Gemini API Key (AQ.Ab8R...) saved successfully!');
+  } else {
+    localStorage.removeItem('nova_gemini_api_key');
+    showToast('Removed custom API Key (using server default)');
+  }
+  closeApiKeyModal();
+}
+
+function saveMicLanguage() {
+  const lang = document.getElementById('micLanguageSelector').value;
+  localStorage.setItem('nova_speech_lang', lang);
+  showToast(`Microphone language set to: ${lang}`);
+}
+
+// Explicit Microphone Permission Request Trigger
+async function requestMicrophonePermission() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showToast('Microphone access is not supported by your browser');
+    return;
+  }
+  try {
+    showToast('Requesting microphone permission from browser...');
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(track => track.stop());
+    showToast('✅ Microphone access granted! You can now click 🎙️ and speak.');
+  } catch (err) {
+    console.warn('Mic permission error:', err);
+    showToast('⚠️ Please Allow microphone permission in your browser URL bar.');
+  }
+}
+
 function loadSpeechVoices() {
   if (!('speechSynthesis' in window)) return;
   const select = document.getElementById('ttsVoiceSelector');
@@ -408,7 +618,6 @@ function loadSpeechVoices() {
     option.value = voice.name;
     option.innerText = `${voice.name} (${voice.lang})`;
     
-    // Choose clean female voices as defaults
     if (voice.name.includes('Zira') || voice.name.includes('Samantha') || voice.name.includes('Google US English')) {
       option.selected = true;
     }
@@ -421,26 +630,63 @@ if ('speechSynthesis' in window) {
   loadSpeechVoices();
 }
 
-// System initialization
+// Responsive Mobile Sidebar Drawer Toggle Functions
+function toggleSidebar(e) {
+  if (e) e.stopPropagation();
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const isOpen = sidebar.classList.contains('open');
+  
+  if (isOpen) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
+function openSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  sidebar.classList.add('open');
+  backdrop.classList.add('active');
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if (sidebar) sidebar.classList.remove('open');
+  if (backdrop) backdrop.classList.remove('active');
+}
+
+function handleMainTap() {
+  // If user taps the main screen while mobile sidebar is open, close it immediately
+  const sidebar = document.getElementById('appSidebar');
+  if (sidebar && sidebar.classList.contains('open')) {
+    closeSidebar();
+  }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-  // Update user initials email
   const userEmail = "azizme12345@gmail.com";
   document.getElementById('profile-user-email').innerText = userEmail;
 
-  // Apply default templates theme
   if (localStorage.getItem('nova_theme') === 'dark') {
     body.dataset.theme = 'dark';
   } else {
     body.dataset.theme = '';
   }
 
-  // Seeding initial chats databases
+  const savedMicLang = localStorage.getItem('nova_speech_lang');
+  if (savedMicLang && document.getElementById('micLanguageSelector')) {
+    document.getElementById('micLanguageSelector').value = savedMicLang;
+  }
+
   if (chats.length === 0) {
     const newId = 'chat_' + Date.now();
     chats.push({
       id: newId,
-      title: 'Multimodal Chat Session',
-      model: 'gemini-3.1-flash',
+      title: 'New Chat Session',
+      model: 'gemini-1.5-flash',
       messages: []
     });
     currentChatId = newId;
@@ -451,7 +697,6 @@ window.addEventListener('DOMContentLoaded', () => {
   loadChatMessages();
 });
 
-// Toast controller
 function showToast(text) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -460,47 +705,38 @@ function showToast(text) {
   container.appendChild(toast);
   setTimeout(() => {
     toast.remove();
-  }, 3000);
+  }, 3500);
 }
 
-// Save databases helpers
 function saveChatsToMemory() {
   localStorage.setItem('nova_chats', JSON.stringify(chats));
   localStorage.setItem('nova_current_chat_id', currentChatId);
 }
 
-// Auto-grow height on composer inputs
 function adjustTextareaHeight(el) {
   el.style.height = 'auto';
   el.style.height = (el.scrollHeight) + 'px';
 }
 
-// Light & Dark theme trigger
 function toggleTheme(){
   const isDark = body.dataset.theme === 'dark';
   body.dataset.theme = isDark ? '' : 'dark';
   localStorage.setItem('nova_theme', body.dataset.theme);
   showToast(isDark ? 'Light theme activated' : 'Dark theme activated');
+  closeSidebar();
 }
 
-// Collapsible Mobile navigation bar drawer togglers
-function toggleSidebar(){
-  const s = document.querySelector('.sidebar');
-  s.style.display = s.style.display === 'flex' ? 'none' : 'flex';
-}
-
-// Toggle attachment selector panel
 function toggleAttach(e){
   e.stopPropagation();
   document.getElementById('attachMenu').classList.toggle('show');
 }
 
-// Close attachment panel dropdown clicking anywhere else
-document.addEventListener('click', () => {
-  document.getElementById('attachMenu').classList.remove('show');
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#attachMenu') && !e.target.closest('.tools')) {
+    document.getElementById('attachMenu').classList.remove('show');
+  }
 });
 
-// Attachment trigger selectors
 function selectAttachmentSource(source) {
   document.getElementById('attachMenu').classList.remove('show');
   if (source === 'camera') {
@@ -510,7 +746,6 @@ function selectAttachmentSource(source) {
   }
 }
 
-// Compress and convert image structures
 function handleComposerFileSelected(input) {
   const file = input.files[0];
   if (!file) return;
@@ -581,20 +816,18 @@ function clearComposerAttachment() {
   document.getElementById('camera-file').value = '';
 }
 
-// Mode workspace switcher
 function switchMode(mode) {
   activeMode = mode;
   
-  // Update top title titles
   const titles = {
     chat: 'NOVA AI Chat',
+    coding: 'Pro Code Studio & Analysis',
     generate: 'Image Generator',
     quiz: 'AI Quiz Builder',
     translator: 'Document Translator'
   };
   document.getElementById('top-title').innerText = titles[mode] || 'NOVA AI';
 
-  // Toggle active workspace panels
   document.querySelectorAll('.workspace-panel').forEach(panel => panel.classList.remove('active'));
   document.getElementById('workspace-chat').style.display = 'none';
   document.getElementById('workspace-composer').style.display = 'none';
@@ -606,18 +839,13 @@ function switchMode(mode) {
     document.getElementById(`workspace-${mode}`).classList.add('active');
   }
 
-  // Toggle active buttons states in sidebar
   document.querySelectorAll('.side-btn').forEach(btn => btn.classList.remove('active'));
   const currentBtn = document.getElementById(`side-btn-${mode}`);
   if (currentBtn) currentBtn.classList.add('active');
 
-  // Auto-hide mobile menus
-  if (innerWidth <= 720) {
-    document.querySelector('.sidebar').style.display = 'none';
-  }
+  closeSidebar();
 }
 
-// Dynamic Model drop-down selector save values
 function saveModelConfig() {
   const model = document.getElementById('modelSelector').value;
   const currentChat = chats.find(c => c.id === currentChatId);
@@ -628,7 +856,6 @@ function saveModelConfig() {
   showToast(`Routed to: ${model}`);
 }
 
-// Select active chat from history list
 function selectActiveChat(chatId) {
   currentChatId = chatId;
   saveChatsToMemory();
@@ -641,9 +868,9 @@ function selectActiveChat(chatId) {
   renderChatHistoryList();
   loadChatMessages();
   switchMode('chat');
+  closeSidebar();
 }
 
-// Render history list inside sidebar
 function renderChatHistoryList() {
   const container = document.getElementById('chat-history-list');
   container.innerHTML = '';
@@ -684,12 +911,13 @@ function deleteChatSession(e, id) {
   loadChatMessages();
 }
 
+// Starts a clean fresh new chat
 function newChat() {
   const newId = 'chat_' + Date.now();
   const selectedModel = document.getElementById('modelSelector').value;
   chats.push({
     id: newId,
-    title: 'New Dialogue Session',
+    title: 'New Chat Session',
     model: selectedModel,
     messages: []
   });
@@ -698,10 +926,16 @@ function newChat() {
   renderChatHistoryList();
   loadChatMessages();
   switchMode('chat');
-  showToast('New clean chat link initialized');
+  closeSidebar();
+  
+  const inputEl = document.getElementById('input');
+  if (inputEl) {
+    inputEl.value = '';
+    inputEl.focus();
+  }
+  showToast('✨ New clean chat session opened');
 }
 
-// Process rendering formatting
 function formatMarkdown(text) {
   if (!text) return '';
   let html = text
@@ -709,27 +943,39 @@ function formatMarkdown(text) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-  // Formatting code blocks
-  html = html.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
-    const id = 'code_' + Math.floor(Math.random() * 100000);
+  html = html.replace(/```([a-zA-Z0-9_\-#+]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
+    const id = 'code_' + Math.floor(Math.random() * 1000000);
+    const displayLang = lang || 'code';
     return `
-      <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden;">
-        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel); padding:5px 12px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted);">
-          <span>${lang || 'code'}</span>
-          <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer;">Copy</button>
+      <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel2); padding:6px 14px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted); font-family:monospace;">
+          <span style="font-weight:700; color:var(--accent); text-transform:uppercase;">${displayLang}</span>
+          <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer; font-size:11px; display:flex; align-items:center; gap:4px;">📋 Copy Code</button>
         </div>
-        <pre style="padding:12px; margin:0; overflow-x:auto; font-size:12px; font-family:monospace; background:var(--panel2); color:var(--text);"><code id="${id}">${code}</code></pre>
+        <pre style="padding:14px; margin:0; overflow-x:auto; font-size:12px; font-family:monospace; line-height:1.6; background:var(--panel); color:var(--text);"><code id="${id}">${code}</code></pre>
       </div>
     `;
   });
 
-  // Formatting inline bold tags
+  html = html.replace(/\n(\|.+?\|\n\|[-:\s|]+?\|\n(?:\|.+?\|\n?)+)/g, (match, tableContent) => {
+    const lines = tableContent.trim().split('\n');
+    if (lines.length < 3) return match;
+    const headerRow = lines[0].split('|').filter(c => c.trim()).map(c => `<th>${c.trim()}</th>`).join('');
+    const bodyRows = lines.slice(2).map(row => {
+      const cells = row.split('|').filter(c => c.trim()).map(c => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    }).join('');
+    return `<table class="md-table"><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+  });
+
+  html = html.replace(/`([^`\n]+)`/g, '<code style="background:var(--panel2); border:1px solid var(--line); padding:2px 6px; border-radius:5px; font-family:monospace; font-size:12px; color:var(--accent);">$1</code>');
+  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size:15px; font-weight:700; margin:10px 0 4px;">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 style="font-size:17px; font-weight:700; margin:12px 0 6px;">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 style="font-size:19px; font-weight:800; margin:14px 0 8px;">$1</h1>');
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-  // Formatting bullet lists
-  html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li style="margin-left:15px; font-size:13px;">$1</li>');
-
-  // Line breaks
+  html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  html = html.replace(/^\s*[-*]\s+(.+)$/gm, '<li style="margin-left:16px; font-size:13.5px; margin-bottom:3px;">$1</li>');
+  html = html.replace(/^\s*(\d+)\.\s+(.+)$/gm, '<li style="margin-left:16px; font-size:13.5px; margin-bottom:3px; list-style-type:decimal;">$2</li>');
   html = html.replace(/\n/g, '<br>');
 
   return html;
@@ -738,27 +984,34 @@ function formatMarkdown(text) {
 function copyPreCodeBlock(id, btn) {
   const code = document.getElementById(id).innerText;
   navigator.clipboard.writeText(code).then(() => {
-    const original = btn.innerText;
-    btn.innerText = 'Copied!';
-    setTimeout(() => { btn.innerText = original; }, 2000);
-    showToast('Code block copied');
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    setTimeout(() => { btn.innerHTML = original; }, 2000);
+    showToast('Code copied to clipboard');
   });
 }
 
 function copyProseText(text) {
   navigator.clipboard.writeText(text).then(() => {
-    showToast('Prose copied successfully');
+    showToast('Text copied to clipboard');
   });
 }
 
-// Speak response TTS
+function sanitizeTextForTTS(rawText) {
+  return rawText
+    .replace(/```[\s\S]*?```/g, ' [Code segment provided in output] ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/[*#_~>|-]/g, ' ')
+    .replace(/https?:\/\/\S+/g, 'link')
+    .trim();
+}
+
 function speakResponseProse(text) {
   if ('speechSynthesis' in window) {
-    window.speechSynthesis.cancel(); // Stop any previous voice output
+    window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    
-    // Read voice selector values
+    const spokenText = sanitizeTextForTTS(text);
+    const utterance = new SpeechSynthesisUtterance(spokenText);
     const selectedVoiceName = document.getElementById('ttsVoiceSelector').value;
     const voices = window.speechSynthesis.getVoices();
     const voiceObj = voices.find(v => v.name === selectedVoiceName);
@@ -766,7 +1019,6 @@ function speakResponseProse(text) {
       utterance.voice = voiceObj;
     }
 
-    // Set pitch & speed settings dynamically to directly resolve "Sound को चेंज करो"
     const pitchVal = parseFloat(document.getElementById('ttsPitchSlider').value);
     const speedVal = parseFloat(document.getElementById('ttsSpeedSlider').value);
     utterance.pitch = pitchVal;
@@ -784,13 +1036,12 @@ function downloadResponseText(text, index) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `nova_message_block_${index}_${Date.now()}.txt`;
+  a.download = `nova_output_${index}_${Date.now()}.txt`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('Response saved as .TXT');
 }
 
-// Load current active messages in UI
 function loadChatMessages() {
   messagesList.innerHTML = '';
   const currentChat = chats.find(c => c.id === currentChatId);
@@ -828,9 +1079,8 @@ function loadChatMessages() {
         <div>${cleanHTML}</div>
       </div>
       
-      <!-- Sleek Action bar under each AI response block -->
       ${!isUser ? `
-        <div style="display:flex; items-center:center; gap:10px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
+        <div style="display:flex; align-items:center; gap:10px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
           <button onclick="copyProseText(\`${encodeURIComponent(msg.text)}\`)" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">📋 Copy</button>
           <span>·</span>
           <button onclick="speakResponseProse(\`${encodeURIComponent(msg.text)}\`)" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;" class="hover-accent">🔊 Listen</button>
@@ -847,54 +1097,101 @@ function loadChatMessages() {
   chatScroll.scrollTop = chatScroll.scrollHeight;
 }
 
-// Trigger speech dictation microphone STT
-function toggleVoiceDictation() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Speech Recognition not supported in this browser');
-    return;
-  }
+// Interactive Microphone Speech Dictation Engine with permission guarantee
+async function toggleVoiceDictation() {
+  const btn = document.getElementById('btn-mic-dictate');
 
   if (dictationActive) {
-    recognition.stop();
+    if (recognition) {
+      try { recognition.stop(); } catch(e){}
+    }
+    dictationActive = false;
+    btn.style.color = '';
+    btn.classList.remove('mic-pulsing');
+    showToast('Microphone recording stopped');
     return;
   }
 
+  // 1. Explicitly prompt browser for microphone permission
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      showToast('Activating microphone permissions...');
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+      console.warn('Microphone permission request status:', err.name || err.message);
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        showToast('⚠️ Please click the lock icon in your browser URL bar and set Microphone to "Allow"');
+      } else {
+        showToast('Microphone permission required to speak');
+      }
+      return;
+    }
+  }
+
+  // 2. Initialize Web Speech Recognition
   const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognitionClass();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = 'en-US'; // Supports English dictation as default
+  if (!SpeechRecognitionClass) {
+    showToast('Speech recognition not supported on this browser (Chrome/Edge recommended)');
+    return;
+  }
 
-  recognition.onstart = () => {
-    dictationActive = true;
-    document.getElementById('btn-mic-dictate').style.color = 'red';
-    showToast('Microphone active, start dictating...');
-  };
+  try {
+    recognition = new SpeechRecognitionClass();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    const selectedLang = localStorage.getItem('nova_speech_lang') || document.getElementById('micLanguageSelector').value || 'en-US';
+    recognition.lang = selectedLang;
 
-  recognition.onresult = (event) => {
-    const resultText = event.results[0][0].transcript;
-    const txtarea = document.getElementById('input');
-    txtarea.value = (txtarea.value + ' ' + resultText).trim();
-    adjustTextareaHeight(txtarea);
-  };
+    recognition.onstart = () => {
+      dictationActive = true;
+      btn.classList.add('mic-pulsing');
+      showToast(`🎙️ Mic Active (${selectedLang}) - Speak now!`);
+    };
 
-  recognition.onerror = (e) => {
-    const errCode = e && e.error ? e.error : 'unknown';
-    console.warn('Speech recognition status:', errCode);
-    showToast(`Mic timed out or permission error: ${errCode}`);
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      const txtarea = document.getElementById('input');
+      if (finalTranscript) {
+        txtarea.value = (txtarea.value + ' ' + finalTranscript).trim();
+        adjustTextareaHeight(txtarea);
+      }
+    };
+
+    recognition.onerror = (e) => {
+      const errCode = e && e.error ? e.error : 'unknown';
+      console.warn('Speech recognition status:', errCode);
+      if (errCode === 'not-allowed') {
+        showToast('⚠️ Microphone blocked: Click the lock icon in your browser URL bar to Allow Microphone.');
+      } else if (errCode !== 'no-speech') {
+        showToast(`Mic status: ${errCode}`);
+      }
+      dictationActive = false;
+      btn.style.color = '';
+      btn.classList.remove('mic-pulsing');
+    };
+
+    recognition.onend = () => {
+      dictationActive = false;
+      btn.style.color = '';
+      btn.classList.remove('mic-pulsing');
+    };
+
+    recognition.start();
+  } catch (err) {
+    console.warn('Recognition start exception:', err);
     dictationActive = false;
-    document.getElementById('btn-mic-dictate').style.color = '';
-  };
-
-  recognition.onend = () => {
-    dictationActive = false;
-    document.getElementById('btn-mic-dictate').style.color = '';
-  };
-
-  recognition.start();
+    btn.style.color = '';
+    btn.classList.remove('mic-pulsing');
+  }
 }
 
-// Trigger text processing inputs
 async function send() {
   const el = document.getElementById('input');
   const userText = el.value.trim();
@@ -904,7 +1201,6 @@ async function send() {
   const currentChat = chats.find(c => c.id === currentChatId);
   if (!currentChat) return;
 
-  // Append user message block
   const userMsgObj = {
     role: 'user',
     text: userText || 'Analyzed file data.',
@@ -915,7 +1211,6 @@ async function send() {
 
   currentChat.messages.push(userMsgObj);
 
-  // Auto Rename title on first query
   if (currentChat.messages.length === 1 && userText) {
     currentChat.title = userText.substring(0, 30) + (userText.length > 30 ? '...' : '');
   }
@@ -923,45 +1218,48 @@ async function send() {
   saveChatsToMemory();
   renderChatHistoryList();
 
-  // Reset UI components
   el.value = '';
   adjustTextareaHeight(el);
   clearComposerAttachment();
   loadChatMessages();
 
-  // Create loading typing indicators
   const loaderDiv = document.createElement('div');
   loaderDiv.className = 'msg ai';
   loaderDiv.id = 'ai-typing-loader';
   loaderDiv.innerHTML = `
     <div class="bubble" style="color:var(--muted); font-style:italic; display:flex; align-items:center; gap:8px;">
       <div style="width:10px; height:10px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
-      <span>Nova is generating response...</span>
+      <span>NOVA is generating response...</span>
     </div>
   `;
   messagesList.appendChild(loaderDiv);
   messagesList.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
   try {
+    const apiKey = getActiveGeminiApiKey();
     const payload = {
       prompt: userMsgObj.text,
-      model: currentChat.model || 'gemini-3.1-flash',
+      model: currentChat.model || 'gemini-1.5-flash',
       image: userMsgObj.attachment,
-      mimeType: userMsgObj.attachmentMimeType
+      mimeType: userMsgObj.attachmentMimeType,
+      apiKey: apiKey
     };
 
     const response = await fetch('/api/translate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
+      },
       body: JSON.stringify(payload)
     });
 
-    // Remove typing indicators
-    document.getElementById('ai-typing-loader').remove();
+    const loader = document.getElementById('ai-typing-loader');
+    if (loader) loader.remove();
 
     if (!response.ok) {
       const errPayload = await response.json();
-      throw new Error(errPayload.error || 'Server pipeline error');
+      throw new Error(errPayload.error || 'Server request error');
     }
 
     const data = await response.json();
@@ -977,10 +1275,12 @@ async function send() {
 
   } catch (error) {
     console.error(error);
-    document.getElementById('ai-typing-loader').remove();
+    const loader = document.getElementById('ai-typing-loader');
+    if (loader) loader.remove();
+    
     currentChat.messages.push({
       role: 'ai',
-      text: `⚠️ **NOVA System Connection Error**: ${error.message}. Verify that the Google Gemini API key is configured inside your AI Studio Secrets panel.`,
+      text: `⚠️ **NOVA AI Notice**: ${error.message}. \n\nClick 🔑 **API Key Settings** in the sidebar to configure your Gemini API key (e.g. \`AQ.Ab8R...\`).`,
       timestamp: Date.now()
     });
     saveChatsToMemory();
@@ -995,9 +1295,112 @@ function keySend(e){
   }
 }
 
+// ==========================================
+// MODE 2: PRO CODE ANALYSIS & WRITING STUDIO
+// ==========================================
+async function executeCodeAnalysis() {
+  const codeSource = document.getElementById('code-input-source').value.trim();
+  const lang = document.getElementById('code-lang-selector').value;
+  const task = document.getElementById('code-task-selector').value;
+  const btn = document.getElementById('btn-code-execute');
+
+  if (!codeSource) {
+    showToast('Please paste source code or describe the software requirement');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = 'Analyzing syntax & formulating code architecture...';
+
+  let systemDirective = '';
+  if (task === 'analyze_fix') {
+    systemDirective = `Perform a deep static code analysis and bug fix on this ${lang} code. Identify any logic errors, race conditions, memory leaks, or type errors. Provide the corrected, production-ready code with an explanation of every fix made.`;
+  } else if (task === 'explain') {
+    systemDirective = `Provide a comprehensive, senior-level line-by-line explanation of this ${lang} code logic, detailing how data flows and functions execute.`;
+  } else if (task === 'optimize') {
+    systemDirective = `Refactor and optimize this ${lang} code for high performance, time/space complexity, modularity, and clean code architecture. Output the fully optimized code and explain performance gains.`;
+  } else if (task === 'unit_tests') {
+    systemDirective = `Write a comprehensive, production-grade unit testing suite for this ${lang} code covering edge cases, happy paths, and error states.`;
+  } else {
+    systemDirective = `Write a complete, pro-level, production-ready software implementation for the following specification in ${lang}. Ensure clean architecture, TypeScript/type safety where applicable, and robust error handling.`;
+  }
+
+  const prompt = `${systemDirective}\n\nLanguage: ${lang}\n\n\`\`\`${lang.toLowerCase()}\n${codeSource}\n\`\`\``;
+  const model = document.getElementById('modelSelector').value;
+  const apiKey = getActiveGeminiApiKey();
+
+  document.getElementById('code-output-container').style.display = 'flex';
+  document.getElementById('code-output-content').innerHTML = '<div style="padding:20px; text-align:center; color:var(--muted);"><div style="width:20px; height:20px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear; margin:auto;"></div><p style="margin-top:8px; font-size:12px;">NOVA is analyzing & writing code...</p></div>';
+
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
+      },
+      body: JSON.stringify({ prompt, model, apiKey })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Code analysis API error');
+    }
+
+    const data = await res.json();
+    lastCodeStudioText = data.text;
+    document.getElementById('code-output-content').innerHTML = formatMarkdown(data.text);
+    showToast('Code analysis & generation completed!');
+
+  } catch (error) {
+    console.error(error);
+    document.getElementById('code-output-content').innerHTML = `<p style="color:#ef4444; font-size:12px;">Error: ${error.message}</p>`;
+    showToast(`Code Studio error: ${error.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = '⚡ Execute Pro Code Analysis / Generation';
+  }
+}
+
+function clearCodeStudio() {
+  document.getElementById('code-input-source').value = '';
+  document.getElementById('code-output-container').style.display = 'none';
+  document.getElementById('code-output-content').innerHTML = '';
+}
+
+function copyCodeStudioOutput() {
+  if (!lastCodeStudioText) return;
+  navigator.clipboard.writeText(lastCodeStudioText).then(() => {
+    showToast('Code & Analysis copied to clipboard');
+  });
+}
+
+function downloadCodeStudioOutput() {
+  if (!lastCodeStudioText) return;
+  const lang = document.getElementById('code-lang-selector').value.toLowerCase();
+  let ext = 'txt';
+  if (lang.includes('typescript')) ext = 'ts';
+  else if (lang.includes('javascript')) ext = 'js';
+  else if (lang.includes('python')) ext = 'py';
+  else if (lang.includes('html')) ext = 'html';
+  else if (lang.includes('c++')) ext = 'cpp';
+  else if (lang.includes('rust')) ext = 'rs';
+  else if (lang.includes('go')) ext = 'go';
+  else if (lang.includes('java')) ext = 'java';
+  else if (lang.includes('sql')) ext = 'sql';
+
+  const blob = new Blob([lastCodeStudioText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nova_code_${Date.now()}.${ext}`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Saved as .${ext} file`);
+}
 
 // ==========================================
-// MODE 2: AI IMAGE GENERATOR
+// MODE 3: AI IMAGE GENERATOR
 // ==========================================
 async function generateAIImage() {
   const promptInput = document.getElementById('image-prompt').value.trim();
@@ -1010,7 +1413,6 @@ async function generateAIImage() {
   const style = document.getElementById('image-style').value;
   const btn = document.getElementById('btn-generate');
 
-  // Toggle visual containers
   document.getElementById('image-output-container').style.display = 'flex';
   document.getElementById('image-loading').style.display = 'flex';
   document.getElementById('image-result').style.display = 'none';
@@ -1028,7 +1430,6 @@ async function generateAIImage() {
   const randomSeed = Math.floor(Math.random() * 100000);
   const stylizedPrompt = `${promptInput}, style preset: ${style}, high-fidelity render, 8k resolution, master shading`;
 
-  // Free Pollinations visual synthesis APIs fallback
   const pollinationURL = `https://image.pollinations.ai/p/${encodeURIComponent(stylizedPrompt)}?width=${width}&height=${height}&seed=${randomSeed}&nologo=true&enhance=true`;
 
   try {
@@ -1055,7 +1456,7 @@ async function generateAIImage() {
     document.getElementById('image-output-container').style.display = 'none';
     btn.disabled = false;
     btn.innerText = 'Generate Masterpiece Art';
-    showToast(`Visual rendering crashed: ${error.message}`);
+    showToast(`Visual rendering error: ${error.message}`);
   }
 }
 
@@ -1065,14 +1466,13 @@ function downloadArtOutput() {
 
   const a = document.createElement('a');
   a.href = img.src;
-  a.download = `nova_art_preset_${Date.now()}.jpg`;
+  a.download = `nova_art_${Date.now()}.jpg`;
   a.click();
   showToast('Image downloaded successfully');
 }
 
-
 // ==========================================
-// MODE 3: AI QUIZ BUILDER
+// MODE 4: AI QUIZ BUILDER
 // ==========================================
 async function buildInteractiveQuiz() {
   const topic = document.getElementById('quiz-topic').value.trim();
@@ -1090,6 +1490,7 @@ async function buildInteractiveQuiz() {
   showToast('Compiling custom syllabus from active cognitive layers...');
 
   const model = document.getElementById('modelSelector').value;
+  const apiKey = getActiveGeminiApiKey();
 
   const prompt = `Generate an interactive trivia multiple choice quiz with exactly ${count} questions on the topic of "${topic}". The difficulty level should be "${difficulty}". 
   Provide the output strictly formatted in a clean, valid JSON array matching this exact schema layout:
@@ -1106,8 +1507,11 @@ async function buildInteractiveQuiz() {
   try {
     const res = await fetch('/api/translate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, model })
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
+      },
+      body: JSON.stringify({ prompt, model, apiKey })
     });
 
     if (!res.ok) throw new Error('API fetch error');
@@ -1115,7 +1519,6 @@ async function buildInteractiveQuiz() {
     const data = await res.json();
     let jsonText = data.text.trim();
 
-    // RegEx string filters
     if (jsonText.startsWith('```')) {
       jsonText = jsonText.replace(/^```[a-zA-Z0-9]*\n/i, '').replace(/\n```$/g, '');
     }
@@ -1126,7 +1529,6 @@ async function buildInteractiveQuiz() {
       throw new Error('Verification arrays format mismatched');
     }
 
-    // Launch Quiz gameplay board
     activeQuizIndex = 0;
     activeQuizScore = 0;
     userQuizAnswerSubmitted = false;
@@ -1198,7 +1600,6 @@ function submitQuizOptionAnswer(btn, encOpt) {
     btn.style.color = '#ef4444';
     showToast('Incorrect answer');
 
-    // Highlight correct response
     document.querySelectorAll('#quiz-game-options button').forEach(button => {
       const text = button.querySelector('span').innerText;
       if (text === data.answer) {
@@ -1218,12 +1619,11 @@ function advanceQuizQuestion() {
   if (activeQuizIndex < currentQuizData.length) {
     renderQuizGameQuestion();
   } else {
-    // Show summary screen
     document.getElementById('quiz-game-panel').style.display = 'none';
     document.getElementById('quiz-summary-panel').style.display = 'flex';
 
     document.getElementById('quiz-final-score-circle').innerText = `${activeQuizScore} / ${currentQuizData.length}`;
-    document.getElementById('quiz-final-summary-text').innerText = `You completed the knowledge run, scoring ${activeQuizScore} out of ${currentQuizData.length} questions correctly.`;
+    document.getElementById('quiz-final-summary-text').innerText = `You completed the quiz, scoring ${activeQuizScore} out of ${currentQuizData.length} questions correctly.`;
   }
 }
 
@@ -1234,9 +1634,8 @@ function resetQuizWorkspace() {
   document.getElementById('quiz-topic').value = '';
 }
 
-
 // ==========================================
-// MODE 4: DOCUMENT & VISION TRANSLATOR
+// MODE 5: DOCUMENT & VISION TRANSLATOR
 // ==========================================
 function handleTranslatorFileSelect(input) {
   const file = input.files[0];
@@ -1304,17 +1703,22 @@ async function executeDocumentTranslation() {
   document.getElementById('translator-output-result').innerText = '';
 
   const model = document.getElementById('modelSelector').value;
+  const apiKey = getActiveGeminiApiKey();
   const prompt = `Extract, parse, and translate all text structures layout from this document directly into target language: "${lang}". Keep structural formatting, list items, and headings fully preserved. Only output the translated prose text.`;
 
   try {
     const res = await fetch('/api/translate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
+      },
       body: JSON.stringify({
         prompt,
         model,
         image: activeTranslatorAttachment.base64,
-        mimeType: activeTranslatorAttachment.mimeType
+        mimeType: activeTranslatorAttachment.mimeType,
+        apiKey
       })
     });
 
@@ -1346,7 +1750,6 @@ function copyTranslationText() {
 </script>
 
 <style>
-/* Smooth spinner animation */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
