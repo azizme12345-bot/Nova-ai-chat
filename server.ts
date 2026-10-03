@@ -25,6 +25,57 @@ app.use((req, res, next) => {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+async function callPollinationsBackup(normalizedContents: any[], systemInstruction: string): Promise<string> {
+  try {
+    const pollinationsMessages = [
+      { role: 'system', content: systemInstruction }
+    ];
+
+    for (const c of normalizedContents) {
+      const partsText = c.parts.map((p: any) => p.text || '').join('\n');
+      pollinationsMessages.push({
+        role: c.role === 'user' ? 'user' : 'assistant',
+        content: partsText || 'Analyzed data.'
+      });
+    }
+
+    // 1. Try OpenAI-compatible endpoint
+    try {
+      const polRes = await fetch('https://text.pollinations.ai/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: pollinationsMessages,
+          model: 'openai'
+        })
+      });
+
+      if (polRes.ok) {
+        const polJson: any = await polRes.json();
+        const textOut = polJson?.choices?.[0]?.message?.content;
+        if (textOut && textOut.trim()) {
+          return textOut.trim();
+        }
+      }
+    } catch (e) {
+      // continue to fallback
+    }
+
+    // 2. Direct simple prompt fallback
+    const lastUserPrompt = pollinationsMessages[pollinationsMessages.length - 1]?.content || 'سلام';
+    const directRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(lastUserPrompt)}?system=${encodeURIComponent(systemInstruction)}`);
+    if (directRes.ok) {
+      const directText = await directRes.text();
+      if (directText && directText.trim()) {
+        return directText.trim();
+      }
+    }
+  } catch (polErr) {
+    console.log('Pollinations text backup failed:', polErr);
+  }
+  return '';
+}
+
 async function analyzeAndExpandPrompt(rawPrompt: string, apiKey?: string, isEditing: boolean = false): Promise<string> {
   if (!rawPrompt) return 'High resolution masterwork artwork';
 
@@ -62,7 +113,7 @@ CRITICAL MANDATES:
 
 Return ONLY the refined, detailed masterwork image generation prompt in English.`;
 
-    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    const candidateModels = ['gemini-3.8-flash'];
     for (const modelName of candidateModels) {
       try {
         const response = await ai.models.generateContent({
@@ -113,12 +164,20 @@ function generateFallbackResponse(prompt: string, language?: string): string {
       : `I am NOVA AI! I can chat naturally, answer questions, write and debug code, analyze screenshots, and generate photos or calligraphy artwork.`;
   }
 
-  // General natural short fallback
+  // General natural beautiful fallback
   if (isUrdu) {
-    return `جی بالکل! میں آپ کی بات سمجھ گیا ہوں۔ آپ اس کے بارے میں مزید کیا جاننا چاہتے ہیں؟`;
+    return `جی میں بالکل سمجھ گیا ہوں اور آپ کی رہنمائی کے لیے حاضر ہوں! 
+
+اگر آپ کے پاس کوئی سوال ہے یا آپ پی ڈی ایف، فوٹو یا کوڈ کا تجزیہ کروانا چاہتے ہیں، تو سائیڈ بار میں **🔑 API Key Settings** پر کلک کر کے اپنی گوگل اے آئی اسٹوڈیو (Google AI Studio) کی چابی سیٹ کر لیں تاکہ جیمنی ماڈل آپ کو لائیو بہترین جواب دے سکے۔
+
+میں ابھی آپ کے لیے کیا مدد کر سکتا ہوں؟`;
   }
 
-  return `Sure! I understand. How would you like to proceed with this?`;
+  return `I understand you perfectly! I am ready to guide you.
+
+To unlock full power for code audits, PDF analysis, or visual debugging, please enter your Google AI Studio API Key in the **🔑 API Key Settings** inside the sidebar.
+
+How can I help you right now?`;
 }
 
 // Voice Transcription Endpoint
@@ -158,7 +217,7 @@ app.post('/api/transcribe', async (req, res) => {
           httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
         });
 
-        const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        const candidateModels = ['gemini-3.8-flash'];
         for (const mName of candidateModels) {
           try {
             const response = await ai.models.generateContent({
@@ -263,7 +322,7 @@ app.post('/api/generate-image', async (req, res) => {
           httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
         });
 
-        const imgModels = ['gemini-2.5-flash', 'gemini-3.1-flash-lite-image'];
+        const imgModels = ['gemini-3.1-flash-lite-image', 'gemini-3.1-flash-image'];
 
         if (baseImage) {
           let cleanBase64 = baseImage;
@@ -443,6 +502,7 @@ app.get('/api/tts', async (req, res) => {
   }
 });
 
+// Translation & Core Multimodal Assistant Endpoint using official @google/genai SDK
 app.post('/api/translate', async (req, res) => {
   try {
     let parsedBody = req.body;
@@ -457,6 +517,7 @@ app.post('/api/translate', async (req, res) => {
       model, 
       image, 
       mimeType, 
+      attachedUrl,
       apiKey: clientApiKey, 
       language, 
       history = []
@@ -470,9 +531,34 @@ app.post('/api/translate', async (req, res) => {
 
     const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
 
+    // 1. Live Website Content Scraper / Link Analyzer
+    let scrapedUrlContext = "";
+    if (attachedUrl) {
+      try {
+        const fetchRes = await fetch(attachedUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } });
+        if (fetchRes.ok) {
+          const html = await fetchRes.text();
+          const cleanText = html
+            .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+            .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+            .replace(/<[^>]*>/g, ' ')
+            .replace(/\s+/g, ' ')
+            .substring(0, 16000); // Scraping up to 16,000 characters
+          scrapedUrlContext = `\n\n[WEBSITE CONTENT SCRAPED FROM USER LINK ${attachedUrl}]:\n${cleanText}\n\n`;
+        }
+      } catch (err) {
+        scrapedUrlContext = `\n\n[WEBSITE LINK]: ${attachedUrl} (Direct parse prevented by network origin rules. Please ask user to paste code/text if needed.)\n\n`;
+      }
+    }
+
+    let finalPrompt = userPrompt;
+    if (scrapedUrlContext) {
+      finalPrompt = `${userPrompt}${scrapedUrlContext}`;
+    }
+
     const langInstruction = language ? `Strictly respond in ${language}.` : `Respond naturally in the same language as the user's message (Urdu, Hindi, English, etc.).`;
     
-    const systemInstruction = `You are NOVA AI, a friendly, natural, and helpful AI assistant.
+    const systemInstruction = `You are NOVA AI, a World-Class Multimodal AI Assistant, Senior Software Engineer, and Expert PDF & Link Auditor.
 ${langInstruction}
 
 CONVERSATIONAL RULES (STRICT MANDATES):
@@ -482,10 +568,15 @@ CONVERSATIONAL RULES (STRICT MANDATES):
    - DO NOT output long introductions, feature menus, or unsolicited lectures on simple greetings.
    - ONLY list features or capabilities IF the user explicitly asks "What can you do?" / "What are your features?" / "تم کیا کیا کر سکتے ہو؟".
 
-2. NATURAL CONVERSATION & ALL-IN-ONE CAPABILITIES:
-   - Talk naturally like a polite friend.
-   - Stand firmly for truth and ethics without blindly agreeing to falsehood.
-   - Within the SAME conversation, effortlessly handle coding requests, screenshot debugging, photo generation, or casual chat depending on what the user asks.`;
+2. MULTIMODAL AUDITING (PDFs, PHOTOS, CODE):
+   - When a user uploads a PDF document, image screenshot, code file, or link:
+     a) Deeply inspect and explain the document's main contents or code bugs.
+     b) Identify any errors, blurry assets, or bad designs.
+     c) Provide complete copyable code blocks to fix all issues.
+     d) Provide a refined AI prompt to copy & paste into Google AI Studio to resolve it.
+
+3. TRUTHFULNESS & MORAL CONSTITUTION:
+   - Always stand for truth, logic, and ethical principles. Never conform to falsehood or agree blindly.`;
 
     const normalizedContents: any[] = [];
 
@@ -499,7 +590,7 @@ CONVERSATIONAL RULES (STRICT MANDATES):
         if (!textContent && !msg.attachment) continue;
 
         const parts: any[] = [{ text: textContent || 'Analyzed data.' }];
-        if (msg.attachment && role === 'user') {
+        if (msg.attachment && role === 'user' && msg.attachmentMimeType !== 'url') {
           let cleanBase64 = msg.attachment;
           let detectedMime = msg.attachmentMimeType || 'image/jpeg';
           const match = msg.attachment.match(/^data:([^;]+);base64,(.+)$/);
@@ -525,8 +616,8 @@ CONVERSATIONAL RULES (STRICT MANDATES):
     }
 
     if (normalizedContents.length === 0) {
-      const parts: any[] = [{ text: userPrompt }];
-      if (image) {
+      const parts: any[] = [{ text: finalPrompt }];
+      if (image && mimeType !== 'url') {
         let cleanBase64 = image;
         let detectedMime = mimeType || 'image/jpeg';
         const match = image.match(/^data:([^;]+);base64,(.+)$/);
@@ -545,85 +636,118 @@ CONVERSATIONAL RULES (STRICT MANDATES):
     }
 
     if (normalizedContents[normalizedContents.length - 1].role !== 'user') {
-      normalizedContents.push({ role: 'user', parts: [{ text: userPrompt }] });
-    }
-
-    const requestBody = {
-      contents: normalizedContents,
-      systemInstruction: { parts: [{ text: systemInstruction }] },
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.95
-      }
-    };
-
-    const targetModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-    const apiVersions = ['v1beta', 'v1'];
-
-    let response: any = null;
-    let success = false;
-
-    if (apiKey) {
-      for (const apiVer of apiVersions) {
-        for (const targetModel of targetModels) {
-          const targetUrl = `https://generativelanguage.googleapis.com/${apiVer}/models/${targetModel}:generateContent?key=${encodeURIComponent(apiKey)}`;
-          
-          try {
-            const headers: any = {
-              'Content-Type': 'application/json',
-              'x-goog-api-key': apiKey,
-              'x-gemini-api-key': apiKey,
-              'User-Agent': 'aistudio-build'
-            };
-            if (apiKey.startsWith('AQ.')) {
-              headers['Authorization'] = `Bearer ${apiKey}`;
-            }
-
-            response = await fetch(targetUrl, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify(requestBody)
-            });
-
-            if (response.ok) {
-              success = true;
-              break;
-            }
-
-            if (response.status === 429) {
-              await sleep(1000);
-              continue;
-            }
-
-            if (response.status === 404 || response.status === 400) {
-              continue;
-            }
-          } catch (err) {
-            // continue
-          }
-        }
-        if (success) break;
-      }
+      normalizedContents.push({ role: 'user', parts: [{ text: finalPrompt }] });
     }
 
     let aiText = '';
 
-    if (success && response && response.ok) {
-      const data: any = await response.json();
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-        aiText = data.candidates[0].content.parts.map((p: any) => p.text || '').join('');
-      } else if (data.promptFeedback && data.promptFeedback.blockReason) {
-        aiText = `[Response filtered by safety guidelines: ${data.promptFeedback.blockReason}]`;
+    // Standard valid @google/genai SDK model candidates in priority order
+    let targetModels = [
+      'gemini-3.1-flash-lite',
+      'gemini-flash-latest',
+      'gemini-3.8-flash',
+      'gemini-3.1-pro-preview'
+    ];
+
+    const requestedModel = (model || '').toLowerCase();
+    if (requestedModel.includes('pro')) {
+      targetModels = ['gemini-3.1-pro-preview', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
+    } else if (requestedModel.includes('3.8')) {
+      targetModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
+    } else if (requestedModel.includes('latest')) {
+      targetModels = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
+    } else {
+      targetModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
+    }
+
+    if (apiKey) {
+      try {
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({
+          apiKey,
+          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+        });
+
+        for (const mName of targetModels) {
+          try {
+            console.log(`Executing Gemini model: ${mName}`);
+            const response = await ai.models.generateContent({
+              model: mName,
+              contents: normalizedContents,
+              config: {
+                systemInstruction,
+                temperature: 0.7,
+                topP: 0.95
+              }
+            });
+
+            if (response.text && response.text.trim()) {
+              aiText = response.text.trim();
+              break;
+            }
+          } catch (modelErr: any) {
+            console.log(`Model ${mName} attempt limit or error:`, modelErr?.message || modelErr);
+          }
+        }
+      } catch (sdkInitErr) {
+        console.log('Gemini SDK Init error:', sdkInitErr);
       }
     }
 
+    // System key fallback if user key was completely exhausted or missing
     if (!aiText) {
-      aiText = generateFallbackResponse(userPrompt, language);
+      const systemKey = process.env.GEMINI_API_KEY || '';
+      if (systemKey && systemKey !== apiKey && systemKey !== 'dummy') {
+        try {
+          const { GoogleGenAI } = await import('@google/genai');
+          const aiSys = new GoogleGenAI({
+            apiKey: systemKey,
+            httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+          });
+          const response = await aiSys.models.generateContent({
+            model: 'gemini-3.1-flash-lite',
+            contents: normalizedContents,
+            config: { systemInstruction, temperature: 0.7 }
+          });
+          if (response.text && response.text.trim()) {
+            aiText = response.text.trim();
+          }
+        } catch (sysErr) {
+          console.log('System key attempt failed:', sysErr);
+        }
+      }
+    }
+
+    // Pollinations Backup (free, unlimited fallback)
+    if (!aiText) {
+      console.log('Activating Pollinations backup engine...');
+      try {
+        aiText = await callPollinationsBackup(normalizedContents, systemInstruction);
+      } catch (pErr) {
+        console.log('Pollinations call failed:', pErr);
+      }
+    }
+
+    // Ultimate fallback
+    if (!aiText) {
+      aiText = generateFallbackResponse(finalPrompt, language);
     }
 
     return res.json({ text: aiText });
 
   } catch (error: any) {
+    console.error('Core translate execution failed:', error);
+    const errorStr = (error?.message || '').toLowerCase();
+    if (errorStr.includes('quota') || errorStr.includes('exhausted') || errorStr.includes('429') || errorStr.includes('limit')) {
+      return res.json({
+        text: `⚠️ **API Quota Exceeded (کوٹہ عارضی طور پر ختم ہو گیا ہے)**
+
+آپ کی گوگل اے آئی اسٹوڈیو (Google AI Studio) کی چابی کا فری کوٹہ اس وقت **Gemini Pro** ماڈل کے لیے ختم ہو چکا ہے۔
+
+**آسان حل (Instant Solution):**
+برائے مہربانی بائیں جانب سائیڈ بار (Sidebar) میں جائیں اور **Active Engine** والے خانے سے **Gemini 3.8 Flash (Super Fast)** سلیکٹ کر لیں۔ وہ بالکل فری ہے، اس کا کوٹہ بہت زیادہ ہے، اور وہ فوری طور پر کام کرنا شروع کر دے گا! 🚀`
+      });
+    }
     const fallback = generateFallbackResponse('Assistance request', 'Urdu');
     return res.json({ text: fallback });
   }

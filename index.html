@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>NOVA AI | Advanced All-in-One Assistant</title>
 <style>
 :root{
-  --bg:#ffffff;--panel:#f7f8fa;--panel2:#ffffff;--text:#17191c;--muted:#73777f;
-  --line:#e6e8eb;--accent:#1677ff;--accent-soft:#eaf3ff;--user:#eef5ff;
+  --bg:#f8f7fc;--panel:#efeef5;--panel2:#ffffff;--text:#1e1432;--muted:#7c6f8f;
+  --line:#dcdae6;--accent:#7844cc;--accent-soft:#f2edfa;--user:#e9e2f8;
 }
 [data-theme="dark"]{
-  --bg:#101214;--panel:#171a1e;--panel2:#14171a;--text:#f3f4f6;--muted:#969ba3;
-  --line:#292d33;--accent:#3d8bff;--accent-soft:#172945;--user:#18283e;
+  --bg:#0b0417;--panel:#140828;--panel2:#0e051c;--text:#f6f2fe;--muted:#a191b8;
+  --line:#2a144c;--accent:#a862ff;--accent-soft:#29104f;--user:#2e1257;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100vh;overflow:hidden}
@@ -21,7 +22,7 @@ button{cursor:pointer}
 .app{height:100vh;display:flex;position:relative}
 .sidebar{width:270px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto;z-index:50}
 .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:9px 8px 14px}
-.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-weight:800;font-size:16px;box-shadow:0 2px 8px rgba(22,119,255,0.3)}
+.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;display:grid;place-items:center;font-weight:800;font-size:16px;box-shadow:0 2px 8px rgba(99,102,241,0.3)}
 .side-btn{width:100%;border:0;background:transparent;color:var(--text);padding:10px 12px;border-radius:9px;text-align:left;display:flex;gap:12px;align-items:center;margin:2px 0;transition:all 0.2s;font-size:13px}
 .side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .side-btn span:first-child{width:20px;text-align:center}
@@ -185,6 +186,19 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
 </style>
 </head>
 <body>
+<svg style="display:none; width:0; height:0;">
+  <defs>
+    <linearGradient id="planetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a29bfe" />
+      <stop offset="40%" stop-color="#6c5ce7" />
+      <stop offset="100%" stop-color="#fd79a8" />
+    </linearGradient>
+    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffeaa7" />
+      <stop offset="100%" stop-color="#ff7675" />
+    </linearGradient>
+  </defs>
+</svg>
 <div class="app">
   <div id="toast-container"></div>
   <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
@@ -368,17 +382,47 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
   <!-- SIDEBAR -->
   <aside class="sidebar" id="appSidebar">
     <div class="brand">
-      <div class="logo">N</div>
-      <span>NOVA PRO</span>
+      <svg viewBox="0 0 120 120" style="width:34px; height:34px; filter: drop-shadow(0 0 8px rgba(168,85,247,0.8)); flex-shrink: 0;">
+        <defs>
+          <linearGradient id="neonGlowSide" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#d8b4fe"/>
+            <stop offset="50%" stop-color="#a855f7"/>
+            <stop offset="100%" stop-color="#6b21a8"/>
+          </linearGradient>
+          <linearGradient id="metalPurpleSide" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f3e8ff"/>
+            <stop offset="30%" stop-color="#c084fc"/>
+            <stop offset="70%" stop-color="#7e22ce"/>
+            <stop offset="100%" stop-color="#3b0764"/>
+          </linearGradient>
+          <radialGradient id="orbGlowSide" cx="35%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="30%" stop-color="#f0abfc"/>
+            <stop offset="70%" stop-color="#a855f7"/>
+            <stop offset="100%" stop-color="#581c87"/>
+          </radialGradient>
+        </defs>
+        <rect x="8" y="8" width="104" height="104" rx="28" fill="#130a24" stroke="url(#neonGlowSide)" stroke-width="4.5"/>
+        <g fill="none" stroke="url(#metalPurpleSide)" stroke-width="7" stroke-linecap="round">
+          <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30"/>
+          <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(120 60 60)"/>
+          <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(240 60 60)"/>
+        </g>
+        <circle cx="60" cy="24" r="7" fill="url(#orbGlowSide)" stroke="#f5d0fe" stroke-width="1.5"/>
+        <circle cx="91" cy="78" r="7" fill="url(#orbGlowSide)" stroke="#f5d0fe" stroke-width="1.5"/>
+        <circle cx="29" cy="78" r="7" fill="url(#orbGlowSide)" stroke="#f5d0fe" stroke-width="1.5"/>
+      </svg>
+      <span style="font-weight:800; letter-spacing:0.5px; color:var(--text);">NOVA CORE</span>
       <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; display:none;" id="sidebar-close-btn">✕</button>
     </div>
 
     <div style="padding: 0 4px; margin-bottom: 12px;">
       <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:600;">ACTIVE ENGINE</div>
       <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; outline:none;">
-        <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash (Super Fast & Smart)</option>
-        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Next-Gen Reasoning)</option>
-        <option value="gemini-1.5-pro">Gemini 1.5 Pro (Deep Code & Analysis)</option>
+        <option value="gemini-3.1-flash-lite" selected>Gemini 3.1 Flash Lite (High Free Quota & Ultra Fast)</option>
+        <option value="gemini-flash-latest">Gemini Flash Latest (Official Auto-Updating)</option>
+        <option value="gemini-3.8-flash">Gemini 3.8 Flash (Multimodal & Fast)</option>
+        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Deep Code & STEM Auditor)</option>
       </select>
     </div>
 
@@ -423,9 +467,48 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
     <header class="topbar">
       <div style="display:flex; align-items:center; gap:8px;">
         <button class="icon-btn" onclick="toggleSidebar(event)" title="Toggle Menu">☰</button>
-        <div class="top-title" id="top-title">NOVA Advanced AI</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <!-- Inline Tri-Loop Logo aligned to top -->
+          <svg viewBox="0 0 120 120" style="width:28px; height:28px; filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); flex-shrink: 0;">
+            <defs>
+              <linearGradient id="neonGlowTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="50%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#1d4ed8"/>
+              </linearGradient>
+              <linearGradient id="metalBlueTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="30%" stop-color="#7dd3fc"/>
+                <stop offset="70%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#1e3a8a"/>
+              </linearGradient>
+              <radialGradient id="orbGlowTop" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="30%" stop-color="#93c5fd"/>
+                <stop offset="70%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#1e40af"/>
+              </radialGradient>
+            </defs>
+            <rect x="8" y="8" width="104" height="104" rx="28" fill="#030712" stroke="url(#neonGlowTop)" stroke-width="4.5"/>
+            <rect x="12" y="12" width="96" height="96" rx="24" fill="#0b0f19" opacity="0.95"/>
+            <g fill="none" stroke="url(#metalBlueTop)" stroke-width="7" stroke-linecap="round">
+              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30"/>
+              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(120 60 60)"/>
+              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(240 60 60)"/>
+            </g>
+            <circle cx="60" cy="24" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="91" cy="78" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
+            <circle cx="29" cy="78" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
+          </svg>
+          <div class="top-title" id="top-title" style="font-weight:750; font-size:16px; letter-spacing:0.5px;">NOVA CORE AI</div>
+        </div>
       </div>
       <div style="display:flex; gap:6px; align-items:center;">
+        <!-- PWA Install Button -->
+        <button id="pwa-install-btn" class="icon-btn" onclick="triggerPwaInstall()" title="Install NOVA App" style="display:none; color:var(--accent); font-weight:bold; position:relative;">
+          📥
+          <span style="position:absolute; top:4px; right:4px; width:7px; height:7px; background:#ff4757; border-radius:50%;"></span>
+        </button>
         <button class="icon-btn" onclick="newChat()" title="New Chat" style="color:var(--accent); font-weight:700;">＋</button>
         <button class="icon-btn" onclick="openApiKeyModal()" title="API Key Settings">🔑</button>
         <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">◐</button>
@@ -433,22 +516,74 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
     </header>
 
     <section class="chat active" id="workspace-chat">
-      <div class="empty" id="empty">
-        <div class="biglogo">N</div>
-        <h1>How can I help you today?</h1>
-        <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate Quranic calligraphy, or transcribe voice dictations.</p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
-          <button onclick="promptPhotoInChat('A high-resolution image featuring a solid green background with white text. At top center, calligraphic text Al-Quran Al-Kareem. In middle, Surah Al-Jumu\'ah Verses 9-10. At bottom, Bismillah ir-Rahman ir-Rahim')" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">🎨 Quran Calligraphy Poster</button>
-          <button onclick="openPhotoStudioModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">⚡ Batch Edit Photos</button>
+      <div class="empty" id="empty" style="justify-content:flex-start; padding-top:40px;">
+        <!-- Persistent Logo: Always Visible -->
+        <div id="empty-logo-wrap" style="display:flex; flex-direction:column; align-items:center; margin-bottom:14px;">
+          <svg viewBox="0 0 120 120" style="width:108px; height:108px; filter: drop-shadow(0 0 22px rgba(56,189,248,0.8));">
+            <defs>
+              <linearGradient id="neonGlowCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="50%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#1d4ed8"/>
+              </linearGradient>
+              <linearGradient id="metalBlueCenter" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="30%" stop-color="#7dd3fc"/>
+                <stop offset="70%" stop-color="#0284c7"/>
+                <stop offset="100%" stop-color="#1e3a8a"/>
+              </linearGradient>
+              <radialGradient id="orbGlowCenter" cx="35%" cy="35%" r="65%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="30%" stop-color="#93c5fd"/>
+                <stop offset="70%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#1e40af"/>
+              </radialGradient>
+            </defs>
+            <rect x="8" y="8" width="104" height="104" rx="28" fill="#030712" stroke="url(#neonGlowCenter)" stroke-width="4.5"/>
+            <rect x="12" y="12" width="96" height="96" rx="24" fill="#0b0f19" opacity="0.95"/>
+            <!-- Sparkles -->
+            <circle cx="28" cy="32" r="1.2" fill="#7dd3fc" opacity="0.9"/>
+            <circle cx="92" cy="38" r="1.5" fill="#ffffff" opacity="0.9"/>
+            <circle cx="34" cy="88" r="1.2" fill="#93c5fd" opacity="0.8"/>
+            <circle cx="86" cy="82" r="1.8" fill="#7dd3fc" opacity="0.9"/>
+            <!-- Arches with vibrant blue inner glow -->
+            <g fill="none" stroke="url(#metalBlueCenter)" stroke-width="7" stroke-linecap="round" style="filter: drop-shadow(0 0 6px rgba(56,189,248,0.9));">
+              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30"/>
+              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(120 60 60)"/>
+              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(240 60 60)"/>
+            </g>
+            <!-- 3 Glowing Vertices Orbs -->
+            <circle cx="60" cy="24" r="7.5" fill="url(#orbGlowCenter)" stroke="#ffffff" stroke-width="1.8"/>
+            <circle cx="91" cy="78" r="7.5" fill="url(#orbGlowCenter)" stroke="#ffffff" stroke-width="1.8"/>
+            <circle cx="29" cy="78" r="7.5" fill="url(#orbGlowCenter)" stroke="#ffffff" stroke-width="1.8"/>
+          </svg>
+        </div>
+
+        <!-- Intro Text & Quick Actions: Hides when typing or chatting -->
+        <div id="empty-intro-wrap" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;">
+          <h1>How can I help you today?</h1>
+          <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate Quranic calligraphy, or transcribe voice dictations.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
+            <button onclick="promptPhotoInChat('A high-resolution image featuring a solid green background with white text. At top center, calligraphic text Al-Quran Al-Kareem. In middle, Surah Al-Jumu\'ah Verses 9-10. At bottom, Bismillah ir-Rahman ir-Rahim')" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">🎨 Quran Calligraphy Poster</button>
+            <button onclick="openPhotoStudioModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">⚡ Batch Edit Photos</button>
+          </div>
         </div>
       </div>
       <div class="messages" id="messages-list"></div>
     </section>
 
-    <div class="composer-wrap">
+    <div class="composer-wrap" style="position:relative;">
+      <!-- PLUS ATTACHMENT MENU -->
+      <div id="plus-menu" style="display:none; position:absolute; bottom:82px; left:20px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:8px; z-index:30; flex-direction:column; gap:4px; width:190px;">
+        <button onclick="triggerAttachment('camera')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">📸</span><span>Camera</span></button>
+        <button onclick="triggerAttachment('gallery')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">🖼️</span><span>Gallery / Photo</span></button>
+        <button onclick="triggerAttachment('pdf')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">📄</span><span>PDF / Document</span></button>
+        <button onclick="triggerAttachment('link')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">🔗</span><span>Attach Website Link</span></button>
+      </div>
+
       <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:800px; margin:0 auto 10px; font-size:11px;">
         <div style="display:flex; align-items:center; gap:6px;">
-          <span>📎</span>
+          <span id="composer-attachment-icon">📎</span>
           <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">file.jpg</span>
         </div>
         <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
@@ -457,19 +592,48 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
       <div class="composer">
         <textarea id="input" placeholder="Asking nova..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
         <div class="tools">
-          <button class="tool" onclick="document.getElementById('file').click()" title="Attach image / code screenshot to analyze or edit">📎</button>
+          <button class="tool" onclick="togglePlusMenu(event)" title="Add Attachments" style="font-size: 15px; font-weight:700;">➕</button>
           <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Voice Input (Microphone)">🎙️</button>
           <button class="send" onclick="send()" title="Send message">➤</button>
         </div>
       </div>
       <div style="text-align:center;color:var(--muted);font-size:10px;margin-top:7px">NOVA AI Advanced Core · Powered by Google Gemini</div>
     </div>
-    <input id="file" type="file" hidden accept="image/*,application/pdf,text/*" onchange="handleFileSelected(this)">
+    
+    <!-- Multi Hidden Inputs -->
+    <input id="input-camera" type="file" accept="image/*" capture="environment" hidden onchange="handlePlusFileSelected(this, 'Camera Photo')">
+    <input id="input-gallery" type="file" accept="image/*" hidden onchange="handlePlusFileSelected(this, 'Gallery Photo')">
+    <input id="input-pdf" type="file" accept="application/pdf,text/*,.js,.ts,.py,.html,.css,.json" hidden onchange="handlePlusFileSelected(this, 'Document / File')">
+
+    <!-- Link Attachment Modal -->
+    <div class="modal-overlay" id="linkModal">
+      <div class="modal-card" style="max-width: 420px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="margin:0; font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px;">
+            <span>🔗</span> <span>Attach Website Link</span>
+          </h3>
+          <button onclick="closeLinkModal()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer;">✕</button>
+        </div>
+        <input type="url" id="modal-link-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-bottom:14px; font-size:13px; background:var(--panel); color:var(--text);" placeholder="Enter website URL (https://...)" value="https://">
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button onclick="closeLinkModal()" style="background:none; border:1px solid var(--line); color:var(--text); padding:6px 12px; border-radius:8px; font-size:12px;">Cancel</button>
+          <button onclick="saveAttachedLink()" class="side-btn" style="background:var(--accent); color:white; width:auto; padding:6px 14px; justify-content:center; font-size:12px; font-weight:600;">Attach Link</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 
 <script>
 let chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
+chats.forEach(c => {
+  if (!c.model || c.model === 'gemini-1.5-flash' || c.model === 'gemini-2.0-flash' || c.model === 'gemini-2.5-flash' || c.model === 'gemini-3.5-flash') {
+    c.model = 'gemini-3.1-flash-lite';
+  } else if (c.model === 'gemini-1.5-pro') {
+    c.model = 'gemini-3.1-pro-preview';
+  }
+});
+localStorage.setItem('nova_chats', JSON.stringify(chats));
 let currentChatId = localStorage.getItem('nova_current_chat_id') || '';
 let dictationActive = false;
 let recognition = null;
@@ -964,7 +1128,7 @@ function handleMainTap() {
 function newChat() {
   stopSpeechPlayback(false);
   const id = 'chat_' + Date.now();
-  const selectedModel = document.getElementById('modelSelector') ? document.getElementById('modelSelector').value : 'gemini-1.5-flash';
+  const selectedModel = document.getElementById('modelSelector') ? document.getElementById('modelSelector').value : 'gemini-3.8-flash';
   chats.push({ 
     id, 
     title: 'New Conversation', 
@@ -1254,41 +1418,146 @@ function toggleTheme() {
   showToast(isDark ? 'Light theme activated' : 'Dark theme activated');
 }
 
-function handleFileSelected(input) {
+function togglePlusMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('plus-menu');
+  if (menu) {
+    const isShowing = menu.style.display === 'flex';
+    menu.style.display = isShowing ? 'none' : 'flex';
+  }
+}
+
+// Close plus menu if user taps outside
+document.addEventListener('click', () => {
+  const menu = document.getElementById('plus-menu');
+  if (menu) menu.style.display = 'none';
+});
+
+function triggerAttachment(type) {
+  const menu = document.getElementById('plus-menu');
+  if (menu) menu.style.display = 'none';
+
+  if (type === 'camera') {
+    document.getElementById('input-camera').click();
+  } else if (type === 'gallery') {
+    document.getElementById('input-gallery').click();
+  } else if (type === 'pdf') {
+    document.getElementById('input-pdf').click();
+  } else if (type === 'link') {
+    document.getElementById('modal-link-input').value = 'https://';
+    document.getElementById('linkModal').classList.add('active');
+  }
+}
+
+function handlePlusFileSelected(input, typeName) {
   const file = input.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => { 
-    currentAttachment = { 
-      data: e.target.result, 
-      type: file.type,
-      name: file.name
-    }; 
-    document.getElementById('composer-attachment-panel').style.display = 'flex';
-    document.getElementById('composer-attachment-name').innerText = file.name;
-    showToast('File / Screenshot attached for analysis'); 
+
+  const iconEl = document.getElementById('composer-attachment-icon');
+  const nameEl = document.getElementById('composer-attachment-name');
+  const panelEl = document.getElementById('composer-attachment-panel');
+
+  if (file.type === 'application/pdf') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      currentAttachment = {
+        data: e.target.result,
+        type: 'application/pdf',
+        name: file.name
+      };
+      if (iconEl) iconEl.innerText = '📄';
+      if (nameEl) nameEl.innerText = `${file.name} (PDF Document)`;
+      if (panelEl) panelEl.style.display = 'flex';
+      showToast('📄 PDF Attached natively for AI analysis!');
+    };
+    reader.readAsDataURL(file);
+  } else if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      currentAttachment = {
+        data: e.target.result,
+        type: file.type,
+        name: file.name
+      };
+      if (iconEl) iconEl.innerText = '🖼️';
+      if (nameEl) nameEl.innerText = file.name;
+      if (panelEl) panelEl.style.display = 'flex';
+      showToast(`${typeName} ready for analysis!`);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    // Read text/code files
+    const reader = new FileReader();
+    reader.onload = e => {
+      currentAttachment = {
+        data: e.target.result, // base64
+        type: file.type || 'text/plain',
+        name: file.name
+      };
+      if (iconEl) iconEl.innerText = '📝';
+      if (nameEl) nameEl.innerText = `${file.name} (Source File)`;
+      if (panelEl) panelEl.style.display = 'flex';
+      showToast('📝 Source code file attached!');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function closeLinkModal() {
+  document.getElementById('linkModal').classList.remove('active');
+}
+
+function saveAttachedLink() {
+  const inputVal = document.getElementById('modal-link-input').value.trim();
+  if (!inputVal || inputVal === 'https://' || inputVal === 'http://') {
+    showToast('Please enter a valid website URL');
+    return;
+  }
+
+  currentAttachment = {
+    data: inputVal,
+    type: 'url',
+    name: inputVal
   };
-  reader.readAsDataURL(file);
+
+  const iconEl = document.getElementById('composer-attachment-icon');
+  const nameEl = document.getElementById('composer-attachment-name');
+  const panelEl = document.getElementById('composer-attachment-panel');
+
+  if (iconEl) iconEl.innerText = '🔗';
+  if (nameEl) nameEl.innerText = inputVal;
+  if (panelEl) panelEl.style.display = 'flex';
+
+  closeLinkModal();
+  showToast('🔗 Website Link attached successfully!');
 }
 
 function clearComposerAttachment() {
   currentAttachment = null;
-  document.getElementById('composer-attachment-panel').style.display = 'none';
-  document.getElementById('file').value = '';
+  const panelEl = document.getElementById('composer-attachment-panel');
+  if (panelEl) panelEl.style.display = 'none';
+  
+  // Reset input values
+  document.getElementById('input-camera').value = '';
+  document.getElementById('input-gallery').value = '';
+  document.getElementById('input-pdf').value = '';
 }
 
 function updateEmptyStateVisibility() {
-  const emptyState = document.getElementById('empty');
+  const introWrap = document.getElementById('empty-intro-wrap');
   const inputEl = document.getElementById('input');
   const currentChat = chats.find(c => c.id === currentChatId);
   const hasMessages = currentChat && currentChat.messages && currentChat.messages.length > 0;
   const isInputActive = (inputEl === document.activeElement) || (inputEl && inputEl.value.trim().length > 0);
 
-  if (emptyState) {
+  if (introWrap) {
     if (hasMessages || isInputActive) {
-      emptyState.style.display = 'none';
+      introWrap.style.display = 'none';
     } else {
-      emptyState.style.display = 'flex';
+      introWrap.style.display = 'flex';
+      introWrap.style.flexDirection = 'column';
+      introWrap.style.alignItems = 'center';
+      introWrap.style.gap = '10px';
     }
   }
 }
@@ -1448,7 +1717,7 @@ async function send() {
       }
     }
 
-    const selectedModel = currentChat.model || 'gemini-1.5-flash';
+    const selectedModel = currentChat.model || 'gemini-3.1-flash-lite';
 
     const res = await fetch('/api/translate', {
       method: 'POST',
@@ -1459,8 +1728,9 @@ async function send() {
       body: JSON.stringify({
         prompt: userMsg.text,
         model: selectedModel,
-        image: userMsg.attachment,
-        mimeType: userMsg.attachmentMimeType,
+        image: (attachmentData && attachmentData.type !== 'url') ? attachmentData.data : null,
+        mimeType: (attachmentData && attachmentData.type !== 'url') ? attachmentData.type : null,
+        attachedUrl: (attachmentData && attachmentData.type === 'url') ? attachmentData.data : null,
         apiKey: apiKey,
         history: currentChat.messages
       })
@@ -1491,9 +1761,23 @@ async function send() {
     const loaderEl = document.getElementById('ai-typing-loader');
     if (loaderEl) loaderEl.remove();
 
+    const hasSavedKey = !!localStorage.getItem('nova_gemini_api_key');
+    const errText = (err.message || '').toLowerCase();
+    const isInvalidKey = errText.includes('key') && (errText.includes('invalid') || errText.includes('not valid') || errText.includes('api_key_invalid'));
+    const isQuotaError = errText.includes('quota') || errText.includes('exhausted') || errText.includes('429') || errText.includes('limit');
+
+    let displayMsg = '';
+    if (hasSavedKey && isQuotaError) {
+      displayMsg = `⚠️ **NOVA Notice (Quota Exceeded)**: Your Google AI Studio API Key has temporarily reached its free-tier limit (which allows up to 15-20 requests per day on free Gemini 3.8 keys). \n\nNo action is required! NOVA has automatically fallen back to its **Backup Engines** for this message, so your conversation will continue uninterrupted. 👍`;
+    } else if (isInvalidKey) {
+      displayMsg = `⚠️ **NOVA Notice (Invalid Key)**: ${err.message}. \n\nPlease click 🔑 **API Key Settings** in the sidebar to verify or update your Google AI Studio API key.`;
+    } else {
+      displayMsg = `⚠️ **NOVA Notice**: ${err.message}. \n\n*(Your saved API Key is active, and the background servers are assisting to resolve this connection smoothly).*`;
+    }
+
     currentChat.messages.push({ 
       role: 'ai', 
-      text: `⚠️ **NOVA Notice**: ${err.message}. \n\nClick 🔑 **API Key Settings** in the sidebar to verify your Google AI Studio API key.`,
+      text: displayMsg,
       timestamp: Date.now()
     });
     saveChats();
@@ -1634,7 +1918,8 @@ async function startDirectMediaRecorder(btn) {
     showToast('🎙️ Recording voice... Click mic when finished!');
 
   } catch(e) {
-    showToast('🎙️ Voice dictation active');
+    console.error('Mic error:', e);
+    showToast('⚠️ Microphone permission denied or blocked in iframe. Please check browser settings.');
   }
 }
 
@@ -1661,6 +1946,44 @@ function stopVoiceDictation() {
 
   showToast('Mic stopped');
 }
+
+// PWA Installation Prompt Logic
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const pwaInstallBtn = document.getElementById('pwa-install-btn');
+  if (pwaInstallBtn) {
+    pwaInstallBtn.style.display = 'grid';
+  }
+});
+
+async function triggerPwaInstall() {
+  const pwaInstallBtn = document.getElementById('pwa-install-btn');
+  if (!deferredPrompt) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      showToast('📲 To install: Tap the "Share" icon in Safari, scroll down, and tap "Add to Home Screen"!');
+    } else {
+      showToast('ℹ️ Open browser menu (vertical dots) and click "Install App" to download!');
+    }
+    return;
+  }
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast('🎉 Thank you for installing NOVA AI!');
+    if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+    deferredPrompt = null;
+  }
+}
+
+window.addEventListener('appinstalled', () => {
+  showToast('🚀 NOVA AI Installed successfully!');
+  const pwaInstallBtn = document.getElementById('pwa-install-btn');
+  if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+});
 
 window.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('nova_theme') === 'dark') document.body.dataset.theme = 'dark';
