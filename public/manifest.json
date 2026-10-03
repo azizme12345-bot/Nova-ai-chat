@@ -1,0 +1,16 @@
+{
+  "name": "NOVA AI - Advanced Assistant",
+  "short_name": "NOVA AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0417",
+  "theme_color": "#7844cc",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

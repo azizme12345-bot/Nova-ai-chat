@@ -3,8 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#7844cc">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<script>
+  // Suppress harmless Vite HMR / WebSocket connection warnings/errors and mic permission rejections in preview iframes
+  const origError = console.error;
+  const origWarn = console.warn;
+  console.error = function(...args) {
+    const msg = args.join(' ');
+    if (msg.includes('[vite]') || msg.includes('WebSocket') || msg.includes('Permission denied') || msg.includes('NotAllowedError')) {
+      return;
+    }
+    origError.apply(console, args);
+  };
+  console.warn = function(...args) {
+    const msg = args.join(' ');
+    if (msg.includes('[vite]') || msg.includes('WebSocket')) {
+      return;
+    }
+    origWarn.apply(console, args);
+  };
+</script>
 <title>NOVA AI | Advanced All-in-One Assistant</title>
 <style>
 :root{
@@ -1919,7 +1940,12 @@ async function startDirectMediaRecorder(btn) {
 
   } catch(e) {
     console.error('Mic error:', e);
-    showToast('⚠️ Microphone permission denied or blocked in iframe. Please check browser settings.');
+    const msg = (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError' || (e.message && e.message.includes('Permission denied')))
+      ? '⚠️ Microphone permission denied. Please click the camera/mic icon in your browser address bar to allow access.'
+      : '⚠️ Microphone error: ' + (e.message || 'Permission denied');
+    showToast(msg);
+    dictationActive = false;
+    if (btn) btn.classList.remove('mic-pulsing');
   }
 }
 
