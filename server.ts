@@ -529,6 +529,13 @@ app.post('/api/translate', async (req, res) => {
       return res.status(400).json({ error: 'Missing prompt parameter' });
     }
 
+    // Intercept short greetings / friendly chat queries and return instant natural warm responses
+    const trimmedLower = userPrompt.toLowerCase().trim();
+    if (trimmedLower === 'hi' || trimmedLower === 'hello' || trimmedLower === 'سلام' || trimmedLower === 'ہائے' || trimmedLower === 'سلام علیکم' || trimmedLower === 'assalam o alaikum' || trimmedLower.includes('how are you') || trimmedLower.includes('kya hal hai') || trimmedLower.includes('کیسے ہو') || trimmedLower.includes('کیا حال ہے')) {
+      const fallbackText = generateFallbackResponse(userPrompt, language);
+      return res.json({ text: fallbackText });
+    }
+
     const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
 
     // 1. Live Website Content Scraper / Link Analyzer
