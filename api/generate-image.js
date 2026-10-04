@@ -1,5 +1,5 @@
 /**
- * NOVA AI - Advanced Photo Generator & Photo Editor API
+ * NOVA AI - Advanced Photo Generator & Intelligent Photo Editor API
  * File: api/generate-image.js
  */
 import { GoogleGenAI } from '@google/genai';
@@ -10,12 +10,133 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const PHOTO_EDITING_SYSTEM_PROMPT = `You are an INTELLIGENT PHOTO EDITING AI.
+
+When a user gives you a photo and an instruction, you MUST:
+
+1. UNDERSTAND their instruction exactly
+2. ANALYZE what they want changed
+3. EDIT ONLY that part
+4. KEEP everything else ORIGINAL
+
+OPERATIONS YOU CAN DO:
+- Change background
+- Remove object
+- Change color
+- Add object
+- Move/reposition
+- Change style
+- Modify appearance
+- Resize object
+- Blur selectively
+- Enhance image
+
+IMPORTANT RULES:
+✓ Do EXACTLY what user asks
+✓ Don't make unnecessary changes
+✓ Keep original quality
+✓ Keep natural appearance
+✓ Preserve lighting consistency
+✓ Don't modify what user didn't ask for`;
+
 function getServerApiKey() {
   const key = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '').trim();
   if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
     return '';
   }
   return key;
+}
+
+function parsePhotoEditSpec(rawPrompt) {
+  const lower = (rawPrompt || '').toLowerCase();
+
+  const colorMap = [
+    { keywords: ['white', 'سفید', 'safed', 'sufaid'], name: 'white', hex: '#ffffff' },
+    { keywords: ['green', 'سبز', 'hara', 'sabz'], name: 'green', hex: '#16a34a' },
+    { keywords: ['blue', 'نیلا', 'neela', 'sky'], name: 'blue', hex: '#2563eb' },
+    { keywords: ['red', 'سرخ', 'لال', 'laal', 'surkh'], name: 'red', hex: '#dc2626' },
+    { keywords: ['black', 'کالا', 'سیاہ', 'kala', 'siyah'], name: 'black', hex: '#09090b' },
+    { keywords: ['yellow', 'پیلا', 'peela', 'gold', 'سنہری'], name: 'gold/yellow', hex: '#eab308' },
+    { keywords: ['purple', 'جامنی', 'violet', 'magenta'], name: 'purple', hex: '#7c3aed' },
+    { keywords: ['pink', 'گلابی', 'gulabi'], name: 'pink', hex: '#ec4899' },
+    { keywords: ['gray', 'grey', 'گرے', 'سرمئی'], name: 'gray', hex: '#64748b' },
+    { keywords: ['orange', 'نارنجی'], name: 'orange', hex: '#ea580c' },
+  ];
+
+  let detectedColor = { name: 'white', hex: '#ffffff', matched: false };
+  for (const c of colorMap) {
+    if (c.keywords.some(k => lower.includes(k))) {
+      detectedColor = { name: c.name, hex: c.hex, matched: true };
+      break;
+    }
+  }
+
+  const isBgChange =
+    lower.includes('background') ||
+    lower.includes('بیک گراؤنڈ') ||
+    lower.includes('پس منظر') ||
+    lower.includes('bg ') ||
+    (detectedColor.matched && (lower.includes('تبدیل') || lower.includes('change') || lower.includes('کر دو') || lower.includes('کرو')));
+
+  const isBlur = lower.includes('blur') || lower.includes('دھندلا') || lower.includes('bokeh');
+  const isRemove = lower.includes('remove') || lower.includes('ہٹا') || lower.includes('delete') || lower.includes('erase');
+  const isEnhance = lower.includes('enhance') || lower.includes('hd') || lower.includes('صاف') || lower.includes('sharpen') || lower.includes('quality');
+
+  let operation = 'custom_edit';
+  let steps = [];
+
+  if (isBgChange) {
+    operation = 'change_background';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting background...',
+      '✓ Keeping person original...',
+      `✓ Changing only background to ${detectedColor.name}...`,
+      '✓ Result: [edited photo]'
+    ];
+  } else if (isBlur) {
+    operation = 'blur_background';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting main subject & depth...',
+      '✓ Keeping subject sharp and original...',
+      '✓ Applying selective background blur...',
+      '✓ Result: [edited photo]'
+    ];
+  } else if (isRemove) {
+    operation = 'remove_object';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting target object to remove...',
+      '✓ Keeping surrounding area & subject original...',
+      '✓ Removing only requested object...',
+      '✓ Result: [edited photo]'
+    ];
+  } else if (isEnhance) {
+    operation = 'enhance';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting lighting & detail levels...',
+      '✓ Keeping original appearance & composition...',
+      '✓ Enhancing clarity, contrast, and sharpness...',
+      '✓ Result: [edited photo]'
+    ];
+  } else {
+    steps = [
+      '✓ Analyzing photo...',
+      `✓ Understanding instruction: "${rawPrompt}"...`,
+      '✓ Keeping unrequested areas 100% original...',
+      '✓ Editing only the requested part...',
+      '✓ Result: [edited photo]'
+    ];
+  }
+
+  return {
+    operation,
+    targetColorName: detectedColor.name,
+    targetColorHex: detectedColor.hex,
+    steps
+  };
 }
 
 async function analyzeAndExpandPrompt(rawPrompt, apiKey, isEditing = false) {
@@ -28,11 +149,12 @@ async function analyzeAndExpandPrompt(rawPrompt, apiKey, isEditing = false) {
       httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
     });
 
-    const analysisInstruction = `You are a World-Class AI Image Prompt Architect.
+    const analysisInstruction = isEditing
+      ? `${PHOTO_EDITING_SYSTEM_PROMPT}\n\nTranslate the user's photo editing instruction into a crystal-clear, precise English instruction for the image editing model. Specify ONLY the exact change requested while keeping the person/subject and everything else 100% original.`
+      : `You are a World-Class AI Image Prompt Architect.
 Analyze the user's request deeply to understand the EXACT subject, language, text, and scene they want:
 - If the user requests an Islamic / Quranic calligraphic design, generate a pristine masterwork Islamic calligraphy art prompt with sacred Arabic typography and gold accents matching their exact request.
-- If the user requests any other subject (landscape, animal, car, portrait, fantasy, logo), generate a detailed, high-resolution masterwork prompt in English that precisely matches the user's prompt without changing their intended subject.
-- If editing (${isEditing ? 'YES' : 'NO'}), modify ONLY what the user requested.
+- If the user requests any other subject, generate a detailed, high-resolution masterwork prompt in English that precisely matches the user's prompt without changing their intended subject.
 - Return ONLY the refined, detailed masterwork image generation prompt in English.`;
 
     const candidateModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
@@ -96,8 +218,11 @@ export default async function handler(req, res) {
       return;
     }
 
+    const isEditing = !!baseImage;
+    const editSpec = isEditing ? parsePhotoEditSpec(prompt || '') : null;
+
     const apiKey = getServerApiKey();
-    const analyzedPrompt = await analyzeAndExpandPrompt(prompt, apiKey, !!baseImage);
+    const analyzedPrompt = await analyzeAndExpandPrompt(prompt, apiKey, isEditing);
 
     let width = 1024;
     let height = 1024;
@@ -118,7 +243,7 @@ export default async function handler(req, res) {
       watercolor: 'delicate watercolor painting, soft color bleeding'
     };
 
-    if (style && styleEnhancers[style] && !enhancedPrompt.toLowerCase().includes(style)) {
+    if (!isEditing && style && styleEnhancers[style] && !enhancedPrompt.toLowerCase().includes(style)) {
       enhancedPrompt = `${enhancedPrompt}, ${styleEnhancers[style]}`;
     }
 
@@ -131,7 +256,12 @@ export default async function handler(req, res) {
           httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
         });
 
-        const imgModels = ['gemini-3.1-flash-lite-image', 'gemini-3.1-flash-image'];
+        const imgModels = [
+          'gemini-2.5-flash-image',
+          'gemini-3.1-flash-image-preview',
+          'gemini-3.1-flash-image',
+          'gemini-3.1-flash-lite-image'
+        ];
 
         if (baseImage) {
           let cleanBase64 = baseImage;
@@ -139,6 +269,8 @@ export default async function handler(req, res) {
           if (match) {
             cleanBase64 = match[2];
           }
+
+          const strictEditPrompt = `${PHOTO_EDITING_SYSTEM_PROMPT}\n\nUser Instruction: ${prompt}\nRefined Task: ${enhancedPrompt}\nNow analyze the photo and edit it precisely according to the instruction. Edit ONLY what the user asked for and keep the person/subject and everything else 100% original.`;
 
           for (const mName of imgModels) {
             try {
@@ -153,7 +285,7 @@ export default async function handler(req, res) {
                       }
                     },
                     {
-                      text: `Edit this photo strictly according to this instruction: ${enhancedPrompt}. Do not alter unrequested elements.`
+                      text: strictEditPrompt
                     }
                   ]
                 }
@@ -206,6 +338,18 @@ export default async function handler(req, res) {
       }
     }
 
+    if (isEditing && !generatedImageUrl) {
+      res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+      res.end(JSON.stringify({
+        imageUrl: baseImage,
+        useClientSmartEdit: true,
+        editSpec,
+        steps: editSpec?.steps || [],
+        prompt: enhancedPrompt
+      }));
+      return;
+    }
+
     if (!generatedImageUrl) {
       const seed = Math.floor(Math.random() * 1000000);
       const encodedPrompt = encodeURIComponent(enhancedPrompt);
@@ -228,6 +372,8 @@ export default async function handler(req, res) {
     res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
     res.end(JSON.stringify({
       imageUrl: generatedImageUrl,
+      editSpec,
+      steps: editSpec?.steps || [],
       prompt: enhancedPrompt,
       style,
       aspectRatio

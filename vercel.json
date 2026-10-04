@@ -18,15 +18,12 @@
       "destination": "/api/generate-image.js"
     },
     {
+      "source": "/api/video-style",
+      "destination": "/api/video-style.js"
+    },
+    {
       "source": "/api/tts",
       "destination": "/api/tts.js"
     }
-  ],
-  "functions": {
-    "api/chat.js": { "maxDuration": 30 },
-    "api/translate.js": { "maxDuration": 30 },
-    "api/transcribe.js": { "maxDuration": 30 },
-    "api/generate-image.js": { "maxDuration": 30 },
-    "api/tts.js": { "maxDuration": 30 }
-  }
+  ]
 }

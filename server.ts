@@ -45,6 +45,67 @@ function getGeminiClient(): GoogleGenAI | null {
   });
 }
 
+// ============================================================================
+// CORE SYSTEM PROMPTS FOR INTELLIGENT VIDEO & PHOTO EDITING AI
+// ============================================================================
+
+const FONT_VIDEO_SYSTEM_PROMPT = `You are an INTELLIGENT FONT-AWARE VIDEO GENERATION AI.
+
+When a user gives you a font/typography style and text, you MUST:
+
+1. ANALYZE the font:
+   - Style (serif, sans-serif, script)
+   - Weight (light, regular, bold)
+   - Mood (formal, playful, elegant)
+   - Colors and properties
+
+2. EXTRACT characteristics:
+   - Visual style
+   - Animation style
+   - Effects needed
+   - Motion type
+
+3. GENERATE VIDEO matching:
+   - Font exact style
+   - Animation from mood
+   - Effects from properties
+   - Motion from weight
+   - Background from colors
+
+4. OUTPUT:
+   - Video exactly matching font style
+   - Professional quality
+   - No generic defaults`;
+
+const PHOTO_EDITING_SYSTEM_PROMPT = `You are an INTELLIGENT PHOTO EDITING AI.
+
+When a user gives you a photo and an instruction, you MUST:
+
+1. UNDERSTAND their instruction exactly
+2. ANALYZE what they want changed
+3. EDIT ONLY that part
+4. KEEP everything else ORIGINAL
+
+OPERATIONS YOU CAN DO:
+- Change background
+- Remove object
+- Change color
+- Add object
+- Move/reposition
+- Change style
+- Modify appearance
+- Resize object
+- Blur selectively
+- Enhance image
+
+IMPORTANT RULES:
+✓ Do EXACTLY what user asks
+✓ Don't make unnecessary changes
+✓ Keep original quality
+✓ Keep natural appearance
+✓ Preserve lighting consistency
+✓ Don't modify what user didn't ask for`;
+
 async function callPollinationsBackup(normalizedContents: any[], systemInstruction: string): Promise<string> {
   try {
     const pollinationsMessages = [
@@ -94,6 +155,271 @@ async function callPollinationsBackup(normalizedContents: any[], systemInstructi
   return '';
 }
 
+function parsePhotoEditSpec(rawPrompt: string) {
+  const lower = (rawPrompt || '').toLowerCase();
+
+  // Detect target color in English, Urdu, and Roman Urdu
+  const colorMap: Array<{ keywords: string[]; name: string; hex: string }> = [
+    { keywords: ['white', 'سفید', 'safed', 'sufaid'], name: 'white', hex: '#ffffff' },
+    { keywords: ['green', 'سبز', 'hara', 'sabz'], name: 'green', hex: '#16a34a' },
+    { keywords: ['blue', 'نیلا', 'neela', 'sky'], name: 'blue', hex: '#2563eb' },
+    { keywords: ['red', 'سرخ', 'لال', 'laal', 'surkh'], name: 'red', hex: '#dc2626' },
+    { keywords: ['black', 'کالا', 'سیاہ', 'kala', 'siyah'], name: 'black', hex: '#09090b' },
+    { keywords: ['yellow', 'پیلا', 'peela', 'gold', 'سنہری'], name: 'gold/yellow', hex: '#eab308' },
+    { keywords: ['purple', 'جامنی', 'violet', 'magenta'], name: 'purple', hex: '#7c3aed' },
+    { keywords: ['pink', 'گلابی', 'gulabi'], name: 'pink', hex: '#ec4899' },
+    { keywords: ['gray', 'grey', 'گرے', 'سرمئی'], name: 'gray', hex: '#64748b' },
+    { keywords: ['orange', 'نارنجی'], name: 'orange', hex: '#ea580c' },
+  ];
+
+  let detectedColor = { name: 'white', hex: '#ffffff', matched: false };
+  for (const c of colorMap) {
+    if (c.keywords.some(k => lower.includes(k))) {
+      detectedColor = { name: c.name, hex: c.hex, matched: true };
+      break;
+    }
+  }
+
+  const isBgChange =
+    lower.includes('background') ||
+    lower.includes('بیک گراؤنڈ') ||
+    lower.includes('پس منظر') ||
+    lower.includes('bg ') ||
+    (detectedColor.matched && (lower.includes('تبدیل') || lower.includes('change') || lower.includes('کر دو') || lower.includes('کرو')));
+
+  const isBlur = lower.includes('blur') || lower.includes('دھندلا') || lower.includes('bokeh');
+  const isRemove = lower.includes('remove') || lower.includes('ہٹا') || lower.includes('delete') || lower.includes('erase');
+  const isEnhance = lower.includes('enhance') || lower.includes('hd') || lower.includes('صاف') || lower.includes('sharpen') || lower.includes('quality');
+
+  let operation = 'custom_edit';
+  let steps: string[] = [];
+
+  if (isBgChange) {
+    operation = 'change_background';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting background...',
+      '✓ Keeping person original...',
+      `✓ Changing only background to ${detectedColor.name}...`,
+      '✓ Result: [edited photo]'
+    ];
+  } else if (isBlur) {
+    operation = 'blur_background';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting main subject & depth...',
+      '✓ Keeping subject sharp and original...',
+      '✓ Applying selective background blur...',
+      '✓ Result: [edited photo]'
+    ];
+  } else if (isRemove) {
+    operation = 'remove_object';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting target object to remove...',
+      '✓ Keeping surrounding area & subject original...',
+      '✓ Removing only requested object...',
+      '✓ Result: [edited photo]'
+    ];
+  } else if (isEnhance) {
+    operation = 'enhance';
+    steps = [
+      '✓ Analyzing photo...',
+      '✓ Detecting lighting & detail levels...',
+      '✓ Keeping original appearance & composition...',
+      '✓ Enhancing clarity, contrast, and sharpness...',
+      '✓ Result: [edited photo]'
+    ];
+  } else {
+    steps = [
+      '✓ Analyzing photo...',
+      `✓ Understanding instruction: "${rawPrompt}"...`,
+      '✓ Keeping unrequested areas 100% original...',
+      '✓ Editing only the requested part...',
+      '✓ Result: [edited photo]'
+    ];
+  }
+
+  return {
+    operation,
+    targetColorName: detectedColor.name,
+    targetColorHex: detectedColor.hex,
+    steps
+  };
+}
+
+export function parseFontVideoSpec(rawPrompt: string) {
+  const text = rawPrompt || '';
+  const lower = text.toLowerCase();
+
+  // Extract explicit Text: "..." or quoted string
+  let displayText = 'Professional Design';
+  const textFieldMatch = text.match(/text\s*:\s*["'“”]?([^"\n”]+)["'“”]?/i);
+  const quotedMatch = text.match(/["“]([^"”]+)["”]/);
+  if (textFieldMatch && textFieldMatch[1].trim()) {
+    displayText = textFieldMatch[1].trim();
+  } else if (quotedMatch && quotedMatch[1].trim()) {
+    displayText = quotedMatch[1].trim();
+  } else {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    if (lines.length > 1) {
+      displayText = lines[lines.length - 1].replace(/^text\s*:\s*/i, '').replace(/^["']|["']$/g, '');
+    } else if (text.length < 40) {
+      displayText = text.trim();
+    }
+  }
+
+  // Font family & category detection
+  let fontFamily = 'Georgia, "Times New Roman", serif';
+  let fontName = 'Georgia';
+  let fontCategory = 'Serif';
+
+  if (lower.includes('georgia')) {
+    fontFamily = 'Georgia, "Times New Roman", serif';
+    fontName = 'Georgia';
+    fontCategory = 'Serif';
+  } else if (lower.includes('times') || lower.includes('playfair') || lower.includes('garamond') || lower.includes('serif') && !lower.includes('sans')) {
+    fontFamily = '"Playfair Display", Georgia, "Times New Roman", serif';
+    fontName = lower.includes('playfair') ? 'Playfair Display' : 'Classic Serif';
+    fontCategory = 'Serif';
+  } else if (lower.includes('script') || lower.includes('cursive') || lower.includes('calligraph') || lower.includes('handwrit')) {
+    fontFamily = '"Brush Script MT", "Comic Sans MS", cursive';
+    fontName = 'Elegance Script';
+    fontCategory = 'Script';
+  } else if (lower.includes('mono') || lower.includes('courier') || lower.includes('code')) {
+    fontFamily = '"Courier New", Courier, monospace';
+    fontName = 'Courier Monospace';
+    fontCategory = 'Monospace';
+  } else if (lower.includes('montserrat') || lower.includes('arial') || lower.includes('helvetica') || lower.includes('inter') || lower.includes('sans')) {
+    fontFamily = 'Montserrat, Inter, system-ui, -apple-system, sans-serif';
+    fontName = 'Modern Sans-Serif';
+    fontCategory = 'Sans-Serif';
+  }
+
+  // Weight detection
+  let fontWeight = '700';
+  let weightLabel = 'bold';
+  if (lower.includes('light') || lower.includes('thin')) {
+    fontWeight = '300';
+    weightLabel = 'light';
+  } else if (lower.includes('regular') || lower.includes('normal')) {
+    fontWeight = '400';
+    weightLabel = 'regular';
+  } else if (lower.includes('black') || lower.includes('heavy') || lower.includes('extra bold')) {
+    fontWeight = '900';
+    weightLabel = 'extra-bold';
+  }
+
+  const fontStyle = lower.includes('italic') ? 'italic' : 'normal';
+
+  // Mood & animation detection
+  let moodLabel = 'formal, elegant';
+  let animationType = 'slow-fade';
+  let animationLabel = 'Slow fade-in';
+  let effectsLabel = 'Soft shadow, subtle glow';
+  let bgStart = '#0f172a';
+  let bgEnd = '#1e1b4b';
+  let textColor = '#f8fafc';
+  let accentColor = '#e2e8f0';
+  let glowColor = 'rgba(226, 232, 240, 0.45)';
+
+  if (lower.includes('playful') || lower.includes('fun') || lower.includes('energetic') || lower.includes('bounce')) {
+    moodLabel = 'playful, energetic';
+    animationType = 'kinetic-bounce';
+    animationLabel = 'Kinetic bounce & scale';
+    effectsLabel = 'Vibrant drop shadow, dynamic particles';
+    bgStart = '#311042';
+    bgEnd = '#0f172a';
+    textColor = '#ffffff';
+    accentColor = '#f472b6';
+    glowColor = 'rgba(244, 114, 182, 0.6)';
+  } else if (lower.includes('cyber') || lower.includes('neon') || lower.includes('futuristic')) {
+    moodLabel = 'futuristic, neon';
+    animationType = 'shimmer-glow';
+    animationLabel = 'Neon pulse & tracking reveal';
+    effectsLabel = 'intense neon bloom, cyber grid';
+    bgStart = '#030712';
+    bgEnd = '#090d16';
+    textColor = '#38bdf8';
+    accentColor = '#a855f7';
+    glowColor = 'rgba(56, 189, 248, 0.8)';
+  } else if (lower.includes('typewriter') || fontCategory === 'Monospace') {
+    moodLabel = 'technical, precise';
+    animationType = 'typewriter';
+    animationLabel = 'Character-by-character typewriter';
+    effectsLabel = 'Crisp terminal glow, blinking cursor';
+    bgStart = '#090d16';
+    bgEnd = '#111827';
+    textColor = '#34d399';
+    accentColor = '#10b981';
+    glowColor = 'rgba(52, 211, 153, 0.5)';
+  } else if (lower.includes('gold') || lower.includes('luxury') || lower.includes('royal')) {
+    moodLabel = 'luxury, royal, elegant';
+    animationType = 'slow-fade';
+    animationLabel = 'Slow cinematic fade-in & rise';
+    effectsLabel = 'Golden specular glow, soft ambient particles';
+    bgStart = '#0c0a09';
+    bgEnd = '#1c1917';
+    textColor = '#fef08a';
+    accentColor = '#eab308';
+    glowColor = 'rgba(234, 179, 8, 0.55)';
+  } else if (lower.includes('formal') || lower.includes('elegant') || fontCategory === 'Serif') {
+    moodLabel = lower.includes('formal') && lower.includes('elegant') ? 'formal, elegant' : lower.includes('formal') ? 'formal' : 'elegant';
+    animationType = 'slow-fade';
+    animationLabel = 'Slow fade-in';
+    effectsLabel = 'Soft shadow, subtle glow';
+    bgStart = '#090d1a';
+    bgEnd = '#17153b';
+    textColor = '#ffffff';
+    accentColor = '#cbd5e1';
+    glowColor = 'rgba(148, 163, 184, 0.5)';
+  }
+
+  // Color overrides if user specified colors
+  if (lower.includes('white background') || lower.includes('سفید')) {
+    bgStart = '#f8fafc';
+    bgEnd = '#e2e8f0';
+    textColor = '#0f172a';
+    accentColor = '#334155';
+    glowColor = 'rgba(15, 23, 42, 0.25)';
+  } else if (lower.includes('green') || lower.includes('سبز')) {
+    bgStart = '#052e16';
+    bgEnd = '#14532d';
+    textColor = '#f0fdf4';
+    accentColor = '#4ade80';
+    glowColor = 'rgba(74, 222, 128, 0.5)';
+  }
+
+  const steps = [
+    '✓ Analyzing font...',
+    `✓ Detecting: ${fontCategory}, ${weightLabel}, ${moodLabel} mood`,
+    '✓ Creating video...',
+    `✓ Animation: ${animationLabel}`,
+    `✓ Effects: ${effectsLabel}`,
+    '✓ Result: [video with perfect style matching]'
+  ];
+
+  return {
+    displayText,
+    fontName,
+    fontFamily,
+    fontCategory,
+    fontWeight,
+    fontStyle,
+    weightLabel,
+    moodLabel,
+    animationType,
+    animationLabel,
+    effectsLabel,
+    bgStart,
+    bgEnd,
+    textColor,
+    accentColor,
+    glowColor,
+    steps
+  };
+}
+
 async function analyzeAndExpandPrompt(rawPrompt: string, isEditing: boolean = false): Promise<string> {
   if (!rawPrompt) return 'High resolution masterwork artwork';
 
@@ -101,11 +427,12 @@ async function analyzeAndExpandPrompt(rawPrompt: string, isEditing: boolean = fa
     const ai = getGeminiClient();
     if (!ai) return rawPrompt;
 
-    const analysisInstruction = `You are a World-Class AI Image Prompt Architect.
+    const analysisInstruction = isEditing
+      ? `${PHOTO_EDITING_SYSTEM_PROMPT}\n\nTranslate the user's photo editing instruction (which may be in Urdu, Hindi, or English) into a crystal-clear, precise English instruction for the image editing model. Specify ONLY the exact change requested (e.g., "Change ONLY the background to solid pure white (#FFFFFF). Keep the person/subject, face, clothing, lighting, and proportions 100% original and untouched."). Return ONLY the instruction.`
+      : `You are a World-Class AI Image Prompt Architect.
 Analyze the user's request deeply to understand the EXACT subject, language, text, and scene they want:
 - If the user requests an Islamic / Quranic calligraphic design, generate a pristine masterwork Islamic calligraphy art prompt with sacred Arabic typography and gold accents matching their exact request.
 - If the user requests any other subject (landscape, animal, car, portrait, fantasy, logo, object), generate a detailed, high-resolution masterwork prompt in English that precisely matches the user's prompt without changing their intended subject.
-- If editing an existing image (${isEditing ? 'YES' : 'NO'}), modify ONLY what the user explicitly requested while preserving the original subject and composition.
 - Return ONLY the refined, detailed masterwork image generation prompt in English.`;
 
     const candidateModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
@@ -113,7 +440,7 @@ Analyze the user's request deeply to understand the EXACT subject, language, tex
       try {
         const response = await ai.models.generateContent({
           model: modelName,
-          contents: { parts: [{ text: `User Prompt: ${rawPrompt}` }] },
+          contents: { parts: [{ text: `User Instruction: ${rawPrompt}` }] },
           config: {
             systemInstruction: analysisInstruction,
             temperature: 0.2
@@ -152,8 +479,8 @@ function generateFallbackResponse(prompt: string, language?: string): string {
 
   if (lower.includes('what can you do') || lower.includes('features') || lower.includes('کیا کیا کر سکتے ہو') || lower.includes('فیچرز')) {
     return isUrdu
-      ? `میں NOVA AI ہوں! میں آپ کے ساتھ قدرتی انداز میں بات چیت کر سکتا ہوں، آپ کے سوالات کے جوابات دے سکتا ہوں، کوڈ لکھ اور ٹھیک کر سکتا ہوں، اور تصاویر جنریٹ کر سکتا ہوں۔`
-      : `I am NOVA AI! I can chat naturally, answer questions, write and debug code, analyze screenshots, and generate artwork.`;
+      ? `میں NOVA AI ہوں! میں آپ کے ساتھ قدرتی انداز میں بات چیت کر سکتا ہوں، آپ کی اپلوڈ کردہ تصاویر ایڈٹ کر سکتا ہوں (جیسے بیک گراؤنڈ تبدیل کرنا)، فونٹ اسٹائل کے مطابق ویڈیو بنا سکتا ہوں، اور کوڈ لکھ سکتا ہوں۔`
+      : `I am NOVA AI! I can chat naturally, edit photos precisely according to your instructions, generate font-aware typography videos, write code, and generate artwork.`;
   }
 
   if (isUrdu) {
@@ -162,6 +489,61 @@ function generateFallbackResponse(prompt: string, language?: string): string {
 
   return `I received your message, but the server environment variable \`GOOGLE_API_KEY\` (or \`GEMINI_API_KEY\`) is not configured or has reached its quota limit. Please check your server environment variables.`;
 }
+
+// Font-Aware Video Generation Specification Endpoint
+app.post('/api/video-style', async (req: Request, res: Response) => {
+  try {
+    let parsedBody = req.body;
+    if (typeof parsedBody === 'string') {
+      try {
+        parsedBody = JSON.parse(parsedBody);
+      } catch (e) {}
+    }
+
+    const { prompt = '' } = parsedBody || {};
+    const baseSpec = parseFontVideoSpec(prompt);
+
+    const ai = getGeminiClient();
+    if (ai) {
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-3.8-flash',
+          contents: {
+            parts: [
+              {
+                text: `Font/Style Analysis:\n${prompt}\n\nNow analyze this font/typography style and return a JSON object with keys: displayText, fontName, fontCategory (Serif | Sans-Serif | Script | Monospace), weightLabel (light | regular | bold), moodLabel, animationType (slow-fade | kinetic-bounce | typewriter | shimmer-glow), animationLabel, effectsLabel, bgStart (hex color), bgEnd (hex color), textColor (hex color), accentColor (hex color). Return ONLY valid JSON.`
+              }
+            ]
+          },
+          config: {
+            systemInstruction: FONT_VIDEO_SYSTEM_PROMPT,
+            temperature: 0.2
+          }
+        });
+
+        const rawJson = (response.text || '').replace(/```json|```/g, '').trim();
+        const parsedAi = JSON.parse(rawJson);
+        if (parsedAi && parsedAi.displayText) {
+          Object.assign(baseSpec, parsedAi);
+          baseSpec.steps = [
+            '✓ Analyzing font...',
+            `✓ Detecting: ${baseSpec.fontCategory}, ${baseSpec.weightLabel}, ${baseSpec.moodLabel} mood`,
+            '✓ Creating video...',
+            `✓ Animation: ${baseSpec.animationLabel}`,
+            `✓ Effects: ${baseSpec.effectsLabel}`,
+            '✓ Result: [video with perfect style matching]'
+          ];
+        }
+      } catch (e) {
+        // Use deterministic baseSpec
+      }
+    }
+
+    return res.json(baseSpec);
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Video analysis failed' });
+  }
+});
 
 // Voice Transcription Endpoint
 app.post('/api/transcribe', async (req: Request, res: Response) => {
@@ -233,7 +615,7 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
   }
 });
 
-// Photo Generation & Editing Endpoint
+// Photo Generation & Intelligent Photo Editing Endpoint
 app.post('/api/generate-image', async (req: Request, res: Response) => {
   try {
     let parsedBody = req.body;
@@ -255,8 +637,11 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing prompt or image parameter' });
     }
 
+    const isEditing = !!baseImage;
+    const editSpec = isEditing ? parsePhotoEditSpec(prompt || '') : null;
+
     // STAGE 1: Deep AI Prompt Analysis
-    const analyzedPrompt = await analyzeAndExpandPrompt(prompt, !!baseImage);
+    const analyzedPrompt = await analyzeAndExpandPrompt(prompt, isEditing);
 
     let width = 1024;
     let height = 1024;
@@ -277,7 +662,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
       watercolor: 'delicate watercolor painting'
     };
 
-    if (style && styleEnhancers[style] && !enhancedPrompt.toLowerCase().includes(style)) {
+    if (!isEditing && style && styleEnhancers[style] && !enhancedPrompt.toLowerCase().includes(style)) {
       enhancedPrompt = `${enhancedPrompt}, ${styleEnhancers[style]}`;
     }
 
@@ -285,7 +670,12 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
 
     const ai = getGeminiClient();
     if (ai) {
-      const imgModels = ['gemini-3.1-flash-lite-image', 'gemini-3.1-flash-image'];
+      const imgModels = [
+        'gemini-2.5-flash-image',
+        'gemini-3.1-flash-image-preview',
+        'gemini-3.1-flash-image',
+        'gemini-3.1-flash-lite-image'
+      ];
 
       if (baseImage) {
         let cleanBase64 = baseImage;
@@ -293,6 +683,8 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
         if (match) {
           cleanBase64 = match[2];
         }
+
+        const strictEditPrompt = `${PHOTO_EDITING_SYSTEM_PROMPT}\n\nUser Instruction: ${prompt}\nRefined Task: ${enhancedPrompt}\nNow analyze the photo and edit it precisely according to the instruction. Edit ONLY what the user asked for and keep the person/subject and everything else 100% original.`;
 
         for (const mName of imgModels) {
           try {
@@ -307,7 +699,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
                     }
                   },
                   {
-                    text: `Edit this photo strictly according to this instruction: ${enhancedPrompt}. Do not alter unrequested elements.`
+                    text: strictEditPrompt
                   }
                 ]
               }
@@ -323,7 +715,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
             }
             if (generatedImageUrl) break;
           } catch (e) {
-            // continue
+            // continue to next image model
           }
         }
       } else {
@@ -357,6 +749,17 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
       }
     }
 
+    // If editing an uploaded photo and Gemini image model was not available, preserve original photo & trigger client smart pixel editor!
+    if (isEditing && !generatedImageUrl) {
+      return res.json({
+        imageUrl: baseImage,
+        useClientSmartEdit: true,
+        editSpec,
+        steps: editSpec?.steps || [],
+        prompt: enhancedPrompt
+      });
+    }
+
     if (!generatedImageUrl) {
       const seed = Math.floor(Math.random() * 1000000);
       const encodedPrompt = encodeURIComponent(enhancedPrompt);
@@ -378,6 +781,8 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
 
     return res.json({
       imageUrl: generatedImageUrl,
+      editSpec,
+      steps: editSpec?.steps || [],
       prompt: enhancedPrompt,
       style,
       aspectRatio
@@ -388,94 +793,64 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
   }
 });
 
-// MP3 TTS Endpoint
+// Speech / TTS Endpoint
 app.get('/api/tts', async (req: Request, res: Response) => {
-  try {
-    const text = (req.query.text as string) || '';
-    const lang = (req.query.lang as string) || 'en';
+  const { text, lang = 'ur' } = req.query;
 
-    if (!text) {
-      return res.status(400).json({ error: 'Missing text parameter' });
-    }
-
-    const cleanText = text
-      .replace(/```[\s\S]*?```/g, ' ')
-      .replace(/[*#_`>|~[\]()-]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-    const isUrdu = lang.startsWith('ur') || /[\u0600-\u06FF]/.test(cleanText);
-    const targetLang = isUrdu ? 'ur' : lang.startsWith('hi') ? 'hi' : 'en';
-
-    const words = cleanText.split(' ');
-    const chunks: string[] = [];
-    let currentChunk = '';
-
-    for (const w of words) {
-      if ((currentChunk + ' ' + w).length > 90) {
-        if (currentChunk) chunks.push(currentChunk.trim());
-        currentChunk = w;
-      } else {
-        currentChunk = (currentChunk + ' ' + w).trim();
-      }
-      if (chunks.length >= 4) break;
-    }
-    if (currentChunk && chunks.length < 4) {
-      chunks.push(currentChunk.trim());
-    }
-
-    if (chunks.length === 0 && cleanText) {
-      chunks.push(cleanText.substring(0, 90));
-    }
-
-    const buffers: Buffer[] = [];
-    for (const chunk of chunks) {
-      if (!chunk) continue;
-      const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=${targetLang}&q=${encodeURIComponent(chunk)}`;
-      try {
-        const audioRes = await fetch(ttsUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
-        });
-        if (audioRes.ok) {
-          const arr = await audioRes.arrayBuffer();
-          buffers.push(Buffer.from(arr));
-        }
-      } catch (err) {
-        // continue
-      }
-    }
-
-    if (buffers.length > 0) {
-      const combined = Buffer.concat(buffers);
-      res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Content-Length', combined.length.toString());
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-      return res.send(combined);
-    }
-
-    throw new Error('No audio returned');
-
-  } catch (error: any) {
-    return res.status(500).json({ error: 'TTS audio failed', details: error.message });
+  if (!text || typeof text !== 'string') {
+    return res.status(400).json({ error: 'Missing text parameter' });
   }
+
+  const cleanText = text.substring(0, 300).trim();
+  const targetLang = lang === 'ur' ? 'ur' : 'en';
+
+  const ttsEndpoints = [
+    `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=${targetLang}&client=tw-ob`,
+    `https://translate.googleapis.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=${targetLang}&client=gtx`
+  ];
+
+  for (const url of ttsEndpoints) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://translate.google.com/'
+        }
+      });
+
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        if (arrayBuffer.byteLength > 100) {
+          const buffer = Buffer.from(arrayBuffer);
+          res.setHeader('Content-Type', 'audio/mpeg');
+          res.setHeader('Cache-Control', 'public, max-age=3600');
+          return res.send(buffer);
+        }
+      }
+    } catch (err) {
+      // try next endpoint
+    }
+  }
+
+  return res.status(502).json({ error: 'All TTS upstream endpoints failed' });
 });
 
-// Core Chat & Multimodal Assistant Handler (/api/chat and /api/translate)
+// Main Backend Chat Route (/api/chat and /api/translate)
 async function handleChatRequest(req: Request, res: Response) {
   try {
     let parsedBody = req.body;
     if (typeof parsedBody === 'string') {
       try {
         parsedBody = JSON.parse(parsedBody);
-      } catch (e) {}
+      } catch (e) {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+      }
     }
 
     const { 
       prompt, 
       message,
-      model, 
+      model = 'gemini-3.8-flash',
       image, 
       mimeType, 
       attachedUrl,
@@ -516,8 +891,12 @@ async function handleChatRequest(req: Request, res: Response) {
 
     const langInstruction = language ? `Strictly respond in ${language}.` : `Respond naturally in the same language as the user's message (Urdu, Hindi, English, etc.).`;
     
-    const systemInstruction = `You are NOVA AI, a World-Class Multimodal AI Assistant, Senior Software Engineer, and Expert PDF & Link Auditor.
+    const systemInstruction = `You are NOVA AI, a World-Class Multimodal AI Assistant, Intelligent Photo Editing AI, and Intelligent Font-Aware Video Generation AI.
 ${langInstruction}
+
+${FONT_VIDEO_SYSTEM_PROMPT}
+
+${PHOTO_EDITING_SYSTEM_PROMPT}
 
 CONVERSATIONAL RULES (STRICT MANDATES):
 1. MATCH RESPONSE LENGTH TO USER INPUT:

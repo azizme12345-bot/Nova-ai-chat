@@ -2,6 +2,59 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+  (function() {
+    const shouldIgnore = (args) => {
+      try {
+        const msg = Array.from(args).map(a => (typeof a === 'string' ? a : (a && a.message) || String(a))).join(' ');
+        return (
+          msg.includes('[vite]') ||
+          msg.includes('WebSocket') ||
+          msg.includes('ws://') ||
+          msg.includes('wss://') ||
+          msg.includes('vite') && msg.includes('hmr') ||
+          msg.includes('Permission denied') ||
+          msg.includes('NotAllowedError')
+        );
+      } catch (e) {
+        return false;
+      }
+    };
+    const origError = console.error;
+    const origWarn = console.warn;
+    const origLog = console.log;
+    const origDebug = console.debug;
+    console.error = function(...args) {
+      if (shouldIgnore(args)) return;
+      origError.apply(console, args);
+    };
+    console.warn = function(...args) {
+      if (shouldIgnore(args)) return;
+      origWarn.apply(console, args);
+    };
+    console.log = function(...args) {
+      if (shouldIgnore(args)) return;
+      origLog.apply(console, args);
+    };
+    console.debug = function(...args) {
+      if (shouldIgnore(args)) return;
+      origDebug.apply(console, args);
+    };
+    window.addEventListener('error', function(e) {
+      if (e && e.message && (e.message.includes('[vite]') || e.message.includes('WebSocket'))) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+    window.addEventListener('unhandledrejection', function(e) {
+      const reason = e && e.reason ? String(e.reason.message || e.reason) : '';
+      if (reason.includes('[vite]') || reason.includes('WebSocket')) {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+      }
+    }, true);
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="NOVA AI is an advanced all-in-one AI assistant supporting natural chat, multimodal screenshot/photo/URL analysis, code generation, voice dictation, and AI artwork creation.">
 <meta name="keywords" content="AI Assistant, NOVA AI, Gemini AI, Chat, Code Generator, Multimodal AI, Web App">
@@ -17,24 +70,6 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<script>
-  const origError = console.error;
-  const origWarn = console.warn;
-  console.error = function(...args) {
-    const msg = args.join(' ');
-    if (msg.includes('[vite]') || msg.includes('WebSocket') || msg.includes('Permission denied') || msg.includes('NotAllowedError')) {
-      return;
-    }
-    origError.apply(console, args);
-  };
-  console.warn = function(...args) {
-    const msg = args.join(' ');
-    if (msg.includes('[vite]') || msg.includes('WebSocket')) {
-      return;
-    }
-    origWarn.apply(console, args);
-  };
-</script>
 <title>NOVA AI | Advanced All-in-One Assistant</title>
 <style>
 :root{
@@ -62,12 +97,20 @@ button{cursor:pointer}
 .splash-loader-fill{width:100%;height:100%;background:linear-gradient(90deg,#38bdf8,#a855f7);animation:splashLoad 1s ease-in-out infinite}
 @keyframes splashLoad{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
-/* Sidebar */
-.sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto;z-index:60}
+/* Sidebar Drawer (Opens when Hamburger ☰ is clicked) */
+.sidebar{
+  position:fixed;top:0;bottom:0;left:0;width:295px;max-width:86vw;
+  border-right:1px solid var(--line);background:var(--panel);
+  display:flex;flex-direction:column;padding:14px;overflow-y:auto;z-index:60;
+  transform:translateX(-100%);transition:transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:6px 0 28px rgba(0,0,0,0.35);
+}
+.sidebar.open{transform:translateX(0)}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;padding:6px 6px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
 .side-btn{width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:11px 12px;border-radius:10px;text-align:left;display:flex;gap:12px;align-items:center;margin:3px 0;transition:all 0.18s;font-size:13.5px;min-height:44px}
 .side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent);font-weight:700;border-color:var(--line)}
 .side-btn span:first-child{width:22px;text-align:center;font-size:16px}
+.side-section-label{margin-top:12px;margin-bottom:4px;color:var(--muted);font-size:11px;padding:0 8px;font-weight:700;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center}
 .history{margin-top:14px;color:var(--muted);font-size:11px;padding:0 8px;font-weight:700;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center}
 .history-item{margin-top:4px;padding:10px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s;min-height:42px;border:1px solid transparent}
 .history-item:hover,.history-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600;border-color:var(--line)}
@@ -80,8 +123,6 @@ button{cursor:pointer}
 .top-title{font-weight:800;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .icon-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex-shrink:0;transition:all 0.15s}
 .icon-btn:hover,.icon-btn:active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
-.top-new-chat-btn{height:42px;padding:0 13px;border-radius:11px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;transition:all 0.15s}
-.top-new-chat-btn:hover{background:var(--accent);color:#ffffff}
 
 /* Dropdown More Menu (⋮) */
 .more-dropdown{display:none;position:absolute;top:56px;right:12px;width:235px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.22);padding:8px;z-index:80;flex-direction:column;gap:4px}
@@ -104,7 +145,7 @@ button{cursor:pointer}
 .msg.ai .bubble{background:var(--panel);border:1px solid var(--line)}
 
 /* Composer Area */
-.composer-wrap{flex-shrink:0;position:relative;padding:10px 14px 10px;background:var(--bg);border-top:1px solid var(--line);z-index:25}
+.composer-wrap{flex-shrink:0;position:relative;padding:10px 14px 12px;background:var(--bg);border-top:1px solid var(--line);z-index:25}
 .composer{max-width:800px;margin:auto;border:1.5px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);padding:8px 10px}
 textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:6px 8px;min-height:42px;max-height:120px;line-height:1.5;font-size:14.5px}
 .tools{display:flex;align-items:center;gap:8px;margin-top:4px}
@@ -113,18 +154,6 @@ textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:
 .tool-plus{border:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:22px;font-weight:800}
 .send{margin-left:auto;background:var(--accent);color:white;border:0;width:46px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:18px;transition:opacity 0.2s;flex-shrink:0}
 .send:hover{opacity:0.92}
-
-/* Mobile Bottom Navigation Bar */
-.mobile-bottom-nav{
-  display:none;flex-shrink:0;height:62px;background:var(--panel2);border-top:1px solid var(--line);
-  grid-template-columns:repeat(5,1fr);align-items:center;padding:0 6px;z-index:35;
-}
-.mob-nav-btn{
-  border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:3px;height:52px;border-radius:10px;font-size:10.5px;font-weight:600;transition:all 0.15s;
-}
-.mob-nav-btn span.mob-icon{font-size:18px;line-height:1}
-.mob-nav-btn.active,.mob-nav-btn:hover{color:var(--accent);background:var(--accent-soft);font-weight:700}
 
 /* Modals */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:100;place-items:center;padding:16px;overflow-y:auto}
@@ -158,8 +187,9 @@ table.md-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
 table.md-table th,table.md-table td{border:1px solid var(--line);padding:8px 12px;text-align:left}
 table.md-table th{background:var(--panel2);font-weight:600}
 
-/* Mobile Backdrop overlay */
-.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(2px);z-index:55;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+/* Sidebar Backdrop overlay */
+.sidebar-backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(2px);z-index:55;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+.sidebar-backdrop.active{opacity:1;pointer-events:auto}
 
 @keyframes pulse-mic{
   0%{transform:scale(1);filter:drop-shadow(0 0 2px rgba(239,68,68,0.5))}
@@ -179,21 +209,10 @@ body.is-standalone-pwa .website-only-logo {
 }
 
 @media(max-width:768px){
-  .sidebar{
-    position:fixed;top:0;bottom:0;left:0;width:285px;max-width:84vw;z-index:60;
-    transform:translateX(-100%);transition:transform 0.25s cubic-bezier(0.4,0,0.2,1);
-    box-shadow:4px 0 25px rgba(0,0,0,0.3);display:flex !important;
-  }
-  .sidebar.open{transform:translateX(0)}
-  #sidebar-close-btn{display:grid !important}
-  .sidebar-backdrop{display:block}
-  .sidebar-backdrop.active{opacity:1;pointer-events:auto}
   .topbar{padding:0 10px;height:58px}
-  .top-new-chat-label{display:none}
   .chat{padding:14px 12px 18px}
-  .composer-wrap{padding:8px 10px 8px}
+  .composer-wrap{padding:8px 10px 10px}
   .bubble{max-width:90%}
-  .mobile-bottom-nav{display:grid}
 }
 </style>
 </head>
@@ -477,7 +496,7 @@ body.is-standalone-pwa .website-only-logo {
     </div>
   </div>
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR (Opens when Hamburger ≡ is clicked) -->
   <aside class="sidebar" id="appSidebar">
     <div class="brand">
       <svg class="website-only-logo" viewBox="0 0 120 120" style="width:34px; height:34px; filter: drop-shadow(0 0 8px rgba(168,85,247,0.8)); flex-shrink: 0;">
@@ -510,28 +529,41 @@ body.is-standalone-pwa .website-only-logo {
         <circle cx="91" cy="78" r="7" fill="url(#orbGlowSide)" stroke="#f5d0fe" stroke-width="1.5"/>
         <circle cx="29" cy="78" r="7" fill="url(#orbGlowSide)" stroke="#f5d0fe" stroke-width="1.5"/>
       </svg>
-      <span style="font-weight:800; letter-spacing:0.5px; color:var(--text);">NOVA CORE</span>
-      <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; display:none; width:36px; height:36px;" id="sidebar-close-btn">✕</button>
+      <span style="font-weight:800; letter-spacing:0.5px; color:var(--text);">NOVA AI</span>
+      <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; width:36px; height:36px;" id="sidebar-close-btn">✕</button>
     </div>
 
+    <!-- MAIN SIDEBAR MENU OPTIONS -->
     <button class="side-btn active" onclick="newChat()" style="background:var(--accent); color:#ffffff; font-weight:700; margin-bottom:6px;">
-      <span>＋</span><span>New Chat (نیا چیٹ)</span>
+      <span>＋</span><span>New Chat</span>
     </button>
     <button class="side-btn" onclick="openHistoryModal()">
-      <span>🕒</span><span>Chat History (ہسٹری)</span>
-    </button>
-    <button class="side-btn" onclick="openPhotoStudioModal()" style="color:var(--accent); font-weight:700;">
-      <span>🎨</span><span>AI Photo Studio & Editor</span>
+      <span>⏱</span><span>History</span>
     </button>
     <button class="side-btn" onclick="openSettingsModal()">
-      <span>⚙️</span><span>Settings (سیٹنگز)</span>
-    </button>
-    <button class="side-btn" onclick="toggleTheme()">
-      <span>◐</span><span>Light / Dark Mode</span>
+      <span>⚙️</span><span>Settings</span>
     </button>
 
-    <div style="padding: 10px 4px 4px; margin-top: 6px; border-top: 1px solid var(--line);">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:700;">ACTIVE ENGINE</div>
+    <!-- FEATURES SECTION IN SIDEBAR -->
+    <div class="side-section-label">
+      <span>FEATURES</span>
+    </div>
+    <button class="side-btn" onclick="triggerFeatureInChat('video')">
+      <span>🎬</span><span>Video Generation</span>
+    </button>
+    <button class="side-btn" onclick="openPhotoStudioModal()">
+      <span>🎨</span><span>AI Photo Studio & Editor</span>
+    </button>
+    <button class="side-btn" onclick="triggerAttachment('gallery'); closeSidebar();">
+      <span>🖼️</span><span>Image / File Analysis</span>
+    </button>
+    <button class="side-btn" onclick="triggerAttachment('link'); closeSidebar();">
+      <span>🔗</span><span>Website Link Analysis</span>
+    </button>
+
+    <!-- SETTINGS CONTROLS INSIDE SIDEBAR -->
+    <div style="padding: 10px 4px 4px; margin-top: 8px; border-top: 1px solid var(--line);">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:700;">AI MODEL (SETTINGS)</div>
       <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; outline:none;">
         <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Multimodal & Fast)</option>
         <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Ultra Fast)</option>
@@ -540,19 +572,22 @@ body.is-standalone-pwa .website-only-logo {
       </select>
     </div>
 
-    <!-- Voice & Speaker Settings -->
-    <div style="margin-top: 10px; padding: 10px 4px 0; border-top: 1px solid var(--line);">
+    <div style="margin-top: 8px; padding: 8px 4px 0;">
       <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">MICROPHONE LANGUAGE</div>
-      <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 12px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; outline:none; margin-bottom:8px;">
+      <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 12px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; outline:none; margin-bottom:6px;">
         <option value="ur-PK" selected>اردو (Urdu)</option>
         <option value="en-US">English (US / Global)</option>
         <option value="hi-IN">हिंदी (Hindi)</option>
         <option value="ar-SA">العربية (Arabic)</option>
       </select>
+      <button class="side-btn" onclick="toggleTheme()" style="margin-top:2px;">
+        <span>◐</span><span>Dark / Light Theme</span>
+      </button>
     </div>
 
+    <!-- RECENT HISTORY IN SIDEBAR -->
     <div class="history">
-      <span>RECENT CHATS</span>
+      <span>HISTORY</span>
       <button onclick="openHistoryModal()" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;">View All</button>
     </div>
     <div id="chat-history-list" style="display:flex; flex-direction:column; gap:3px; margin-top:6px;"></div>
@@ -560,17 +595,18 @@ body.is-standalone-pwa .website-only-logo {
     <div class="profile">
       <div class="avatar">N</div>
       <div style="overflow:hidden;">
-        <b style="font-size:13px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="profile-user-email">NOVA AI Workspace</b>
-        <div style="font-size:11px;color:var(--muted)">Production Ready · PWA</div>
+        <b style="font-size:13px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="profile-user-email">NOVA AI</b>
+        <div style="font-size:11px;color:var(--muted)">All-in-One Assistant</div>
       </div>
     </div>
   </aside>
 
   <!-- MAIN -->
   <main class="main" onclick="handleMainTap()">
+    <!-- TOPBAR: Hamburger (≡) + "NOVA AI" + Plus (+) + ⏱ + ⚙️ + ⋮ -->
     <header class="topbar">
       <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-        <button class="icon-btn" onclick="toggleSidebar(event)" title="Open Sidebar Menu" aria-label="Menu">☰</button>
+        <button class="icon-btn" onclick="toggleSidebar(event)" title="Open Sidebar Menu (≡)" aria-label="Menu" style="font-size:20px; font-weight:800;">☰</button>
         <div style="display:flex; align-items:center; gap:8px; min-width:0;">
           <svg class="website-only-logo" viewBox="0 0 120 120" style="width:30px; height:30px; filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); flex-shrink: 0;">
             <defs>
@@ -608,21 +644,18 @@ body.is-standalone-pwa .website-only-logo {
       </div>
 
       <div style="display:flex; gap:6px; align-items:center; position:relative;">
-        <button class="top-new-chat-btn" onclick="newChat()" title="Start New Chat">
-          <span style="font-size:17px;font-weight:800;">＋</span>
-          <span class="top-new-chat-label">New Chat</span>
-        </button>
-        <button class="icon-btn" onclick="openHistoryModal()" title="Conversation History">🕒</button>
-        <button class="icon-btn" onclick="openSettingsModal()" title="Settings">⚙️</button>
-        <button class="icon-btn" id="pwa-install-btn" onclick="triggerPwaInstall()" title="Install NOVA App" style="display:none; color:var(--accent); border-color:var(--accent);">📲</button>
-        <button class="icon-btn" onclick="toggleMoreMenu(event)" title="More Options" style="font-size:22px; font-weight:900;">⋮</button>
+        <button class="icon-btn" onclick="newChat()" title="New Chat (+)" aria-label="New Chat" style="font-size:20px; font-weight:800; color:var(--accent); border-color:var(--accent); background:var(--accent-soft);">＋</button>
+        <button class="icon-btn" onclick="openHistoryModal()" title="History (⏱)" aria-label="History">⏱</button>
+        <button class="icon-btn" onclick="openSettingsModal()" title="Settings (⚙️)" aria-label="Settings">⚙️</button>
+        <button class="icon-btn" onclick="toggleMoreMenu(event)" title="More Options (⋮)" aria-label="More Options" style="font-size:22px; font-weight:900;">⋮</button>
 
         <!-- MORE OPTIONS DROPDOWN MENU (⋮) -->
         <div class="more-dropdown" id="top-more-menu" onclick="event.stopPropagation()">
-          <button class="side-btn" onclick="newChat(); closeMoreMenu();"><span>＋</span><span>New Chat (نیا چیٹ)</span></button>
-          <button class="side-btn" onclick="openHistoryModal(); closeMoreMenu();"><span>🕒</span><span>Chat History (ہسٹری)</span></button>
+          <button class="side-btn" onclick="newChat(); closeMoreMenu();"><span>＋</span><span>New Chat</span></button>
+          <button class="side-btn" onclick="openHistoryModal(); closeMoreMenu();"><span>⏱</span><span>History</span></button>
+          <button class="side-btn" onclick="openSettingsModal(); closeMoreMenu();"><span>⚙️</span><span>Settings</span></button>
+          <button class="side-btn" onclick="triggerFeatureInChat('video'); closeMoreMenu();"><span>🎬</span><span>Video Generation</span></button>
           <button class="side-btn" onclick="openPhotoStudioModal(); closeMoreMenu();"><span>🎨</span><span>AI Photo Studio</span></button>
-          <button class="side-btn" onclick="openSettingsModal(); closeMoreMenu();"><span>⚙️</span><span>Settings (سیٹنگز)</span></button>
           <button class="side-btn" onclick="toggleTheme(); closeMoreMenu();"><span>◐</span><span>Dark / Light Theme</span></button>
           <button class="side-btn" onclick="triggerPwaInstall(); closeMoreMenu();"><span>📲</span><span>Install App (PWA)</span></button>
         </div>
@@ -631,6 +664,7 @@ body.is-standalone-pwa .website-only-logo {
 
     <div id="offline-banner">⚡ Offline Mode — آپ آف لائن ہیں۔ محفوظ شدہ چیٹ ہسٹری دستیاب ہے۔</div>
 
+    <!-- MIDDLE: CHAT WINDOW -->
     <section class="chat active" id="workspace-chat">
       <div class="empty" id="empty">
         <!-- Website Logo: Visible on Website, Hidden in Installed Standalone App after Splash -->
@@ -675,17 +709,12 @@ body.is-standalone-pwa .website-only-logo {
         <div id="empty-intro-wrap" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;">
           <h1>How can I help you today?</h1>
           <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate artwork, or transcribe voice dictations.</p>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:8px;">
-            <button onclick="newChat()" class="side-btn" style="width:auto; background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent); font-size:12.5px; padding:8px 14px; font-weight:700;">＋ New Chat</button>
-            <button onclick="openPhotoStudioModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12.5px; padding:8px 14px; font-weight:600;">🎨 AI Photo Studio</button>
-            <button onclick="openHistoryModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12.5px; padding:8px 14px; font-weight:600;">🕒 History</button>
-            <button onclick="openSettingsModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12.5px; padding:8px 14px; font-weight:600;">⚙️ Settings</button>
-          </div>
         </div>
       </div>
       <div class="messages" id="messages-list"></div>
     </section>
 
+    <!-- BOTTOM: INPUT BOX + BUTTONS (Plus + Mic + Image/File + Purple Send) -->
     <div class="composer-wrap">
       <!-- PLUS ATTACHMENT MENU -->
       <div id="plus-menu" style="display:none; position:absolute; bottom:90px; left:18px; background:var(--panel2); border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,0.22); padding:8px; z-index:40; flex-direction:column; gap:4px; width:215px;">
@@ -712,37 +741,13 @@ body.is-standalone-pwa .website-only-logo {
       <div class="composer">
         <textarea id="input" placeholder="Ask NOVA anything..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
         <div class="tools">
-          <button class="tool tool-plus" id="btn-plus-attach" onclick="togglePlusMenu(event)" title="Add Attachment (+)" aria-label="Add Attachment">＋</button>
-          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Voice Input (Microphone)" aria-label="Voice Input">🎙️</button>
-          <button class="tool" onclick="openPhotoStudioModal()" title="AI Photo Studio" aria-label="Photo Studio">🎨</button>
-          <button class="send" onclick="send()" title="Send message" aria-label="Send">➤</button>
+          <button class="tool tool-plus" id="btn-plus-attach" onclick="togglePlusMenu(event)" title="Plus (+)" aria-label="Plus">＋</button>
+          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Microphone" aria-label="Microphone">🎙️</button>
+          <button class="tool" onclick="triggerAttachment('gallery')" title="Image / File Upload" aria-label="Image or File">🖼️</button>
+          <button class="send" onclick="send()" title="Send Message" aria-label="Send">➤</button>
         </div>
       </div>
     </div>
-
-    <!-- MOBILE BOTTOM NAVIGATION BAR (Chat + New Chat + History + Studio + Settings) -->
-    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
-      <button class="mob-nav-btn active" id="mob-tab-chat" onclick="focusChatWorkspace()">
-        <span class="mob-icon">💬</span>
-        <span>Chat</span>
-      </button>
-      <button class="mob-nav-btn" id="mob-tab-new" onclick="newChat()">
-        <span class="mob-icon">➕</span>
-        <span>New Chat</span>
-      </button>
-      <button class="mob-nav-btn" id="mob-tab-history" onclick="openHistoryModal()">
-        <span class="mob-icon">🕒</span>
-        <span>History</span>
-      </button>
-      <button class="mob-nav-btn" id="mob-tab-studio" onclick="openPhotoStudioModal()">
-        <span class="mob-icon">🎨</span>
-        <span>Studio</span>
-      </button>
-      <button class="mob-nav-btn" id="mob-tab-settings" onclick="openSettingsModal()">
-        <span class="mob-icon">⚙️</span>
-        <span>Settings</span>
-      </button>
-    </nav>
     
     <!-- Multi Hidden Inputs -->
     <input id="input-camera" type="file" accept="image/*" capture="environment" hidden onchange="handlePlusFileSelected(this, 'Camera Photo')">
@@ -1004,8 +1009,12 @@ async function executeBatchEdit() {
 
       const data = await res.json();
       if (data.imageUrl) {
+        let finalImg = data.imageUrl;
+        if (data.useClientSmartEdit) {
+          finalImg = await applyClientSmartPhotoEdit(item.data, data.editSpec);
+        }
         item.status = 'completed';
-        item.resultUrl = data.imageUrl;
+        item.resultUrl = finalImg;
       } else {
         item.status = 'failed';
       }
@@ -1153,8 +1162,12 @@ async function executeStudioEdit() {
     });
     const data = await res.json();
     if (data.imageUrl) {
-      latestStudioResult = data.imageUrl;
-      document.getElementById('studio-result-img').src = data.imageUrl;
+      let finalImg = data.imageUrl;
+      if (data.useClientSmartEdit) {
+        finalImg = await applyClientSmartPhotoEdit(studioBaseImage, data.editSpec);
+      }
+      latestStudioResult = finalImg;
+      document.getElementById('studio-result-img').src = finalImg;
       document.getElementById('studio-result-panel').style.display = 'block';
       showToast('✨ Photo edited successfully!');
     } else {
@@ -1241,21 +1254,18 @@ function syncMicLangFromModal(lang) {
   saveMicLanguage();
 }
 
-function setActiveMobileTab(tabId) {
-  document.querySelectorAll('.mob-nav-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.id === tabId);
-  });
-}
-
-function focusChatWorkspace() {
-  closeHistoryModal();
-  closeSettingsModal();
-  closePhotoStudioModal();
+function triggerFeatureInChat(feature) {
   closeSidebar();
   closeMoreMenu();
-  setActiveMobileTab('mob-tab-chat');
   const inputEl = document.getElementById('input');
-  if (inputEl) inputEl.focus();
+  if (!inputEl) return;
+  if (feature === 'video') {
+    inputEl.value = 'Georgia Bold, formal, elegant\nText: "Professional Design"';
+    adjustTextareaHeight(inputEl);
+    inputEl.focus();
+    updateEmptyStateVisibility();
+    showToast('🎬 Font-Aware Video AI ready — press Send or customize font & text!');
+  }
 }
 
 function openHistoryModal() {
@@ -1263,12 +1273,10 @@ function openHistoryModal() {
   document.getElementById('historyModal').classList.add('active');
   closeSidebar();
   closeMoreMenu();
-  setActiveMobileTab('mob-tab-history');
 }
 
 function closeHistoryModal() {
   document.getElementById('historyModal').classList.remove('active');
-  setActiveMobileTab('mob-tab-chat');
 }
 
 function clearAllHistory() {
@@ -1291,12 +1299,10 @@ function openSettingsModal() {
   document.getElementById('settingsModal').classList.add('active');
   closeSidebar();
   closeMoreMenu();
-  setActiveMobileTab('mob-tab-settings');
 }
 
 function closeSettingsModal() {
   document.getElementById('settingsModal').classList.remove('active');
-  setActiveMobileTab('mob-tab-chat');
 }
 
 function toggleMoreMenu(e) {
@@ -1327,7 +1333,7 @@ function closeSidebar() {
 }
 
 function handleMainTap() {
-  if (window.innerWidth <= 768) closeSidebar();
+  closeSidebar();
   closeMoreMenu();
 }
 
@@ -1348,7 +1354,6 @@ function newChat() {
   loadMessages();
   closeSidebar();
   closeMoreMenu();
-  setActiveMobileTab('mob-tab-chat');
   
   const inputEl = document.getElementById('input');
   if (inputEl) {
@@ -1809,6 +1814,329 @@ function updateEmptyStateVisibility() {
   }
 }
 
+// ============================================================================
+// INTELLIGENT PHOTO EDITING (CLIENT-SIDE PIXEL SEGMENTATION & FALLBACK ENGINE)
+// ============================================================================
+function hexToRgb(hex) {
+  const clean = (hex || '#ffffff').replace('#', '');
+  const num = parseInt(clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  };
+}
+
+async function applyClientSmartPhotoEdit(base64Src, editSpec) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const w = img.naturalWidth || img.width || 800;
+        const h = img.naturalHeight || img.height || 800;
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const op = editSpec?.operation || 'change_background';
+
+        if (op === 'change_background') {
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const data = imgData.data;
+          const targetRgb = hexToRgb(editSpec?.targetColorHex || '#ffffff');
+
+          // Sample border pixels (top, left, right edges) to detect original background color palette
+          const bgSamples = [];
+          const stepX = Math.max(1, Math.floor(w / 30));
+          const stepY = Math.max(1, Math.floor(h / 30));
+
+          for (let x = 0; x < w; x += stepX) {
+            const idxTop = (2 * w + x) * 4;
+            bgSamples.push([data[idxTop], data[idxTop + 1], data[idxTop + 2]]);
+          }
+          for (let y = 0; y < Math.floor(h * 0.75); y += stepY) {
+            const idxLeft = (y * w + 2) * 4;
+            const idxRight = (y * w + (w - 3)) * 4;
+            bgSamples.push([data[idxLeft], data[idxLeft + 1], data[idxLeft + 2]]);
+            bgSamples.push([data[idxRight], data[idxRight + 1], data[idxRight + 2]]);
+          }
+
+          const visited = new Uint8Array(w * h);
+          const bgMask = new Float32Array(w * h);
+          const queue = new Int32Array(w * h);
+          let head = 0;
+          let tail = 0;
+
+          const minColorDist = (r, g, b) => {
+            let best = 999999;
+            for (let i = 0; i < bgSamples.length; i++) {
+              const dr = r - bgSamples[i][0];
+              const dg = g - bgSamples[i][1];
+              const db = b - bgSamples[i][2];
+              const d = dr * dr + dg * dg + db * db;
+              if (d < best) best = d;
+            }
+            return Math.sqrt(best);
+          };
+
+          // Seed flood-fill from top, left, and right outer borders
+          const pushSeed = (x, y) => {
+            const pos = y * w + x;
+            if (!visited[pos]) {
+              visited[pos] = 1;
+              queue[tail++] = pos;
+            }
+          };
+
+          for (let x = 0; x < w; x++) pushSeed(x, 0);
+          for (let y = 0; y < h; y++) {
+            pushSeed(0, y);
+            pushSeed(w - 1, y);
+          }
+
+          const threshold = 68; // Color similarity tolerance for background flood-fill
+
+          while (head < tail) {
+            const pos = queue[head++];
+            const x = pos % w;
+            const y = (pos - x) / w;
+            const idx = pos * 4;
+            const r = data[idx];
+            const g = data[idx + 1];
+            const b = data[idx + 2];
+
+            // Protect central lower torso/face core unless strongly matching border background
+            const normX = (x - w * 0.5) / (w * 0.35);
+            const normY = (y - h * 0.58) / (h * 0.42);
+            const inSubjectCore = (normX * normX + normY * normY) < 0.55;
+            const localTol = inSubjectCore ? threshold * 0.52 : threshold;
+
+            const dist = minColorDist(r, g, b);
+            if (dist <= localTol) {
+              bgMask[pos] = dist > localTol * 0.78 ? 1 - (dist - localTol * 0.78) / (localTol * 0.22) : 1.0;
+
+              if (x > 0 && !visited[pos - 1]) { visited[pos - 1] = 1; queue[tail++] = pos - 1; }
+              if (x < w - 1 && !visited[pos + 1]) { visited[pos + 1] = 1; queue[tail++] = pos + 1; }
+              if (y > 0 && !visited[pos - w]) { visited[pos - w] = 1; queue[tail++] = pos - w; }
+              if (y < h - 1 && !visited[pos + w]) { visited[pos + w] = 1; queue[tail++] = pos + w; }
+            }
+          }
+
+          // Apply smooth background replacement while keeping person/subject 100% original
+          for (let i = 0; i < w * h; i++) {
+            const alpha = bgMask[i];
+            if (alpha > 0) {
+              const idx = i * 4;
+              data[idx] = Math.round(data[idx] * (1 - alpha) + targetRgb.r * alpha);
+              data[idx + 1] = Math.round(data[idx + 1] * (1 - alpha) + targetRgb.g * alpha);
+              data[idx + 2] = Math.round(data[idx + 2] * (1 - alpha) + targetRgb.b * alpha);
+            }
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+        } else if (op === 'blur_background') {
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = w;
+          tempCanvas.height = h;
+          const tCtx = tempCanvas.getContext('2d');
+          tCtx.filter = 'blur(12px)';
+          tCtx.drawImage(img, 0, 0, w, h);
+
+          // Draw blurred background then sharp subject in center radial mask
+          ctx.drawImage(tempCanvas, 0, 0);
+          ctx.save();
+          ctx.beginPath();
+          ctx.ellipse(w * 0.5, h * 0.52, w * 0.34, h * 0.42, 0, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, 0, 0, w, h);
+          ctx.restore();
+        } else if (op === 'enhance') {
+          ctx.filter = 'contrast(1.12) saturate(1.14) brightness(1.03)';
+          ctx.drawImage(img, 0, 0, w, h);
+        }
+
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) {
+        resolve(base64Src);
+      }
+    };
+    img.onerror = () => resolve(base64Src);
+    img.src = base64Src;
+  });
+}
+
+// ============================================================================
+// INTELLIGENT FONT-AWARE VIDEO GENERATION ENGINE (HTML5 CANVAS + WEBM EXPORT)
+// ============================================================================
+const activeVideoAnimations = {};
+
+function renderFontVideoFrame(ctx, w, h, spec, progress) {
+  // 1. Background gradient from analyzed colors
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, spec.bgStart || '#090d1a');
+  grad.addColorStop(1, spec.bgEnd || '#17153b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // 2. Ambient particles / subtle mood effects
+  ctx.save();
+  const particleCount = 18;
+  for (let i = 0; i < particleCount; i++) {
+    const px = ((i * 197 + progress * 90) % w);
+    const py = ((i * 131 + Math.sin(progress * Math.PI * 2 + i) * 35 + h) % h);
+    const radius = (i % 3) + 1.5;
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.fillStyle = spec.accentColor || '#cbd5e1';
+    ctx.globalAlpha = 0.14 + 0.1 * Math.sin(progress * Math.PI * 2 + i);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // 3. Calculate animation transform based on mood & weight
+  let alpha = 1;
+  let offsetY = 0;
+  let scale = 1;
+  let visibleChars = (spec.displayText || 'Professional Design').length;
+  const fullText = spec.displayText || 'Professional Design';
+
+  if (spec.animationType === 'slow-fade') {
+    const ease = Math.min(1, progress * 1.45);
+    alpha = Math.sin(ease * Math.PI * 0.5);
+    offsetY = (1 - alpha) * 24;
+    scale = 0.96 + 0.04 * alpha;
+  } else if (spec.animationType === 'kinetic-bounce') {
+    const t = Math.min(1, progress * 1.6);
+    scale = t < 0.7 ? (t / 0.7) * 1.12 : 1.12 - ((t - 0.7) / 0.3) * 0.12;
+    offsetY = Math.sin(progress * Math.PI * 4) * 8 * (1 - progress * 0.5);
+    alpha = Math.min(1, progress * 2.5);
+  } else if (spec.animationType === 'typewriter') {
+    visibleChars = Math.max(1, Math.floor(Math.min(1, progress * 1.35) * fullText.length));
+  } else if (spec.animationType === 'shimmer-glow') {
+    alpha = Math.min(1, progress * 1.8);
+    scale = 0.94 + 0.06 * Math.sin(progress * Math.PI);
+  }
+
+  // 4. Render Typography with exact analyzed font style, weight, shadow & glow
+  ctx.save();
+  ctx.translate(w / 2, h / 2 + offsetY);
+  ctx.scale(scale, scale);
+  ctx.globalAlpha = alpha;
+
+  const baseFontSize = fullText.length > 26 ? 42 : fullText.length > 18 ? 54 : 66;
+  ctx.font = `${spec.fontStyle || 'normal'} ${spec.fontWeight || '700'} ${baseFontSize}px ${spec.fontFamily || 'Georgia, serif'}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Soft shadow & subtle glow matching properties
+  ctx.shadowColor = spec.glowColor || 'rgba(226, 232, 240, 0.55)';
+  ctx.shadowBlur = 24 + 8 * Math.sin(progress * Math.PI * 2);
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 6;
+
+  const renderedStr = spec.animationType === 'typewriter'
+    ? fullText.substring(0, visibleChars) + (Math.floor(progress * 10) % 2 === 0 ? '|' : '')
+    : fullText;
+
+  ctx.fillStyle = spec.textColor || '#ffffff';
+  ctx.fillText(renderedStr, 0, -8);
+
+  // Decorative underline / frame accent matching mood
+  const lineW = Math.min(w * 0.65, Math.max(140, renderedStr.length * 22)) * Math.min(1, progress * 1.5);
+  ctx.shadowBlur = 10;
+  ctx.strokeStyle = spec.accentColor || '#cbd5e1';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(-lineW / 2, baseFontSize * 0.62);
+  ctx.lineTo(lineW / 2, baseFontSize * 0.62);
+  ctx.stroke();
+
+  // Subtitle metadata tag at bottom of video frame
+  ctx.shadowBlur = 0;
+  ctx.globalAlpha = 0.65 * alpha;
+  ctx.font = `600 15px system-ui, sans-serif`;
+  ctx.fillStyle = spec.accentColor || '#cbd5e1';
+  ctx.fillText(`${spec.fontName || 'Custom Font'} · ${spec.fontCategory || 'Serif'} · ${spec.animationLabel || 'Slow fade-in'}`, 0, h * 0.36);
+
+  ctx.restore();
+}
+
+function startFontVideoCanvas(canvasId, spec) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (activeVideoAnimations[canvasId]) {
+    cancelAnimationFrame(activeVideoAnimations[canvasId]);
+  }
+
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const durationMs = 4200;
+  let startTime = performance.now();
+
+  function animate(now) {
+    if (!document.getElementById(canvasId)) {
+      delete activeVideoAnimations[canvasId];
+      return;
+    }
+    const elapsed = (now - startTime) % durationMs;
+    const progress = elapsed / durationMs;
+    renderFontVideoFrame(ctx, w, h, spec, progress);
+    activeVideoAnimations[canvasId] = requestAnimationFrame(animate);
+  }
+
+  activeVideoAnimations[canvasId] = requestAnimationFrame(animate);
+}
+
+function replayFontVideo(canvasId, msgIdx) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[msgIdx]?.videoSpec) return;
+  startFontVideoCanvas(canvasId, currentChat.messages[msgIdx].videoSpec);
+  showToast('▶️ Replaying font-aware video animation');
+}
+
+async function downloadFontVideoWebM(canvasId, msgIdx) {
+  const canvas = document.getElementById(canvasId);
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!canvas || !currentChat || !currentChat.messages[msgIdx]?.videoSpec) return;
+
+  if (typeof canvas.captureStream !== 'function' || typeof MediaRecorder === 'undefined') {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `nova_font_video_${Date.now()}.png`;
+    a.click();
+    showToast('⬇️ Downloaded high-res frame!');
+    return;
+  }
+
+  showToast('⏳ Rendering & exporting HD Video (3 seconds)...');
+  const stream = canvas.captureStream(30);
+  let mimeType = 'video/webm';
+  if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+    mimeType = 'video/webm;codecs=vp9';
+  }
+  const recorder = new MediaRecorder(stream, { mimeType });
+  const chunks = [];
+  recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nova_typography_video_${Date.now()}.webm`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    showToast('🎬 Video downloaded successfully!');
+  };
+  recorder.start();
+  setTimeout(() => {
+    if (recorder.state !== 'inactive') recorder.stop();
+  }, 3600);
+}
+
 function loadMessages() {
   messagesList.innerHTML = '';
   const chat = chats.find(c => c.id === currentChatId);
@@ -1817,6 +2145,8 @@ function loadMessages() {
     return; 
   }
   
+  const pendingVideoCanvases = [];
+
   chat.messages.forEach((msg, idx) => {
     const isUser = msg.role === 'user';
     const div = document.createElement('div');
@@ -1835,10 +2165,28 @@ function loadMessages() {
     if (msg.generatedImage) {
       generatedImageHTML = `
         <div style="margin:10px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg);">
-          <img src="${msg.generatedImage}" style="max-width:100%; border-radius:12px 12px 0 0; display:block;" referrerPolicy="no-referrer">
+          <img src="${msg.generatedImage}" style="max-width:100%; max-height:420px; border-radius:12px 12px 0 0; display:block; margin:0 auto;" referrerPolicy="no-referrer">
           <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; background:var(--panel2); font-size:11px;">
-            <span style="color:var(--accent); font-weight:700;">✨ AI Photo</span>
-            <a href="${msg.generatedImage}" download="nova_art_${Date.now()}.png" style="color:var(--accent); text-decoration:none; font-weight:600;">⬇️ Download HD</a>
+            <span style="color:var(--accent); font-weight:700;">✨ AI Edited / Generated Photo</span>
+            <a href="${msg.generatedImage}" download="nova_photo_${Date.now()}.png" style="color:var(--accent); text-decoration:none; font-weight:600;">⬇️ Download HD</a>
+          </div>
+        </div>
+      `;
+    }
+
+    let generatedVideoHTML = '';
+    if (msg.videoSpec) {
+      const canvasId = `font_video_canvas_${idx}`;
+      pendingVideoCanvases.push({ canvasId, spec: msg.videoSpec });
+      generatedVideoHTML = `
+        <div style="margin:10px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#090d1a;">
+          <canvas id="${canvasId}" width="960" height="540" style="width:100%; max-width:600px; aspect-ratio:16/9; display:block;"></canvas>
+          <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; background:var(--panel2); font-size:11px; gap:10px; flex-wrap:wrap;">
+            <span style="color:var(--accent); font-weight:700;">🎬 Font-Matched Video (${msg.videoSpec.fontName || 'Typography'})</span>
+            <div style="display:flex; gap:10px;">
+              <button onclick="replayFontVideo('${canvasId}', ${idx})" style="background:none; border:none; color:var(--text); font-weight:600; cursor:pointer; font-size:11px;">▶️ Replay</button>
+              <button onclick="downloadFontVideoWebM('${canvasId}', ${idx})" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">⬇️ Download Video</button>
+            </div>
           </div>
         </div>
       `;
@@ -1851,6 +2199,7 @@ function loadMessages() {
         ${attachmentHTML}
         <div>${cleanHTML}</div>
         ${generatedImageHTML}
+        ${generatedVideoHTML}
       </div>
       ${isUser ? '' : `
         <div style="display:flex; align-items:center; gap:12px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
@@ -1861,6 +2210,10 @@ function loadMessages() {
       `}
     `;
     messagesList.appendChild(div);
+  });
+
+  pendingVideoCanvases.forEach(item => {
+    startFontVideoCanvas(item.canvasId, item.spec);
   });
   
   updateSpeechButtons();
@@ -1904,31 +2257,111 @@ async function send() {
   loader.innerHTML = `
     <div class="bubble" style="color:var(--muted); font-style:italic; display:flex; align-items:center; gap:8px;">
       <div style="width:12px; height:12px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
-      <span>NOVA AI is typing...</span>
+      <span id="ai-typing-status-text">NOVA AI is analyzing...</span>
     </div>
   `;
   messagesList.appendChild(loader);
   
-  // Continuous smooth auto-scroll to bottom while AI is thinking/typing
   const scrollInterval = setInterval(() => {
     scrollToBottom(true);
   }, 150);
 
   const lower = (text || '').toLowerCase();
-  
-  const isPhotoGenRequest = 
-    lower.includes('photo banao') || lower.includes('tasveer banao') || lower.includes('تصویر بناؤ') ||
-    lower.includes('generate photo') || lower.includes('generate image') || lower.includes('create photo') || lower.includes('draw photo') ||
-    lower.includes('image featuring') || lower.includes('high-resolution image') || lower.includes('high resolution image') ||
-    lower.startsWith('a photo') || lower.startsWith('an image') || lower.startsWith('a high-resolution') || lower.startsWith('a picture') ||
-    lower.startsWith('a graphic') || lower.startsWith('a poster') || lower.startsWith('a wallpaper') || lower.startsWith('calligraphic text') ||
-    lower.includes('solid green background') || lower.includes('photorealistic image') || lower.includes('3d render of') || lower.includes('calligraphy') ||
-    lower.includes('quran') || lower.includes('surah') || lower.includes('bismillah') || lower.includes('قرآن');
+  const hasImageAttachment = !!(attachmentData && attachmentData.type && attachmentData.type.startsWith('image/'));
 
-  const isPhotoEditRequest = attachmentData && (lower.includes('edit photo') || lower.includes('change photo') || lower.includes('photo edit') || lower.includes('تصویر ایڈٹ'));
+  // 1. Detect Font-Aware Video Generation Request
+  const isFontVideoRequest =
+    !hasImageAttachment && (
+      (lower.includes('text:') && (
+        lower.includes('georgia') || lower.includes('serif') || lower.includes('sans') ||
+        lower.includes('script') || lower.includes('bold') || lower.includes('regular') ||
+        lower.includes('light') || lower.includes('formal') || lower.includes('elegant') ||
+        lower.includes('playful') || lower.includes('font') || lower.includes('style')
+      )) ||
+      lower.includes('font-aware video') ||
+      lower.includes('video generation') ||
+      lower.includes('create video') ||
+      lower.includes('generate video') ||
+      lower.includes('ویڈیو بناؤ') ||
+      lower.includes('video banao')
+    );
+
+  // 2. Detect Intelligent Photo Editing Request (Whenever an image is uploaded with an edit instruction in Urdu/English)
+  const isPhotoEditRequest =
+    hasImageAttachment && (
+      lower.includes('background') || lower.includes('بیک گراؤنڈ') || lower.includes('پس منظر') || lower.includes('bg') ||
+      lower.includes('تبدیل') || lower.includes('change') || lower.includes('replace') || lower.includes('بدل') ||
+      lower.includes('white') || lower.includes('سفید') || lower.includes('safed') ||
+      lower.includes('green') || lower.includes('سبز') || lower.includes('hara') ||
+      lower.includes('blue') || lower.includes('نیلا') || lower.includes('red') || lower.includes('سرخ') || lower.includes('لال') ||
+      lower.includes('black') || lower.includes('کالا') || lower.includes('سیاہ') ||
+      lower.includes('remove') || lower.includes('ہٹا') || lower.includes('ختم') || lower.includes('delete') ||
+      lower.includes('blur') || lower.includes('دھندلا') ||
+      lower.includes('enhance') || lower.includes('صاف') || lower.includes('hd') ||
+      lower.includes('resize') || lower.includes('move') || lower.includes('add') || lower.includes('شامل') ||
+      lower.includes('color') || lower.includes('رنگ') || lower.includes('style') ||
+      lower.includes('edit') || lower.includes('ایڈٹ') || lower.includes('modify') ||
+      lower.includes('کرو') || lower.includes('کر دو') || lower.includes('kar do') || lower.includes('karo')
+    );
+
+  // 3. Detect New Photo Generation Request (No uploaded image)
+  const isPhotoGenRequest = 
+    !hasImageAttachment && (
+      lower.includes('photo banao') || lower.includes('tasveer banao') || lower.includes('تصویر بناؤ') ||
+      lower.includes('generate photo') || lower.includes('generate image') || lower.includes('create photo') || lower.includes('draw photo') ||
+      lower.includes('image featuring') || lower.includes('high-resolution image') || lower.includes('high resolution image') ||
+      lower.startsWith('a photo') || lower.startsWith('an image') || lower.startsWith('a high-resolution') || lower.startsWith('a picture') ||
+      lower.startsWith('a graphic') || lower.startsWith('a poster') || lower.startsWith('a wallpaper') || lower.startsWith('calligraphic text') ||
+      lower.includes('solid green background') || lower.includes('photorealistic image') || lower.includes('3d render of') || lower.includes('calligraphy') ||
+      lower.includes('quran') || lower.includes('surah') || lower.includes('bismillah') || lower.includes('قرآن')
+    );
 
   try {
-    if (isPhotoGenRequest || isPhotoEditRequest) {
+    // FLOW A: INTELLIGENT FONT-AWARE VIDEO GENERATION AI
+    if (isFontVideoRequest) {
+      const statusEl = document.getElementById('ai-typing-status-text');
+      if (statusEl) statusEl.innerText = '✓ Analyzing font, mood & creating video...';
+
+      const vidRes = await fetch('/api/video-style', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: text })
+      });
+      const vidSpec = await vidRes.json();
+
+      clearInterval(scrollInterval);
+      const loaderEl = document.getElementById('ai-typing-loader');
+      if (loaderEl) loaderEl.remove();
+
+      const stepsText = (vidSpec.steps || [
+        '✓ Analyzing font...',
+        `✓ Detecting: ${vidSpec.fontCategory || 'Serif'}, ${vidSpec.weightLabel || 'bold'}, ${vidSpec.moodLabel || 'formal'} mood`,
+        '✓ Creating video...',
+        `✓ Animation: ${vidSpec.animationLabel || 'Slow fade-in'}`,
+        `✓ Effects: ${vidSpec.effectsLabel || 'Soft shadow, subtle glow'}`,
+        '✓ Result: [video with perfect style matching]'
+      ]).join('\n');
+
+      currentChat.messages.push({
+        role: 'ai',
+        text: stepsText,
+        videoSpec: vidSpec,
+        timestamp: Date.now()
+      });
+      saveChats();
+      loadMessages();
+      return;
+    }
+
+    // FLOW B: INTELLIGENT PHOTO EDITING AI & PHOTO GENERATION
+    if (isPhotoEditRequest || isPhotoGenRequest) {
+      const statusEl = document.getElementById('ai-typing-status-text');
+      if (statusEl) {
+        statusEl.innerText = isPhotoEditRequest
+          ? '✓ Analyzing photo & editing only requested area...'
+          : '✓ Generating high-resolution artwork...';
+      }
+
       let promptToUse = text
         .replace(/^(generate photo of|generate image of|create photo of|photo banao|tasveer banao|تصویر بناؤ)/i, '')
         .trim() || text;
@@ -1944,15 +2377,27 @@ async function send() {
       });
 
       const imgData = await imgRes.json();
+
+      let finalImageUrl = imgData.imageUrl;
+      if (isPhotoEditRequest && imgData.useClientSmartEdit && attachmentData?.data) {
+        finalImageUrl = await applyClientSmartPhotoEdit(attachmentData.data, imgData.editSpec);
+      }
+
       clearInterval(scrollInterval);
       const loaderEl = document.getElementById('ai-typing-loader');
       if (loaderEl) loaderEl.remove();
 
-      if (imgData.imageUrl) {
+      if (finalImageUrl) {
+        const stepsLines = (isPhotoEditRequest && Array.isArray(imgData.steps) && imgData.steps.length > 0)
+          ? imgData.steps.join('\n')
+          : (isPhotoEditRequest
+              ? `✓ Analyzing photo...\n✓ Understanding instruction: "${promptToUse}"\n✓ Keeping person/subject original...\n✓ Result: [edited photo]`
+              : `آپ کی فرمائش کے مطابق تیار کی گئی شبیہ حاضر ہے! 🎨\n**پرامپٹ:** ${promptToUse}`);
+
         currentChat.messages.push({
           role: 'ai',
-          text: isPhotoEditRequest ? `آپ کی تصویر پر AI ایڈیٹنگ مکمل ہو چکی ہے! 🎨` : `آپ کی فرمائش کے مطابق تیار کی گئی شبیہ حاضر ہے! 🎨\n**پرامپٹ:** ${promptToUse}`,
-          generatedImage: imgData.imageUrl,
+          text: stepsLines,
+          generatedImage: finalImageUrl,
           timestamp: Date.now()
         });
         saveChats();

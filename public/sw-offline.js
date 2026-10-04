@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nova-ai-offline-v2';
+const CACHE_NAME = 'nova-ai-offline-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -23,7 +23,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME && !key.includes('workbox')) {
+          if (key !== CACHE_NAME) {
             return caches.delete(key);
           }
         })
@@ -36,7 +36,20 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith('/api/')) return;
+
+  // Never intercept API routes or Vite internal dev server endpoints
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/@vite') ||
+    url.pathname.startsWith('/@fs') ||
+    url.pathname.startsWith('/@id') ||
+    url.pathname.startsWith('/node_modules/') ||
+    url.pathname.startsWith('/src/') ||
+    url.pathname.includes('dev-sw.js') ||
+    url.pathname.includes('workbox-')
+  ) {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
