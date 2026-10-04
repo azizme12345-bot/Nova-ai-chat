@@ -12,13 +12,6 @@ const CORS_HEADERS = {
 async function analyzeAndExpandPrompt(rawPrompt, apiKey, isEditing = false) {
   if (!rawPrompt) return 'High resolution masterwork artwork';
 
-  const lower = rawPrompt.toLowerCase();
-  const isQuranic = lower.includes('قرآن') || lower.includes('سور') || lower.includes('بِسْمِ') || lower.includes('quran') || lower.includes('surah') || lower.includes('jumu') || lower.includes('juma') || lower.includes('bismillah') || lower.includes('calligraph') || lower.includes('green background');
-
-  if (isQuranic) {
-    return `Pristine masterwork Islamic calligraphic graphic print on a solid deep emerald green background with high-contrast white and gold Arabic calligraphy. Top center reads 'القرآن الكريم', center reads 'سُورَةُ الْجُمُعَة', middle reads 'VERSE(S) 9-10', and bottom reads 'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ'. ABSOLUTELY ZERO HUMAN FIGURES, ZERO PEOPLE, ZERO BOYS, pure sacred Arabic typography, illuminated manuscript border, 8k vector precision.`;
-  }
-
   // Intelligent prompt expansion using Gemini
   try {
     const { GoogleGenAI } = await import('@google/genai');
@@ -31,21 +24,10 @@ async function analyzeAndExpandPrompt(rawPrompt, apiKey, isEditing = false) {
     });
 
     const analysisInstruction = `You are a World-Class AI Image Prompt Architect.
-Analyze the user's request deeply to understand the EXACT subject, language, text, and scene:
-
-CRITICAL MANDATES:
-1. IF the prompt mentions Quran, Surah (e.g. Surah Al-Jumu'ah / Al-Baqarah), Ayah / Verses, Bismillah, Arabic Calligraphy, Islamic typography, or Islamic art:
-   - STRICTLY formulate an image generation prompt for a pristine Islamic calligraphic graphic print.
-   - Include: Solid deep emerald green background, ornate gold and white calligraphic script for 'القرآن الكريم' at top center, traditional Thuluth Arabic script for 'سُورَةُ الْجُمُعَة' in middle, 'VERSE(S) 9-10' cleanly typeset, and 'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ' at the bottom.
-   - MANDATORY: ABSOLUTELY ZERO HUMAN FIGURES, ZERO PEOPLE, ZERO BOYS, ZERO PORTRAITS. Only pristine Islamic Arabic calligraphy, gold leaf accents, and sacred typography.
-
-2. IF the prompt is for a general image (e.g., car, landscape, animal, futuristic city, logo):
-   - Expand the prompt into a detailed, high-resolution masterwork prompt in English that captures the user's exact subject without introducing unrelated objects or figures.
-
-3. IF editing an existing image (${isEditing ? 'YES' : 'NO'}):
-   - Modify ONLY what the user explicitly requested while preserving the original subject, face, or scene structure.
-
-Return ONLY the refined, detailed masterwork image generation prompt in English.`;
+Analyze the user's request deeply to understand the EXACT subject, language, text, and scene they want:
+- If the user requests an Islamic / Quranic calligraphic design, generate a pristine masterwork Islamic calligraphy art prompt with beautiful sacred Arabic typography and gold accents matching their exact request.
+- If the user requests any other subject (landscape, animal, car, portrait, fantasy, logo), generate a detailed, high-resolution masterwork prompt in English that precisely matches the user's prompt without changing their intended subject.
+- Return ONLY the refined, detailed masterwork image generation prompt in English.`;
 
     const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
     for (const modelName of candidateModels) {

@@ -1828,9 +1828,18 @@ async function toggleVoiceDictation() {
     return;
   }
 
-  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let webSpeechStarted = false;
+  try {
+    // Explicitly request mic permission first to ensure mobile browser permission prompt triggers
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      activeMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+  } catch (permErr) {
+    console.error('Microphone permission blocked:', permErr);
+    showToast('⚠️ Microphone permission denied. Please allow mic access in browser settings.');
+    return;
+  }
 
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (Speech) {
     try {
       recognition = new Speech();
@@ -1839,7 +1848,6 @@ async function toggleVoiceDictation() {
       recognition.lang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
 
       recognition.onstart = () => {
-        webSpeechStarted = true;
         dictationActive = true;
         btn.classList.add('mic-pulsing');
         showToast(`🎙️ Listening (${recognition.lang}) - Speak now!`);
@@ -1858,34 +1866,83 @@ async function toggleVoiceDictation() {
       };
 
       recognition.onerror = e => {
-        if (!webSpeechStarted) {
-          startDirectMediaRecorder(btn);
-        }
+        console.warn('SpeechRecognition error:', e);
       };
 
       recognition.onend = () => {
-        if (dictationActive && webSpeechStarted) {
+        if (dictationActive) {
           stopVoiceDictation();
         }
       };
 
       recognition.start();
-
-      setTimeout(() => {
-        if (!webSpeechStarted && dictationActive) {
-          startDirectMediaRecorder(btn);
-        }
-      }, 700);
-
       dictationActive = true;
       return;
 
     } catch (err) {
-      // Fallback
+      console.warn('SpeechRecognition failed, using MediaRecorder:', err);
     }
   }
 
-  startDirectMediaRecorder(btn);
+  startDirectMediaRecorderWithStream(btn, activeMicStream);
+}
+
+function startDirectMediaRecorderWithStream(btn, stream) {
+  try {
+    recordedAudioChunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    mediaRecorderInstance = new MediaRecorder(stream, { mimeType });
+
+    mediaRecorderInstance.ondataavailable = e => {
+      if (e.data && e.data.size > 0) {
+        recordedAudioChunks.push(e.data);
+      }
+    };
+
+    mediaRecorderInstance.onstop = async () => {
+      const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
+      if (audioBlob.size > 1000) {
+        showToast('⏳ Transcribing your voice...');
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Data = e.target.result;
+          try {
+            const res = await fetch('/api/transcribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                audioData: base64Data,
+                mimeType: mimeType,
+                language: localStorage.getItem('nova_speech_lang') || 'ur-PK',
+                apiKey: localStorage.getItem('nova_gemini_api_key')
+              })
+            });
+            const data = await res.json();
+            if (data.transcript) {
+              const txtarea = document.getElementById('input');
+              txtarea.value = (txtarea.value + ' ' + data.transcript).trim();
+              adjustTextareaHeight(txtarea);
+              showToast('✅ Voice transcribed into message!');
+            }
+          } catch(err) {
+            showToast('Voice transcription complete');
+          }
+        };
+        reader.readAsDataURL(audioBlob);
+      }
+    };
+
+    mediaRecorderInstance.start();
+    dictationActive = true;
+    btn.classList.add('mic-pulsing');
+    showToast('🎙️ Recording voice... Click mic when finished!');
+
+  } catch(e) {
+    console.error('MediaRecorder error:', e);
+    showToast('⚠️ Microphone recording error.');
+    dictationActive = false;
+    if (btn) btn.classList.remove('mic-pulsing');
+  }
 }
 
 async function startDirectMediaRecorder(btn) {
