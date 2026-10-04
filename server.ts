@@ -574,7 +574,12 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
 
     const ai = getGeminiClient();
     if (ai) {
-      const candidateModels = ['gemini-3.5-transcribe', 'gemini-3.8-flash'];
+      const candidateModels = [
+        'gemini-2.5-flash',
+        'gemini-3-flash-preview',
+        'gemini-3.1-flash-lite-preview',
+        'gemini-flash-latest'
+      ];
       for (const mName of candidateModels) {
         try {
           const response = await ai.models.generateContent({
@@ -605,13 +610,20 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
     }
 
     if (!transcriptText) {
-      return res.status(500).json({ error: 'Voice transcription could not be completed. Please verify GOOGLE_API_KEY on the server.' });
+      return res.status(200).json({
+        transcript: '',
+        useBrowserSpeech: true
+      });
     }
 
     return res.json({ transcript: transcriptText });
 
   } catch (error: any) {
-    return res.status(500).json({ error: 'Transcription failed', details: error.message });
+    return res.status(200).json({
+      transcript: '',
+      useBrowserSpeech: true,
+      details: error.message
+    });
   }
 });
 

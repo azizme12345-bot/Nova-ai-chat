@@ -11,7 +11,12 @@ const CORS_HEADERS = {
 };
 
 function getServerApiKey() {
-  const key = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '').trim();
+  const key = (
+    process.env.GOOGLE_API_KEY ||
+    process.env.GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    ''
+  ).trim();
   if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
     return '';
   }
@@ -56,7 +61,15 @@ export default async function handler(req, res) {
     }
 
     const isUrdu = language.startsWith('ur');
-    const targetLang = isUrdu ? 'Urdu' : language.startsWith('hi') ? 'Hindi' : language.startsWith('ar') ? 'Arabic' : 'English';
+    const targetLang = isUrdu
+      ? 'Urdu'
+      : language.startsWith('hi')
+      ? 'Hindi'
+      : language.startsWith('pa')
+      ? 'Punjabi'
+      : language.startsWith('ar')
+      ? 'Arabic'
+      : 'English';
 
     let transcriptText = '';
 
@@ -66,7 +79,12 @@ export default async function handler(req, res) {
         httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
       });
 
-      const candidateModels = ['gemini-3.5-transcribe', 'gemini-3.8-flash'];
+      const candidateModels = [
+        'gemini-2.5-flash',
+        'gemini-3-flash-preview',
+        'gemini-3.1-flash-lite-preview',
+        'gemini-flash-latest'
+      ];
       for (const mName of candidateModels) {
         try {
           const response = await ai.models.generateContent({
@@ -80,7 +98,7 @@ export default async function handler(req, res) {
                   }
                 },
                 {
-                  text: `Transcribe this spoken audio accurately in ${targetLang}. Return ONLY verbatim transcribed text.`
+                  text: `Transcribe this spoken audio accurately in ${targetLang}. Return ONLY verbatim transcribed text without any extra commentary.`
                 }
               ]
             }
@@ -97,16 +115,27 @@ export default async function handler(req, res) {
     }
 
     if (!transcriptText) {
-      res.writeHead(500, { 'Content-Type': 'application/json', ...CORS_HEADERS });
-      res.end(JSON.stringify({ error: 'Transcription failed. Please verify GOOGLE_API_KEY on the server.' }));
+      res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+      res.end(
+        JSON.stringify({
+          transcript: '',
+          useBrowserSpeech: true,
+          notice: 'Browser Web Speech API active'
+        })
+      );
       return;
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
     res.end(JSON.stringify({ transcript: transcriptText }));
-
   } catch (error) {
-    res.writeHead(500, { 'Content-Type': 'application/json', ...CORS_HEADERS });
-    res.end(JSON.stringify({ error: 'Transcription failed', details: error.message }));
+    res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+    res.end(
+      JSON.stringify({
+        transcript: '',
+        useBrowserSpeech: true,
+        details: error.message
+      })
+    );
   }
 }

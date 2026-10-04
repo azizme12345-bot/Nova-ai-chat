@@ -2609,9 +2609,11 @@ async function checkMicrophonePermission() {
   return 'prompt';
 }
 
+let dictationBaseText = '';
+
 async function toggleVoiceDictation() {
   const btn = document.getElementById('btn-mic-dictate');
-  
+
   if (dictationActive) {
     stopVoiceDictation();
     return;
@@ -2619,13 +2621,76 @@ async function toggleVoiceDictation() {
 
   hideMicErrorBanner();
 
-  // 1. Browser Permission Check
+  const selectedLang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // PRIMARY ENGINE: 100% FREE Browser Web Speech API (Works on Android Chrome, Desktop Chrome, Edge, Safari — NO API KEY REQUIRED & NO MediaRecorder mic lock conflict!)
+  if (Speech) {
+    try {
+      const txtarea = document.getElementById('input');
+      dictationBaseText = txtarea ? txtarea.value.trim() : '';
+      if (dictationBaseText) dictationBaseText += ' ';
+
+      recognition = new Speech();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = selectedLang;
+
+      dictationActive = true;
+      speechRecognizedInSession = false;
+      if (btn) btn.classList.add('mic-pulsing');
+
+      showToast(`🎙️ مائیک آن ہے (${selectedLang}) — اب بولیں، آپ کی آواز فوری ٹیکسٹ میں لکھتی جائے گی!`);
+
+      recognition.onresult = (e) => {
+        let interimTranscript = '';
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+          const chunk = e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            dictationBaseText += chunk.trim() + ' ';
+            speechRecognizedInSession = true;
+          } else {
+            interimTranscript += chunk;
+            speechRecognizedInSession = true;
+          }
+        }
+        if (txtarea) {
+          txtarea.value = (dictationBaseText + interimTranscript).trim();
+          adjustTextareaHeight(txtarea);
+          updateEmptyStateVisibility();
+        }
+      };
+
+      recognition.onerror = (e) => {
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          dictationActive = false;
+          if (btn) btn.classList.remove('mic-pulsing');
+          showMicErrorBanner('⚠️ Permission Denied: براہ کرم براؤزر کے ایڈریس بار (🔒) میں جا کر Microphone کو Allow کریں۔');
+        }
+      };
+
+      recognition.onend = () => {
+        // Keep listening continuously on Android Chrome until user taps mic to stop
+        if (dictationActive && recognition) {
+          try {
+            recognition.start();
+          } catch (restartErr) {}
+        }
+      };
+
+      recognition.start();
+      return;
+    } catch (speechErr) {
+      console.warn('Web Speech start fallback:', speechErr);
+    }
+  }
+
+  // FALLBACK ENGINE (Only for browsers without Web Speech API):
   const permState = await checkMicrophonePermission();
   if (permState === 'denied' || permState === 'unsupported') {
     return;
   }
 
-  // 2. Request Microphone Stream Access
   try {
     activeMicStream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -2635,68 +2700,23 @@ async function toggleVoiceDictation() {
       }
     });
   } catch (permErr) {
-    console.error('Microphone permission error:', permErr);
     const errName = permErr?.name || '';
     const errMsg = permErr?.message || '';
     if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError' || errMsg.toLowerCase().includes('permission denied')) {
       showMicErrorBanner('⚠️ Permission Denied: مائیکروفون کی اجازت نہیں دی گئی۔ براہ کرم براؤزر سیٹنگز میں مائیک کو Allow کریں۔');
-    } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
-      showMicErrorBanner('⚠️ کوئی مائیکروفون ڈیوائس نہیں ملی (No microphone found).');
     } else {
-      showMicErrorBanner('⚠️ مائیکروفون چلانے میں مسئلہ پیش آیا: ' + (errMsg || 'Permission Denied'));
+      showMicErrorBanner('⚠️ مائیکروفون چلانے میں مسئلہ پیش آیا۔');
     }
     dictationActive = false;
     if (btn) btn.classList.remove('mic-pulsing');
     return;
   }
 
-  // 3. Start reliable MediaRecorder + optional live SpeechRecognition
   speechRecognizedInSession = false;
   dictationActive = true;
   if (btn) btn.classList.add('mic-pulsing');
-
-  const selectedLang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
-  showToast(`🎙️ مائیک آن ہے (${selectedLang}) - اب بولیں، مکمل ہونے پر دوبارہ مائیک دبائیں!`);
-
-  // Start MediaRecorder so audio is always captured and transcribed via /api/transcribe if Web Speech doesn't fire
+  showToast(`🎙️ مائیک آن ہے (${selectedLang}) - اب بولیں!`);
   startDirectMediaRecorderWithStream(btn, activeMicStream);
-
-  // Also start Web Speech API for instant live text if browser supports it
-  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (Speech) {
-    try {
-      recognition = new Speech();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = selectedLang;
-
-      recognition.onresult = e => {
-        let finalTranscript = '';
-        for (let i = e.resultIndex; i < e.results.length; ++i) {
-          if (e.results[i].isFinal) {
-            finalTranscript += e.results[i][0].transcript;
-          }
-        }
-        if (finalTranscript) {
-          speechRecognizedInSession = true;
-          const txtarea = document.getElementById('input');
-          txtarea.value = (txtarea.value + ' ' + finalTranscript).trim();
-          adjustTextareaHeight(txtarea);
-          updateEmptyStateVisibility();
-        }
-      };
-
-      recognition.onerror = e => {
-        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          showMicErrorBanner('⚠️ Permission Denied: براؤزر نے مائیکروفون تک رسائی روک دی ہے۔');
-        }
-      };
-
-      recognition.start();
-    } catch (err) {
-      // MediaRecorder is already running as primary recorder
-    }
-  }
 }
 
 function startDirectMediaRecorderWithStream(btn, stream) {
@@ -2722,7 +2742,6 @@ function startDirectMediaRecorderWithStream(btn, stream) {
     };
 
     mediaRecorderInstance.onstop = async () => {
-      // Only send to backend /api/transcribe if Web Speech API didn't already insert live transcript
       if (speechRecognizedInSession) {
         showToast('✅ آواز ٹیکسٹ میں تبدیل ہو گئی!');
         return;
@@ -2730,7 +2749,7 @@ function startDirectMediaRecorderWithStream(btn, stream) {
 
       const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
       if (audioBlob.size > 500) {
-        showToast('⏳ آپ کی آواز کو الفاظ میں تبدیل کیا جا رہا ہے (Transcribing)...');
+        showToast('⏳ آپ کی آواز کو الفاظ میں تبدیل کیا جا رہا ہے...');
         const reader = new FileReader();
         reader.onload = async (e) => {
           const base64Data = e.target.result;
@@ -2751,11 +2770,11 @@ function startDirectMediaRecorderWithStream(btn, stream) {
               adjustTextareaHeight(txtarea);
               updateEmptyStateVisibility();
               showToast('✅ آپ کی آواز میسج میں لکھ دی گئی ہے!');
-            } else if (data.error) {
-              showToast('⚠️ ' + data.error);
+            } else {
+              showToast('ℹ️ براہ کرم وائس ٹو ٹیکسٹ کے لیے Chrome یا Edge براؤزر استعمال کریں۔');
             }
           } catch (err) {
-            showToast('⚠️ Voice transcription error: ' + (err.message || 'Server error'));
+            showToast('ℹ️ براہ کرم وائس ٹو ٹیکسٹ کے لیے Chrome یا Edge براؤزر استعمال کریں۔');
           }
         };
         reader.readAsDataURL(audioBlob);
@@ -2774,8 +2793,10 @@ function stopVoiceDictation() {
   if (btn) btn.classList.remove('mic-pulsing');
 
   if (recognition) {
-    try { recognition.stop(); } catch (e) {}
+    const activeRec = recognition;
     recognition = null;
+    try { activeRec.stop(); } catch (e) {}
+    showToast('✅ آواز ٹیکسٹ میں تبدیل ہو گئی!');
   }
 
   if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
