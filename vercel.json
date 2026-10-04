@@ -4,11 +4,24 @@
     {
       "source": "/api/translate",
       "destination": "/api/translate.js"
+    },
+    {
+      "source": "/api/transcribe",
+      "destination": "/api/transcribe.js"
+    },
+    {
+      "source": "/api/generate-image",
+      "destination": "/api/generate-image.js"
+    },
+    {
+      "source": "/api/tts",
+      "destination": "/api/tts.js"
     }
   ],
   "functions": {
-    "api/translate.js": {
-      "maxDuration": 30
-    }
+    "api/translate.js": { "maxDuration": 30 },
+    "api/transcribe.js": { "maxDuration": 30 },
+    "api/generate-image.js": { "maxDuration": 30 },
+    "api/tts.js": { "maxDuration": 30 }
   }
 }
