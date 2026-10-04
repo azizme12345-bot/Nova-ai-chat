@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nova-ai-offline-v3';
+const CACHE_NAME = 'nova-ai-offline-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -8,12 +8,14 @@ const ASSETS_TO_CACHE = [
   '/pwa-192x192.png',
   '/pwa-512x512.png',
   '/pwa-maskable-512x512.png',
-  '/apple-touch-icon.png'
+  '/apple-touch-icon.png',
+  '/PROMOTE_URDU.txt',
+  '/voice_to_text_tool.html'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE)).catch(() => {})
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
@@ -35,33 +37,42 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
   const url = new URL(event.request.url);
 
-  // Never intercept API routes or Vite internal dev server endpoints
+  // Never intercept Vite internal dev scripts, HMR, node_modules, or API routes
   if (
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/@vite') ||
     url.pathname.startsWith('/@fs') ||
     url.pathname.startsWith('/@id') ||
-    url.pathname.startsWith('/node_modules/') ||
+    url.pathname.startsWith('/node_modules') ||
     url.pathname.startsWith('/src/') ||
-    url.pathname.includes('dev-sw.js') ||
-    url.pathname.includes('workbox-')
+    url.search.includes('import') ||
+    url.search.includes('t=')
   ) {
     return;
   }
 
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && url.origin === self.location.origin) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return response;
+        return networkResponse;
       })
-      .catch(() =>
-        caches.match(event.request).then((cached) => cached || caches.match('/index.html'))
-      )
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+          return new Response('', { status: 503, statusText: 'Offline' });
+        });
+      })
   );
 });

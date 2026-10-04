@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎤 اردو وائس ٹو ٹیکسٹ ٹول — Free Voice to Text Tool</title>
+  <style>
+    :root {
+      --bg: #0b0f17;
+      --card: #111826;
+      --card2: #172033;
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #7c5cff;
+      --accent-glow: rgba(124, 92, 255, 0.35);
+      --green: #10b981;
+      --red: #ef4444;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #172033 0%, #0b0f17 70%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 18px;
+    }
+    .container {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .title-wrap h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .title-wrap p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .badge {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .controls-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    select {
+      flex: 1;
+      min-width: 180px;
+      background: var(--card2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+    }
+    .mic-btn {
+      flex: 2;
+      min-width: 220px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 20px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 22px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+    .mic-btn.recording {
+      background: var(--red);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.65);
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+    .status-bar {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    textarea {
+      width: 100%;
+      height: 230px;
+      background: #080c14;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 17px;
+      line-height: 1.75;
+      resize: vertical;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    textarea:focus {
+      border-color: var(--accent);
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .btn {
+      background: var(--card2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: rgba(124, 92, 255, 0.2);
+      border-color: var(--accent);
+    }
+    .share-box {
+      background: rgba(124, 92, 255, 0.08);
+      border: 1px dashed rgba(124, 92, 255, 0.45);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 8px;
+    }
+    .share-box h3 {
+      font-size: 15px;
+      margin-bottom: 8px;
+      color: #c4b5fd;
+    }
+    .share-pre {
+      background: #080c14;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      color: #e5e7eb;
+      margin-bottom: 12px;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10b981;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title-wrap">
+        <h1>🎤 اردو وائس ٹو ٹیکسٹ ٹول</h1>
+        <p>آواز کو فوری طور پر TEXT میں بدلیں — بالکل FREE، بغیر کسی API Key کے!</p>
+      </div>
+      <span class="badge">✓ 100% FREE · No API Key</span>
+    </div>
+
+    <div class="controls-row">
+      <select id="langSelect" onchange="updateLang()">
+        <option value="ur-PK" selected>🇵🇰 اردو (پاکستان - Urdu)</option>
+        <option value="ur-IN">🇮🇳 اردو (بھارت - Urdu)</option>
+        <option value="en-US">🇺🇸 English (US / Global)</option>
+        <option value="hi-IN">🇮🇳 हिंदी (Hindi)</option>
+        <option value="pa-PK">🇵🇰 پنجابی (Punjabi)</option>
+        <option value="ar-SA">🇸🇦 العربية (Arabic)</option>
+      </select>
+
+      <button id="micBtn" class="mic-btn" onclick="toggleRecording()">
+        <span id="micIcon">🎤</span>
+        <span id="micBtnText">بولنا شروع کریں (Start Speaking)</span>
+      </button>
+    </div>
+
+    <div class="status-bar">
+      <span id="statusText">🟢 تیار ہے — مائیک بٹن دبائیں اور بولیں</span>
+      <span id="wordCount">0 الفاظ</span>
+    </div>
+
+    <textarea id="outputText" placeholder="یہاں آپ کی آواز خودکار طور پر تحریر (Text) میں تبدیل ہو کر نظر آئے گی..." oninput="updateStats()"></textarea>
+
+    <div class="action-grid">
+      <button class="btn" onclick="copyText()">📋 ٹیکسٹ کاپی کریں (Copy)</button>
+      <button class="btn" onclick="downloadTranscript()">💾 فائل ڈاؤنلوڈ (.txt)</button>
+      <button class="btn" onclick="clearText()">🗑️ صاف کریں (Clear)</button>
+      <a class="btn" href="/" style="color:#a78bfa;">💬 NOVA AI Chat پر واپس جائیں</a>
+    </div>
+
+    <div class="share-box">
+      <h3>📤 دوست کو بھیجیں (Share with Friends):</h3>
+      <div class="share-pre" id="promoMessage">السلام علیکم! 
+
+ایک شاندار ٹول ہے:
+- Voice کو TEXT میں بدل دیتا ہے
+- اردو میں کام کرتا ہے
+- بالکل FREE
+- کوئی API key نہیں
+
+یہ 2 فائلیں download کرو اور پڑھ:
+👉 PROMOTE_URDU.txt (پہلے یہ پڑھو)
+👉 voice_to_text_tool.html (پھر یہ کھولو)
+
+Try کر کے بتا!</div>
+      <div class="action-grid" style="margin-bottom:0;">
+        <button class="btn" onclick="copyPromoMessage()" style="background:var(--accent); color:#fff; border:none;">📋 یہ پیغام کاپی کریں</button>
+        <a class="btn" href="/PROMOTE_URDU.txt" download="PROMOTE_URDU.txt">📥 Download PROMOTE_URDU.txt</a>
+        <a class="btn" href="/voice_to_text_tool.html" download="voice_to_text_tool.html">📥 Download voice_to_text_tool.html</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let recognition = null;
+    let isRecording = false;
+    let finalTranscriptStore = '';
+
+    function showNotice(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2800);
+    }
+
+    function updateLang() {
+      const lang = document.getElementById('langSelect').value;
+      const box = document.getElementById('outputText');
+      if (lang.startsWith('en') || lang.startsWith('hi')) {
+        box.style.direction = 'ltr';
+        box.style.textAlign = 'left';
+      } else {
+        box.style.direction = 'rtl';
+        box.style.textAlign = 'right';
+      }
+      if (isRecording) {
+        stopRecording();
+        setTimeout(startRecording, 250);
+      }
+    }
+
+    function updateStats() {
+      const val = document.getElementById('outputText').value.trim();
+      const words = val ? val.split(/\s+/).length : 0;
+      document.getElementById('wordCount').innerText = words + ' الفاظ';
+    }
+
+    function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    function startRecording() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        document.getElementById('statusText').innerText = '⚠️ براہ کرم Google Chrome یا Microsoft Edge براؤزر استعمال کریں۔';
+        showNotice('⚠️ Speech API کے لیے Chrome یا Edge استعمال کریں');
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = document.getElementById('langSelect').value;
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      finalTranscriptStore = document.getElementById('outputText').value;
+      if (finalTranscriptStore && !finalTranscriptStore.endsWith(' ')) {
+        finalTranscriptStore += ' ';
+      }
+
+      recognition.onstart = () => {
+        isRecording = true;
+        document.getElementById('micBtn').classList.add('recording');
+        document.getElementById('micBtnText').innerText = 'روکنے کے لیے کلک کریں (Stop)';
+        document.getElementById('statusText').innerText = '🔴 سن رہا ہے... اب بولیں (Listening)';
+      };
+
+      recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const tr = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscriptStore += tr + ' ';
+          } else {
+            interim += tr;
+          }
+        }
+        document.getElementById('outputText').value = finalTranscriptStore + interim;
+        updateStats();
+      };
+
+      recognition.onerror = (event) => {
+        document.getElementById('statusText').innerText = '⚠️ مائیکروفون ایرر: ' + event.error;
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          try { recognition.start(); } catch (e) {}
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch (e) {
+        showNotice('⚠️ مائیکروفون شروع کرنے میں مسئلہ پیش آیا');
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+      }
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('micBtnText').innerText = 'بولنا شروع کریں (Start Speaking)';
+      document.getElementById('statusText').innerText = '✅ ریکارڈنگ مکمل — ٹیکسٹ تیار ہے';
+    }
+
+    function copyText() {
+      const val = document.getElementById('outputText').value;
+      if (!val.trim()) {
+        showNotice('⚠️ کاپی کرنے کے لیے پہلے کچھ بولیں یا لکھیں');
+        return;
+      }
+      navigator.clipboard.writeText(val).then(() => {
+        showNotice('✅ ٹیکسٹ کاپی ہو گیا!');
+      });
+    }
+
+    function downloadTranscript() {
+      const val = document.getElementById('outputText').value;
+      if (!val.trim()) {
+        showNotice('⚠️ ڈاؤنلوڈ کرنے کے لیے ٹیکسٹ موجود نہیں');
+        return;
+      }
+      const blob = new Blob([val], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'urdu_voice_to_text.txt';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      showNotice('📥 ٹیکسٹ فائل ڈاؤنلوڈ ہو گئی!');
+    }
+
+    function clearText() {
+      finalTranscriptStore = '';
+      document.getElementById('outputText').value = '';
+      updateStats();
+      showNotice('🗑️ ٹیکسٹ صاف کر دیا گیا');
+    }
+
+    function copyPromoMessage() {
+      const msg = document.getElementById('promoMessage').innerText;
+      navigator.clipboard.writeText(msg).then(() => {
+        showNotice('✅ دوست کو بھیجنے والا پیغام کاپی ہو گیا!');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -496,6 +496,95 @@ body.is-standalone-pwa .website-only-logo {
     </div>
   </div>
 
+  <!-- FREE URDU VOICE TO TEXT TOOL & SHARE WITH FRIEND MODAL -->
+  <div class="modal-overlay" id="voiceToolModal">
+    <div class="modal-card" style="max-width:540px; max-height:90dvh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+          <span>🎤</span> <span>اردو وائس ٹو ٹیکسٹ ٹول (FREE Voice to Text)</span>
+        </h3>
+        <button onclick="closeVoiceToolModal()" class="icon-btn" style="width:36px; height:36px;">✕</button>
+      </div>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+        <span style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700;">✓ اردو میں کام کرتا ہے</span>
+        <span style="background:var(--accent-soft); color:var(--accent); border:1px solid var(--line); padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700;">✓ بالکل FREE</span>
+        <span style="background:var(--panel); color:var(--muted); border:1px solid var(--line); padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700;">✓ کوئی API key نہیں</span>
+      </div>
+
+      <!-- LIVE VOICE TO TEXT BOX INSIDE MODAL -->
+      <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:14px;">
+        <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+          <select id="voiceToolLang" onchange="changeVoiceToolLang()" style="flex:1; min-width:140px; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-size:12.5px; font-weight:600; outline:none;">
+            <option value="ur-PK" selected>🇵🇰 اردو (Urdu - Pakistan)</option>
+            <option value="ur-IN">🇮🇳 اردو (Urdu - India)</option>
+            <option value="en-US">🇺🇸 English (US / Global)</option>
+            <option value="hi-IN">🇮🇳 हिंदी (Hindi)</option>
+            <option value="pa-PK">🇵🇰 پنجابی (Punjabi)</option>
+            <option value="ar-SA">🇸🇦 العربية (Arabic)</option>
+          </select>
+          <button id="btnVoiceToolRecord" onclick="toggleStandaloneVoiceTool()" class="side-btn" style="flex:1.4; min-width:170px; background:var(--accent); color:#fff; justify-content:center; font-weight:800; padding:9px 14px;">
+            <span id="voiceToolMicIcon">🎤</span>
+            <span id="voiceToolBtnText">بولنا شروع کریں (Start)</span>
+          </button>
+        </div>
+
+        <div id="voiceToolStatus" style="font-size:11.5px; color:var(--muted); margin-bottom:8px; font-weight:600;">
+          🟢 تیار ہے — مائیک بٹن دبائیں اور اردو یا انگریزی میں بولیں
+        </div>
+
+        <textarea id="voiceToolTextarea" dir="rtl" placeholder="یہاں آپ کی آواز خودکار طور پر تحریر (Text) میں بدلتی جائے گی..." style="width:100%; height:115px; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14.5px; line-height:1.65; resize:vertical; outline:none; margin-bottom:10px;"></textarea>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button onclick="copyVoiceToolOutput()" class="side-btn" style="flex:1; border:1px solid var(--line); justify-content:center; font-size:12px; font-weight:700; padding:8px;">📋 Copy Text</button>
+          <button onclick="insertVoiceToolToChat()" class="side-btn" style="flex:1; background:var(--accent-soft); color:var(--accent); justify-content:center; font-size:12px; font-weight:700; padding:8px;">💬 Insert to Chat</button>
+          <button onclick="clearVoiceToolOutput()" class="side-btn" style="width:auto; border:1px solid var(--line); justify-content:center; font-size:12px; padding:8px 12px; color:#ef4444;">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <!-- SHARE WITH FRIEND ("دوست کو بھیجیں") & 2 FILES DOWNLOAD SECTION -->
+      <div style="background:var(--accent-soft); border:1px dashed var(--accent); border-radius:12px; padding:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-size:13px; font-weight:800; color:var(--accent);">📤 دوست کو بھیجیں (Share Message & Files):</span>
+          <button onclick="copyFriendPromoMessage()" style="background:var(--accent); color:#fff; border:none; border-radius:8px; padding:5px 10px; font-size:11.5px; font-weight:700; cursor:pointer;">📋 پیغام کاپی کریں</button>
+        </div>
+
+        <pre id="friendPromoText" dir="rtl" style="background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.65; color:var(--text); white-space:pre-wrap; font-family:inherit; margin:0 0 10px 0; text-align:right;">السلام علیکم! 
+
+ایک شاندار ٹول ہے:
+- Voice کو TEXT میں بدل دیتا ہے
+- اردو میں کام کرتا ہے
+- بالکل FREE
+- کوئی API key نہیں
+
+یہ 2 فائلیں download کرو اور پڑھ:
+👉 PROMOTE_URDU.txt (پہلے یہ پڑھو)
+👉 voice_to_text_tool.html (پھر یہ کھولو)
+
+Try کر کے بتا!</pre>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+          <a href="/PROMOTE_URDU.txt" download="PROMOTE_URDU.txt" class="side-btn" style="background:var(--panel2); border:1px solid var(--line); justify-content:center; font-size:11.5px; font-weight:700; text-decoration:none; padding:9px 8px; text-align:center;">
+            📥 1. PROMOTE_URDU.txt
+          </a>
+          <a href="/voice_to_text_tool.html" download="voice_to_text_tool.html" class="side-btn" style="background:var(--panel2); border:1px solid var(--line); justify-content:center; font-size:11.5px; font-weight:700; text-decoration:none; padding:9px 8px; text-align:center;">
+            📥 2. voice_to_text_tool.html
+          </a>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button onclick="shareVoiceToolWithFriend()" class="side-btn" style="flex:1; background:var(--accent); color:#fff; justify-content:center; font-size:12px; font-weight:700; padding:9px;">
+            📲 دوست کو بھیجیں (Share Now)
+          </button>
+          <a href="/voice_to_text_tool.html" target="_blank" rel="noopener noreferrer" class="side-btn" style="flex:1; border:1px solid var(--line); background:var(--panel); justify-content:center; font-size:12px; font-weight:700; padding:9px; text-decoration:none;">
+            🌐 ٹول الگ ٹیب میں کھولیں
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- SIDEBAR (Opens when Hamburger ≡ is clicked) -->
   <aside class="sidebar" id="appSidebar">
     <div class="brand">
@@ -553,6 +642,9 @@ body.is-standalone-pwa .website-only-logo {
     </button>
     <button class="side-btn" onclick="openPhotoStudioModal()">
       <span>🎨</span><span>AI Photo Studio & Editor</span>
+    </button>
+    <button class="side-btn" onclick="openVoiceToolModal()">
+      <span>🎤</span><span>Voice to Text Tool (اردو)</span>
     </button>
     <button class="side-btn" onclick="triggerAttachment('gallery'); closeSidebar();">
       <span>🖼️</span><span>Image / File Analysis</span>
@@ -656,6 +748,7 @@ body.is-standalone-pwa .website-only-logo {
           <button class="side-btn" onclick="openSettingsModal(); closeMoreMenu();"><span>⚙️</span><span>Settings</span></button>
           <button class="side-btn" onclick="triggerFeatureInChat('video'); closeMoreMenu();"><span>🎬</span><span>Video Generation</span></button>
           <button class="side-btn" onclick="openPhotoStudioModal(); closeMoreMenu();"><span>🎨</span><span>AI Photo Studio</span></button>
+          <button class="side-btn" onclick="openVoiceToolModal(); closeMoreMenu();"><span>🎤</span><span>Voice to Text Tool (اردو)</span></button>
           <button class="side-btn" onclick="toggleTheme(); closeMoreMenu();"><span>◐</span><span>Dark / Light Theme</span></button>
           <button class="side-btn" onclick="triggerPwaInstall(); closeMoreMenu();"><span>📲</span><span>Install App (PWA)</span></button>
         </div>
@@ -723,6 +816,7 @@ body.is-standalone-pwa .website-only-logo {
         <button onclick="triggerAttachment('pdf')" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px;"><span style="margin-right:8px;">📄</span><span>PDF / Code File</span></button>
         <button onclick="triggerAttachment('link')" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px;"><span style="margin-right:8px;">🔗</span><span>Attach Website Link</span></button>
         <button onclick="openPhotoStudioModal()" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px; color:var(--accent); font-weight:700;"><span style="margin-right:8px;">🎨</span><span>AI Photo Studio</span></button>
+        <button onclick="openVoiceToolModal()" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px; color:#10b981; font-weight:700;"><span style="margin-right:8px;">🎤</span><span>Voice to Text (اردو)</span></button>
       </div>
 
       <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:800px; margin:0 auto 8px; font-size:12px;">
@@ -2694,6 +2788,189 @@ function stopVoiceDictation() {
     } catch (e) {}
     activeMicStream = null;
   }
+}
+
+// ============================================================================
+// STANDALONE URDU VOICE TO TEXT TOOL & SHARE WITH FRIEND ("دوست کو بھیجیں")
+// ============================================================================
+let voiceToolRec = null;
+let voiceToolRecording = false;
+let voiceToolFinalStore = '';
+
+function openVoiceToolModal() {
+  const plusMenu = document.getElementById('plus-menu');
+  if (plusMenu) plusMenu.style.display = 'none';
+  closeSidebar();
+  closeMoreMenu();
+  const modal = document.getElementById('voiceToolModal');
+  if (modal) modal.classList.add('active');
+}
+
+function closeVoiceToolModal() {
+  if (voiceToolRecording) {
+    stopStandaloneVoiceTool();
+  }
+  const modal = document.getElementById('voiceToolModal');
+  if (modal) modal.classList.remove('active');
+}
+
+function changeVoiceToolLang() {
+  const lang = document.getElementById('voiceToolLang')?.value || 'ur-PK';
+  const box = document.getElementById('voiceToolTextarea');
+  if (box) {
+    if (lang.startsWith('en') || lang.startsWith('hi')) {
+      box.dir = 'ltr';
+      box.style.textAlign = 'left';
+    } else {
+      box.dir = 'rtl';
+      box.style.textAlign = 'right';
+    }
+  }
+  if (voiceToolRecording) {
+    stopStandaloneVoiceTool();
+    setTimeout(startStandaloneVoiceTool, 200);
+  }
+}
+
+function toggleStandaloneVoiceTool() {
+  if (voiceToolRecording) {
+    stopStandaloneVoiceTool();
+  } else {
+    startStandaloneVoiceTool();
+  }
+}
+
+function startStandaloneVoiceTool() {
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const statusEl = document.getElementById('voiceToolStatus');
+  const btn = document.getElementById('btnVoiceToolRecord');
+  const btnText = document.getElementById('voiceToolBtnText');
+  const box = document.getElementById('voiceToolTextarea');
+
+  if (!Speech) {
+    if (statusEl) statusEl.innerText = '⚠️ براہ کرم Google Chrome یا Edge براؤزر استعمال کریں۔';
+    showToast('⚠️ Speech Recognition کے لیے Chrome یا Edge استعمال کریں');
+    return;
+  }
+
+  voiceToolRec = new Speech();
+  voiceToolRec.lang = document.getElementById('voiceToolLang')?.value || 'ur-PK';
+  voiceToolRec.continuous = true;
+  voiceToolRec.interimResults = true;
+
+  voiceToolFinalStore = box ? box.value : '';
+  if (voiceToolFinalStore && !voiceToolFinalStore.endsWith(' ')) {
+    voiceToolFinalStore += ' ';
+  }
+
+  voiceToolRec.onstart = () => {
+    voiceToolRecording = true;
+    if (btn) btn.style.background = '#ef4444';
+    if (btnText) btnText.innerText = 'روکنے کے لیے دبائیں (Stop)';
+    if (statusEl) statusEl.innerText = '🔴 سن رہا ہے... اب اردو یا اپنی زبان میں بولیں!';
+  };
+
+  voiceToolRec.onresult = (event) => {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const tr = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        voiceToolFinalStore += tr + ' ';
+      } else {
+        interim += tr;
+      }
+    }
+    if (box) box.value = voiceToolFinalStore + interim;
+  };
+
+  voiceToolRec.onerror = (e) => {
+    if (statusEl) statusEl.innerText = '⚠️ مائیکروفون ایرر: ' + (e.error || 'Permission needed');
+  };
+
+  voiceToolRec.onend = () => {
+    if (voiceToolRecording) {
+      try { voiceToolRec.start(); } catch (e) {}
+    }
+  };
+
+  try {
+    voiceToolRec.start();
+  } catch (e) {
+    showToast('⚠️ مائیکروفون شروع کرنے میں مسئلہ پیش آیا');
+  }
+}
+
+function stopStandaloneVoiceTool() {
+  voiceToolRecording = false;
+  if (voiceToolRec) {
+    try { voiceToolRec.stop(); } catch (e) {}
+  }
+  const btn = document.getElementById('btnVoiceToolRecord');
+  const btnText = document.getElementById('voiceToolBtnText');
+  const statusEl = document.getElementById('voiceToolStatus');
+  if (btn) btn.style.background = 'var(--accent)';
+  if (btnText) btnText.innerText = 'بولنا شروع کریں (Start)';
+  if (statusEl) statusEl.innerText = '✅ آواز کامیابی سے TEXT میں تبدیل ہو گئی!';
+}
+
+function copyVoiceToolOutput() {
+  const box = document.getElementById('voiceToolTextarea');
+  if (!box || !box.value.trim()) {
+    showToast('⚠️ کاپی کرنے کے لیے پہلے کچھ بولیں یا لکھیں');
+    return;
+  }
+  navigator.clipboard.writeText(box.value).then(() => {
+    showToast('✅ ٹیکسٹ کاپی ہو گیا!');
+  });
+}
+
+function insertVoiceToolToChat() {
+  const box = document.getElementById('voiceToolTextarea');
+  if (!box || !box.value.trim()) {
+    showToast('⚠️ چیٹ میں بھیجنے کے لیے پہلے کچھ بولیں');
+    return;
+  }
+  const chatInput = document.getElementById('input');
+  if (chatInput) {
+    chatInput.value = (chatInput.value + ' ' + box.value.trim()).trim();
+    adjustTextareaHeight(chatInput);
+    updateEmptyStateVisibility();
+  }
+  closeVoiceToolModal();
+  showToast('💬 ٹیکسٹ چیٹ باکس میں شامل کر دیا گیا!');
+}
+
+function clearVoiceToolOutput() {
+  voiceToolFinalStore = '';
+  const box = document.getElementById('voiceToolTextarea');
+  if (box) box.value = '';
+  showToast('🗑️ ٹیکسٹ صاف کر دیا گیا');
+}
+
+function copyFriendPromoMessage() {
+  const promoEl = document.getElementById('friendPromoText');
+  const textToCopy = promoEl ? promoEl.innerText : '';
+  if (!textToCopy) return;
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    showToast('✅ دوست کو بھیجنے والا پیغام کاپی ہو گیا!');
+  });
+}
+
+async function shareVoiceToolWithFriend() {
+  const promoEl = document.getElementById('friendPromoText');
+  const shareText = promoEl ? promoEl.innerText : '';
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: '🎤 اردو وائس ٹو ٹیکسٹ ٹول (FREE Voice to Text)',
+        text: shareText,
+        url: window.location.origin + '/voice_to_text_tool.html'
+      });
+      showToast('📤 کامیابی سے شیئر کیا گیا!');
+      return;
+    } catch (e) {}
+  }
+  copyFriendPromoMessage();
 }
 
 // PWA Installation, Standalone Logo Control, Splash Screen & Offline Mode Logic
