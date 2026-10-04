@@ -1,7 +1,8 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { GoogleGenAI } from '@google/genai';
 
 dotenv.config();
 
@@ -16,14 +17,33 @@ app.use(express.json({ limit: '25mb' }));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-gemini-api-key, x-goog-api-key');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
   next();
 });
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+function getServerApiKey(): string {
+  const key = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '').trim();
+  if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
+    return '';
+  }
+  return key;
+}
+
+function getGeminiClient(): GoogleGenAI | null {
+  const apiKey = getServerApiKey();
+  if (!apiKey) return null;
+  return new GoogleGenAI({
+    apiKey,
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      },
+    },
+  });
+}
 
 async function callPollinationsBackup(normalizedContents: any[], systemInstruction: string): Promise<string> {
   try {
@@ -39,7 +59,6 @@ async function callPollinationsBackup(normalizedContents: any[], systemInstructi
       });
     }
 
-    // 1. Try OpenAI-compatible endpoint
     try {
       const polRes = await fetch('https://text.pollinations.ai/openai/v1/chat/completions', {
         method: 'POST',
@@ -61,7 +80,6 @@ async function callPollinationsBackup(normalizedContents: any[], systemInstructi
       // continue to fallback
     }
 
-    // 2. Direct simple prompt fallback
     const lastUserPrompt = pollinationsMessages[pollinationsMessages.length - 1]?.content || 'سلام';
     const directRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(lastUserPrompt)}?system=${encodeURIComponent(systemInstruction)}`);
     if (directRes.ok) {
@@ -76,44 +94,21 @@ async function callPollinationsBackup(normalizedContents: any[], systemInstructi
   return '';
 }
 
-async function analyzeAndExpandPrompt(rawPrompt: string, apiKey?: string, isEditing: boolean = false): Promise<string> {
+async function analyzeAndExpandPrompt(rawPrompt: string, isEditing: boolean = false): Promise<string> {
   if (!rawPrompt) return 'High resolution masterwork artwork';
 
-  const lower = rawPrompt.toLowerCase();
-  const isQuranic = lower.includes('قرآن') || lower.includes('سور') || lower.includes('بِسْمِ') || lower.includes('quran') || lower.includes('surah') || lower.includes('jumu') || lower.includes('juma') || lower.includes('bismillah') || lower.includes('calligraph') || lower.includes('green background');
-
-  if (isQuranic) {
-    return `Pristine masterwork Islamic calligraphic graphic print on a solid deep emerald green background with high-contrast white and gold Arabic calligraphy. Top center reads 'القرآن الكريم', center reads 'سُورَةُ الْجُمُعَة', middle reads 'VERSE(S) 9-10', and bottom reads 'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ'. ABSOLUTELY ZERO HUMAN FIGURES, ZERO PEOPLE, ZERO BOYS, pure sacred Arabic typography, illuminated manuscript border, 8k vector precision.`;
-  }
-
   try {
-    const { GoogleGenAI } = await import('@google/genai');
-    const aiKey = apiKey || process.env.GEMINI_API_KEY || '';
-    if (!aiKey) return rawPrompt;
-
-    const ai = new GoogleGenAI({
-      apiKey: aiKey,
-      httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-    });
+    const ai = getGeminiClient();
+    if (!ai) return rawPrompt;
 
     const analysisInstruction = `You are a World-Class AI Image Prompt Architect.
-Analyze the user's request deeply to understand the EXACT subject, language, text, and scene:
+Analyze the user's request deeply to understand the EXACT subject, language, text, and scene they want:
+- If the user requests an Islamic / Quranic calligraphic design, generate a pristine masterwork Islamic calligraphy art prompt with sacred Arabic typography and gold accents matching their exact request.
+- If the user requests any other subject (landscape, animal, car, portrait, fantasy, logo, object), generate a detailed, high-resolution masterwork prompt in English that precisely matches the user's prompt without changing their intended subject.
+- If editing an existing image (${isEditing ? 'YES' : 'NO'}), modify ONLY what the user explicitly requested while preserving the original subject and composition.
+- Return ONLY the refined, detailed masterwork image generation prompt in English.`;
 
-CRITICAL MANDATES:
-1. IF the prompt mentions Quran, Surah (e.g. Surah Al-Jumu'ah / Al-Baqarah), Ayah / Verses, Bismillah, Arabic Calligraphy, Islamic typography, or Islamic art:
-   - STRICTLY formulate an image generation prompt for a pristine Islamic calligraphic graphic print.
-   - Include: Solid deep emerald green background, ornate gold and white calligraphic script for 'القرآن الكريم' at top center, traditional Thuluth Arabic script for 'سُورَةُ الْجُمُعَة' in middle, 'VERSE(S) 9-10' cleanly typeset, and 'بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيمِ' at the bottom.
-   - MANDATORY: ABSOLUTELY ZERO HUMAN FIGURES, ZERO PEOPLE, ZERO BOYS, ZERO PORTRAITS. Only pristine Islamic Arabic calligraphy, gold leaf accents, and sacred typography.
-
-2. IF the prompt is for a general image (e.g., car, landscape, animal, futuristic city, logo):
-   - Expand the prompt into a detailed, high-resolution masterwork prompt in English that captures the user's exact subject without introducing unrelated objects or figures.
-
-3. IF editing an existing image (${isEditing ? 'YES' : 'NO'}):
-   - Modify ONLY what the user explicitly requested while preserving the original subject, face, or scene structure.
-
-Return ONLY the refined, detailed masterwork image generation prompt in English.`;
-
-    const candidateModels = ['gemini-3.8-flash'];
+    const candidateModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
     for (const modelName of candidateModels) {
       try {
         const response = await ai.models.generateContent({
@@ -133,7 +128,7 @@ Return ONLY the refined, detailed masterwork image generation prompt in English.
       }
     }
   } catch (err) {
-    // Fallback
+    // Fallback to rawPrompt
   }
 
   return rawPrompt;
@@ -143,45 +138,33 @@ function generateFallbackResponse(prompt: string, language?: string): string {
   const lower = prompt.toLowerCase().trim();
   const isUrdu = (language && language.toLowerCase().includes('urdu')) || /[\u0600-\u06FF]/.test(prompt);
 
-  // Short greetings
   if (lower === 'hi' || lower === 'hello' || lower === 'سلام' || lower === 'ہائے' || lower === 'سلام علیکم' || lower === 'assalam o alaikum') {
     return isUrdu 
       ? 'سلام! میں نووا AI ہوں۔ میں آپ کی کیا مدد کر سکتا ہوں؟'
       : 'Hello! I am NOVA AI. How can I help you today?';
   }
 
-  // How are you
   if (lower.includes('how are you') || lower.includes('kya hal hai') || lower.includes('کیسے ہو') || lower.includes('کیا حال ہے')) {
     return isUrdu
-      ? 'میں بالکل ٹھیک ہوں، الحمدللہ! آپ بتائیں کیسے ہیں؟ گھر میں سب کیسے ہیں؟'
-      : 'I am doing great, thank you! How are you doing today?';
+      ? 'میں بالکل ٹھیک ہوں، الحمدللہ! آپ بتائیں کیسے ہیں؟ میں آج آپ کی کیا مدد کر سکتا ہوں؟'
+      : 'I am doing great, thank you! How can I assist you today?';
   }
 
-  // Explicit feature request
   if (lower.includes('what can you do') || lower.includes('features') || lower.includes('کیا کیا کر سکتے ہو') || lower.includes('فیچرز')) {
     return isUrdu
-      ? `میں NOVA AI ہوں! میں آپ کے ساتھ قدرتی انداز میں بات چیت کر سکتا ہوں، آپ کے سوالات کے جوابات دے سکتا ہوں، کوڈ لکھ اور ٹھیک کر سکتا ہوں، اور تصاویر یا قرآن پاک کی خطاطی جنریٹ کر سکتا ہوں۔`
-      : `I am NOVA AI! I can chat naturally, answer questions, write and debug code, analyze screenshots, and generate photos or calligraphy artwork.`;
+      ? `میں NOVA AI ہوں! میں آپ کے ساتھ قدرتی انداز میں بات چیت کر سکتا ہوں، آپ کے سوالات کے جوابات دے سکتا ہوں، کوڈ لکھ اور ٹھیک کر سکتا ہوں، اور تصاویر جنریٹ کر سکتا ہوں۔`
+      : `I am NOVA AI! I can chat naturally, answer questions, write and debug code, analyze screenshots, and generate artwork.`;
   }
 
-  // General natural beautiful fallback
   if (isUrdu) {
-    return `جی میں بالکل سمجھ گیا ہوں اور آپ کی رہنمائی کے لیے حاضر ہوں! 
-
-اگر آپ کے پاس کوئی سوال ہے یا آپ پی ڈی ایف، فوٹو یا کوڈ کا تجزیہ کروانا چاہتے ہیں، تو سائیڈ بار میں **🔑 API Key Settings** پر کلک کر کے اپنی گوگل اے آئی اسٹوڈیو (Google AI Studio) کی چابی سیٹ کر لیں تاکہ جیمنی ماڈل آپ کو لائیو بہترین جواب دے سکے۔
-
-میں ابھی آپ کے لیے کیا مدد کر سکتا ہوں؟`;
+    return `جی میں آپ کی بات سمجھ گیا ہوں۔ سرور پر اس وقت \`GOOGLE_API_KEY\` یا \`GEMINI_API_KEY\` انوائرمنٹ ویری ایبل سیٹ نہیں ہے یا کوٹہ ختم ہو چکا ہے۔ براہ کرم سرور کے Environment Variables میں اپنی کی (Key) چیک کریں۔`;
   }
 
-  return `I understand you perfectly! I am ready to guide you.
-
-To unlock full power for code audits, PDF analysis, or visual debugging, please enter your Google AI Studio API Key in the **🔑 API Key Settings** inside the sidebar.
-
-How can I help you right now?`;
+  return `I received your message, but the server environment variable \`GOOGLE_API_KEY\` (or \`GEMINI_API_KEY\`) is not configured or has reached its quota limit. Please check your server environment variables.`;
 }
 
 // Voice Transcription Endpoint
-app.post('/api/transcribe', async (req, res) => {
+app.post('/api/transcribe', async (req: Request, res: Response) => {
   try {
     let parsedBody = req.body;
     if (typeof parsedBody === 'string') {
@@ -190,13 +173,11 @@ app.post('/api/transcribe', async (req, res) => {
       } catch (e) {}
     }
 
-    const { audioData, mimeType = 'audio/webm', language = 'ur-PK', apiKey: clientApiKey } = parsedBody || {};
+    const { audioData, mimeType = 'audio/webm', language = 'ur-PK' } = parsedBody || {};
 
     if (!audioData) {
       return res.status(400).json({ error: 'Missing audioData parameter' });
     }
-
-    const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
 
     let cleanBase64 = audioData;
     const match = audioData.match(/^data:([^;]+);base64,(.+)$/);
@@ -209,49 +190,40 @@ app.post('/api/transcribe', async (req, res) => {
 
     let transcriptText = '';
 
-    if (apiKey) {
-      try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({
-          apiKey,
-          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-        });
-
-        const candidateModels = ['gemini-3.8-flash'];
-        for (const mName of candidateModels) {
-          try {
-            const response = await ai.models.generateContent({
-              model: mName,
-              contents: {
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: mimeType || 'audio/webm',
-                      data: cleanBase64
-                    }
-                  },
-                  {
-                    text: `Listen to this short audio dictation and transcribe spoken words accurately in ${targetLang}. Return ONLY verbatim transcribed text.`
+    const ai = getGeminiClient();
+    if (ai) {
+      const candidateModels = ['gemini-3.5-transcribe', 'gemini-3.8-flash'];
+      for (const mName of candidateModels) {
+        try {
+          const response = await ai.models.generateContent({
+            model: mName,
+            contents: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType || 'audio/webm',
+                    data: cleanBase64
                   }
-                ]
-              }
-            });
-
-            if (response.text && response.text.trim()) {
-              transcriptText = response.text.trim();
-              break;
+                },
+                {
+                  text: `Transcribe this spoken audio accurately in ${targetLang}. Return ONLY the transcribed text without any extra commentary.`
+                }
+              ]
             }
-          } catch (mErr) {
-            // try next model
+          });
+
+          if (response.text && response.text.trim()) {
+            transcriptText = response.text.trim();
+            break;
           }
+        } catch (mErr) {
+          console.warn(`Transcribe model ${mName} failed:`, mErr);
         }
-      } catch (geminiErr) {
-        console.warn('Transcribe warning:', geminiErr);
       }
     }
 
     if (!transcriptText) {
-      transcriptText = isUrdu ? 'سلام، آپ کا شکریہ' : 'Hello, thank you.';
+      return res.status(500).json({ error: 'Voice transcription could not be completed. Please verify GOOGLE_API_KEY on the server.' });
     }
 
     return res.json({ transcript: transcriptText });
@@ -261,8 +233,8 @@ app.post('/api/transcribe', async (req, res) => {
   }
 });
 
-// Photo Generation Endpoint
-app.post('/api/generate-image', async (req, res) => {
+// Photo Generation & Editing Endpoint
+app.post('/api/generate-image', async (req: Request, res: Response) => {
   try {
     let parsedBody = req.body;
     if (typeof parsedBody === 'string') {
@@ -276,18 +248,15 @@ app.post('/api/generate-image', async (req, res) => {
       style = 'photorealistic', 
       aspectRatio = '1:1', 
       baseImage, 
-      mimeType = 'image/jpeg',
-      apiKey: clientApiKey 
+      mimeType = 'image/jpeg'
     } = parsedBody || {};
 
     if (!prompt && !baseImage) {
       return res.status(400).json({ error: 'Missing prompt or image parameter' });
     }
 
-    const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
-
     // STAGE 1: Deep AI Prompt Analysis
-    const analyzedPrompt = await analyzeAndExpandPrompt(prompt, apiKey, !!baseImage);
+    const analyzedPrompt = await analyzeAndExpandPrompt(prompt, !!baseImage);
 
     let width = 1024;
     let height = 1024;
@@ -314,86 +283,77 @@ app.post('/api/generate-image', async (req, res) => {
 
     let generatedImageUrl = '';
 
-    if (apiKey) {
-      try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({
-          apiKey,
-          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-        });
+    const ai = getGeminiClient();
+    if (ai) {
+      const imgModels = ['gemini-3.1-flash-lite-image', 'gemini-3.1-flash-image'];
 
-        const imgModels = ['gemini-3.1-flash-lite-image', 'gemini-3.1-flash-image'];
+      if (baseImage) {
+        let cleanBase64 = baseImage;
+        const match = baseImage.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          cleanBase64 = match[2];
+        }
 
-        if (baseImage) {
-          let cleanBase64 = baseImage;
-          const match = baseImage.match(/^data:([^;]+);base64,(.+)$/);
-          if (match) {
-            cleanBase64 = match[2];
-          }
-
-          for (const mName of imgModels) {
-            try {
-              const editResponse = await ai.models.generateContent({
-                model: mName,
-                contents: {
-                  parts: [
-                    {
-                      inlineData: {
-                        mimeType: mimeType || 'image/jpeg',
-                        data: cleanBase64,
-                      }
-                    },
-                    {
-                      text: `Edit this photo strictly according to this instruction: ${enhancedPrompt}. Do not alter unrequested elements.`
+        for (const mName of imgModels) {
+          try {
+            const editResponse = await ai.models.generateContent({
+              model: mName,
+              contents: {
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: mimeType || 'image/jpeg',
+                      data: cleanBase64,
                     }
-                  ]
-                }
-              });
-
-              if (editResponse.candidates?.[0]?.content?.parts) {
-                for (const part of editResponse.candidates[0].content.parts) {
-                  if (part.inlineData?.data) {
-                    generatedImageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
-                    break;
+                  },
+                  {
+                    text: `Edit this photo strictly according to this instruction: ${enhancedPrompt}. Do not alter unrequested elements.`
                   }
+                ]
+              }
+            });
+
+            if (editResponse.candidates?.[0]?.content?.parts) {
+              for (const part of editResponse.candidates[0].content.parts) {
+                if (part.inlineData?.data) {
+                  generatedImageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+                  break;
                 }
               }
-              if (generatedImageUrl) break;
-            } catch (e) {
-              // continue
             }
-          }
-        } else {
-          for (const mName of imgModels) {
-            try {
-              const imgResponse = await ai.models.generateContent({
-                model: mName,
-                contents: {
-                  parts: [{ text: enhancedPrompt }]
-                },
-                config: {
-                  imageConfig: {
-                    aspectRatio: (aspectRatio as any) || '1:1'
-                  }
-                }
-              });
-
-              if (imgResponse.candidates?.[0]?.content?.parts) {
-                for (const part of imgResponse.candidates[0].content.parts) {
-                  if (part.inlineData?.data) {
-                    generatedImageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
-                    break;
-                  }
-                }
-              }
-              if (generatedImageUrl) break;
-            } catch (e) {
-              // continue
-            }
+            if (generatedImageUrl) break;
+          } catch (e) {
+            // continue
           }
         }
-      } catch (geminiErr) {
-        // Quietly fallback
+      } else {
+        for (const mName of imgModels) {
+          try {
+            const imgResponse = await ai.models.generateContent({
+              model: mName,
+              contents: {
+                parts: [{ text: enhancedPrompt }]
+              },
+              config: {
+                imageConfig: {
+                  aspectRatio: (aspectRatio as any) || '1:1'
+                }
+              }
+            });
+
+            if (imgResponse.candidates?.[0]?.content?.parts) {
+              for (const part of imgResponse.candidates[0].content.parts) {
+                if (part.inlineData?.data) {
+                  generatedImageUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+                  break;
+                }
+              }
+            }
+            if (generatedImageUrl) break;
+          } catch (e) {
+            // continue
+          }
+        }
       }
     }
 
@@ -429,7 +389,7 @@ app.post('/api/generate-image', async (req, res) => {
 });
 
 // MP3 TTS Endpoint
-app.get('/api/tts', async (req, res) => {
+app.get('/api/tts', async (req: Request, res: Response) => {
   try {
     const text = (req.query.text as string) || '';
     const lang = (req.query.lang as string) || 'en';
@@ -502,8 +462,8 @@ app.get('/api/tts', async (req, res) => {
   }
 });
 
-// Translation & Core Multimodal Assistant Endpoint using official @google/genai SDK
-app.post('/api/translate', async (req, res) => {
+// Core Chat & Multimodal Assistant Handler (/api/chat and /api/translate)
+async function handleChatRequest(req: Request, res: Response) {
   try {
     let parsedBody = req.body;
     if (typeof parsedBody === 'string') {
@@ -514,32 +474,23 @@ app.post('/api/translate', async (req, res) => {
 
     const { 
       prompt, 
+      message,
       model, 
       image, 
       mimeType, 
       attachedUrl,
-      apiKey: clientApiKey, 
       language, 
       history = []
     } = parsedBody || {};
 
-    const userPrompt = prompt || (history.length > 0 ? history[history.length - 1].text : '');
+    const userPrompt = prompt || message || (history.length > 0 ? history[history.length - 1].text : '');
 
-    if (!userPrompt) {
+    if (!userPrompt && !image) {
       return res.status(400).json({ error: 'Missing prompt parameter' });
     }
 
-    // Intercept short greetings / friendly chat queries and return instant natural warm responses
-    const trimmedLower = userPrompt.toLowerCase().trim();
-    if (trimmedLower === 'hi' || trimmedLower === 'hello' || trimmedLower === 'سلام' || trimmedLower === 'ہائے' || trimmedLower === 'سلام علیکم' || trimmedLower === 'assalam o alaikum' || trimmedLower.includes('how are you') || trimmedLower.includes('kya hal hai') || trimmedLower.includes('کیسے ہو') || trimmedLower.includes('کیا حال ہے')) {
-      const fallbackText = generateFallbackResponse(userPrompt, language);
-      return res.json({ text: fallbackText });
-    }
-
-    const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
-
-    // 1. Live Website Content Scraper / Link Analyzer
-    let scrapedUrlContext = "";
+    // Live Website Content Scraper / Link Analyzer
+    let scrapedUrlContext = '';
     if (attachedUrl) {
       try {
         const fetchRes = await fetch(attachedUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } });
@@ -550,7 +501,7 @@ app.post('/api/translate', async (req, res) => {
             .replace(/<style[\s\S]*?<\/style>/gi, ' ')
             .replace(/<[^>]*>/g, ' ')
             .replace(/\s+/g, ' ')
-            .substring(0, 16000); // Scraping up to 16,000 characters
+            .substring(0, 16000);
           scrapedUrlContext = `\n\n[WEBSITE CONTENT SCRAPED FROM USER LINK ${attachedUrl}]:\n${cleanText}\n\n`;
         }
       } catch (err) {
@@ -558,9 +509,9 @@ app.post('/api/translate', async (req, res) => {
       }
     }
 
-    let finalPrompt = userPrompt;
+    let finalPrompt = userPrompt || 'Please analyze the attached file.';
     if (scrapedUrlContext) {
-      finalPrompt = `${userPrompt}${scrapedUrlContext}`;
+      finalPrompt = `${finalPrompt}${scrapedUrlContext}`;
     }
 
     const langInstruction = language ? `Strictly respond in ${language}.` : `Respond naturally in the same language as the user's message (Urdu, Hindi, English, etc.).`;
@@ -571,7 +522,7 @@ ${langInstruction}
 CONVERSATIONAL RULES (STRICT MANDATES):
 1. MATCH RESPONSE LENGTH TO USER INPUT:
    - For simple greetings like "Hi", "Hello", "سلام", "ہائے": Give a short, natural greeting (e.g. "سلام! میں نووا AI ہوں۔ میں آپ کی کیا مدد کر سکتا ہوں؟").
-   - For "How are you?" / "کیا حال ہے؟": Respond warmly and concisely (e.g. "میں بالکل ٹھیک ہوں، الحمدللہ! آپ سنائیں کیسے ہیں؟ گھر میں سب کیسے ہیں؟").
+   - For "How are you?" / "کیا حال ہے؟": Respond warmly and concisely (e.g. "میں بالکل ٹھیک ہوں، الحمدللہ! آپ سنائیں کیسے ہیں؟").
    - DO NOT output long introductions, feature menus, or unsolicited lectures on simple greetings.
    - ONLY list features or capabilities IF the user explicitly asks "What can you do?" / "What are your features?" / "تم کیا کیا کر سکتے ہو؟".
 
@@ -580,16 +531,15 @@ CONVERSATIONAL RULES (STRICT MANDATES):
      a) Deeply inspect and explain the document's main contents or code bugs.
      b) Identify any errors, blurry assets, or bad designs.
      c) Provide complete copyable code blocks to fix all issues.
-     d) Provide a refined AI prompt to copy & paste into Google AI Studio to resolve it.
 
 3. TRUTHFULNESS & MORAL CONSTITUTION:
-   - Always stand for truth, logic, and ethical principles. Never conform to falsehood or agree blindly.`;
+   - Always stand for truth, logic, and ethical principles.`;
 
     const normalizedContents: any[] = [];
 
     if (Array.isArray(history) && history.length > 0) {
       const recentHistory = history.slice(-6);
-      let lastRole = null;
+      let lastRole: string | null = null;
 
       for (const msg of recentHistory) {
         const role = msg.role === 'user' ? 'user' : 'model';
@@ -648,124 +598,79 @@ CONVERSATIONAL RULES (STRICT MANDATES):
 
     let aiText = '';
 
-    // Standard valid @google/genai SDK model candidates in priority order
     let targetModels = [
+      'gemini-3.8-flash',
       'gemini-3.1-flash-lite',
       'gemini-flash-latest',
-      'gemini-3.8-flash',
       'gemini-3.1-pro-preview'
     ];
 
     const requestedModel = (model || '').toLowerCase();
     if (requestedModel.includes('pro')) {
-      targetModels = ['gemini-3.1-pro-preview', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash'];
-    } else if (requestedModel.includes('3.8')) {
-      targetModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
+      targetModels = ['gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-flash-latest'];
+    } else if (requestedModel.includes('lite')) {
+      targetModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-3.1-pro-preview'];
     } else if (requestedModel.includes('latest')) {
-      targetModels = ['gemini-flash-latest', 'gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
-    } else {
-      targetModels = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
+      targetModels = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-3.1-pro-preview'];
     }
 
-    if (apiKey) {
-      try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({
-          apiKey,
-          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-        });
-
-        for (const mName of targetModels) {
-          try {
-            console.log(`Executing Gemini model: ${mName}`);
-            const response = await ai.models.generateContent({
-              model: mName,
-              contents: normalizedContents,
-              config: {
-                systemInstruction,
-                temperature: 0.7,
-                topP: 0.95
-              }
-            });
-
-            if (response.text && response.text.trim()) {
-              aiText = response.text.trim();
-              break;
-            }
-          } catch (modelErr: any) {
-            console.log(`Model ${mName} attempt limit or error:`, modelErr?.message || modelErr);
-          }
-        }
-      } catch (sdkInitErr) {
-        console.log('Gemini SDK Init error:', sdkInitErr);
-      }
-    }
-
-    // System key fallback if user key was completely exhausted or missing
-    if (!aiText) {
-      const systemKey = process.env.GEMINI_API_KEY || '';
-      if (systemKey && systemKey !== apiKey && systemKey !== 'dummy') {
+    const ai = getGeminiClient();
+    if (ai) {
+      for (const mName of targetModels) {
         try {
-          const { GoogleGenAI } = await import('@google/genai');
-          const aiSys = new GoogleGenAI({
-            apiKey: systemKey,
-            httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-          });
-          const response = await aiSys.models.generateContent({
-            model: 'gemini-3.1-flash-lite',
+          const response = await ai.models.generateContent({
+            model: mName,
             contents: normalizedContents,
-            config: { systemInstruction, temperature: 0.7 }
+            config: {
+              systemInstruction,
+              temperature: 0.7,
+              topP: 0.95
+            }
           });
+
           if (response.text && response.text.trim()) {
             aiText = response.text.trim();
+            break;
           }
-        } catch (sysErr) {
-          console.log('System key attempt failed:', sysErr);
+        } catch (modelErr: any) {
+          console.log(`Model ${mName} error:`, modelErr?.message || modelErr);
         }
       }
     }
 
-    // Pollinations Backup (free, unlimited fallback)
-    if (!aiText) {
-      console.log('Activating Pollinations backup engine...');
+    // Pollinations Backup if server key is missing or quota reached
+    if (!aiText && !image) {
       try {
         aiText = await callPollinationsBackup(normalizedContents, systemInstruction);
       } catch (pErr) {
-        console.log('Pollinations call failed:', pErr);
+        console.log('Pollinations backup failed:', pErr);
       }
     }
 
-    // Ultimate fallback
     if (!aiText) {
       aiText = generateFallbackResponse(finalPrompt, language);
     }
 
-    return res.json({ text: aiText });
+    return res.json({ text: aiText, reply: aiText });
 
   } catch (error: any) {
-    console.error('Core translate execution failed:', error);
-    const errorStr = (error?.message || '').toLowerCase();
-    if (errorStr.includes('quota') || errorStr.includes('exhausted') || errorStr.includes('429') || errorStr.includes('limit')) {
-      return res.json({
-        text: `⚠️ **API Quota Exceeded (کوٹہ عارضی طور پر ختم ہو گیا ہے)**
-
-آپ کی گوگل اے آئی اسٹوڈیو (Google AI Studio) کی چابی کا فری کوٹہ اس وقت **Gemini Pro** ماڈل کے لیے ختم ہو چکا ہے۔
-
-**آسان حل (Instant Solution):**
-برائے مہربانی بائیں جانب سائیڈ بار (Sidebar) میں جائیں اور **Active Engine** والے خانے سے **Gemini 3.8 Flash (Super Fast)** سلیکٹ کر لیں۔ وہ بالکل فری ہے، اس کا کوٹہ بہت زیادہ ہے، اور وہ فوری طور پر کام کرنا شروع کر دے گا! 🚀`
-      });
-    }
-    const fallback = generateFallbackResponse('Assistance request', 'Urdu');
-    return res.json({ text: fallback });
+    console.error('Chat API error:', error);
+    return res.status(500).json({
+      error: error?.message || 'Internal Server Error',
+      text: generateFallbackResponse('Assistance request', 'Urdu')
+    });
   }
-});
+}
+
+app.post('/api/chat', handleChatRequest);
+app.post('/api/translate', handleChatRequest);
 
 const isProd = process.env.NODE_ENV === 'production';
 
 if (!isProd) {
   const { createServer: createViteServer } = await import('vite');
   const vite = await createViteServer({
-    server: { middlewareMode: true },
+    server: { middlewareMode: true, hmr: false, watch: null },
     appType: 'spa',
   });
   app.use(vite.middlewares);

@@ -2,12 +2,21 @@
  * NOVA AI - Server-Side Voice Transcription API
  * File: api/transcribe.js
  */
+import { GoogleGenAI } from '@google/genai';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-gemini-api-key, x-goog-api-key',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
+
+function getServerApiKey() {
+  const key = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '').trim();
+  if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
+    return '';
+  }
+  return key;
+}
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -30,7 +39,7 @@ export default async function handler(req, res) {
       } catch (e) {}
     }
 
-    const { audioData, mimeType = 'audio/webm', language = 'ur-PK', apiKey: clientApiKey } = parsedBody || {};
+    const { audioData, mimeType = 'audio/webm', language = 'ur-PK' } = parsedBody || {};
 
     if (!audioData) {
       res.writeHead(400, { 'Content-Type': 'application/json', ...CORS_HEADERS });
@@ -38,7 +47,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
+    const apiKey = getServerApiKey();
 
     let cleanBase64 = audioData;
     const match = audioData.match(/^data:([^;]+);base64,(.+)$/);
@@ -52,48 +61,45 @@ export default async function handler(req, res) {
     let transcriptText = '';
 
     if (apiKey) {
-      try {
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({
-          apiKey,
-          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
-        });
+      const ai = new GoogleGenAI({
+        apiKey,
+        httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
+      });
 
-        const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-        for (const mName of candidateModels) {
-          try {
-            const response = await ai.models.generateContent({
-              model: mName,
-              contents: {
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: mimeType || 'audio/webm',
-                      data: cleanBase64
-                    }
-                  },
-                  {
-                    text: `Listen to this short audio dictation and transcribe the spoken words accurately in ${targetLang}. Return ONLY the verbatim transcribed text without any conversational prefix or quotes.`
+      const candidateModels = ['gemini-3.5-transcribe', 'gemini-3.8-flash'];
+      for (const mName of candidateModels) {
+        try {
+          const response = await ai.models.generateContent({
+            model: mName,
+            contents: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: mimeType || 'audio/webm',
+                    data: cleanBase64
                   }
-                ]
-              }
-            });
-
-            if (response.text && response.text.trim()) {
-              transcriptText = response.text.trim();
-              break;
+                },
+                {
+                  text: `Transcribe this spoken audio accurately in ${targetLang}. Return ONLY verbatim transcribed text.`
+                }
+              ]
             }
-          } catch (mErr) {
-            // try next model
+          });
+
+          if (response.text && response.text.trim()) {
+            transcriptText = response.text.trim();
+            break;
           }
+        } catch (mErr) {
+          // try next model
         }
-      } catch (geminiErr) {
-        console.warn('Transcribe Gemini warning:', geminiErr);
       }
     }
 
     if (!transcriptText) {
-      transcriptText = isUrdu ? 'سلام، آپ کا شکریہ' : 'Hello, thank you.';
+      res.writeHead(500, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+      res.end(JSON.stringify({ error: 'Transcription failed. Please verify GOOGLE_API_KEY on the server.' }));
+      return;
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json', ...CORS_HEADERS });

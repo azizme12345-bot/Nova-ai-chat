@@ -1,35 +1,41 @@
 /**
- * NOVA AI - Advanced Photo Generator & Photo Editor API with Deep Prompt Analyzer
+ * NOVA AI - Advanced Photo Generator & Photo Editor API
  * File: api/generate-image.js
  */
+import { GoogleGenAI } from '@google/genai';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-gemini-api-key, x-goog-api-key',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
+
+function getServerApiKey() {
+  const key = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '').trim();
+  if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
+    return '';
+  }
+  return key;
+}
 
 async function analyzeAndExpandPrompt(rawPrompt, apiKey, isEditing = false) {
   if (!rawPrompt) return 'High resolution masterwork artwork';
+  if (!apiKey) return rawPrompt;
 
-  // Intelligent prompt expansion using Gemini
   try {
-    const { GoogleGenAI } = await import('@google/genai');
-    const aiKey = apiKey || process.env.GEMINI_API_KEY || '';
-    if (!aiKey) return rawPrompt;
-
     const ai = new GoogleGenAI({
-      apiKey: aiKey,
+      apiKey,
       httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
     });
 
     const analysisInstruction = `You are a World-Class AI Image Prompt Architect.
 Analyze the user's request deeply to understand the EXACT subject, language, text, and scene they want:
-- If the user requests an Islamic / Quranic calligraphic design, generate a pristine masterwork Islamic calligraphy art prompt with beautiful sacred Arabic typography and gold accents matching their exact request.
+- If the user requests an Islamic / Quranic calligraphic design, generate a pristine masterwork Islamic calligraphy art prompt with sacred Arabic typography and gold accents matching their exact request.
 - If the user requests any other subject (landscape, animal, car, portrait, fantasy, logo), generate a detailed, high-resolution masterwork prompt in English that precisely matches the user's prompt without changing their intended subject.
+- If editing (${isEditing ? 'YES' : 'NO'}), modify ONLY what the user requested.
 - Return ONLY the refined, detailed masterwork image generation prompt in English.`;
 
-    const candidateModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    const candidateModels = ['gemini-3.8-flash', 'gemini-3.1-flash-lite'];
     for (const modelName of candidateModels) {
       try {
         const response = await ai.models.generateContent({
@@ -81,8 +87,7 @@ export default async function handler(req, res) {
       style = 'photorealistic', 
       aspectRatio = '1:1', 
       baseImage, 
-      mimeType = 'image/jpeg',
-      apiKey: clientApiKey 
+      mimeType = 'image/jpeg'
     } = parsedBody || {};
 
     if (!prompt && !baseImage) {
@@ -91,12 +96,9 @@ export default async function handler(req, res) {
       return;
     }
 
-    const apiKey = (clientApiKey || req.headers['x-gemini-api-key'] || req.headers['x-goog-api-key'] || process.env.GEMINI_API_KEY || '').toString().trim();
-
-    // STAGE 1: Deep AI Prompt Analysis
+    const apiKey = getServerApiKey();
     const analyzedPrompt = await analyzeAndExpandPrompt(prompt, apiKey, !!baseImage);
 
-    // Map Aspect Ratios to dimensions
     let width = 1024;
     let height = 1024;
     if (aspectRatio === '16:9') { width = 1280; height = 720; }
@@ -122,16 +124,14 @@ export default async function handler(req, res) {
 
     let generatedImageUrl = '';
 
-    // STAGE 2: Image Generation via Gemini or FLUX
     if (apiKey) {
       try {
-        const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({
           apiKey,
           httpOptions: { headers: { 'User-Agent': 'aistudio-build' } }
         });
 
-        const imgModels = ['gemini-2.5-flash', 'gemini-3.1-flash-lite-image'];
+        const imgModels = ['gemini-3.1-flash-lite-image', 'gemini-3.1-flash-image'];
 
         if (baseImage) {
           let cleanBase64 = baseImage;
@@ -202,11 +202,10 @@ export default async function handler(req, res) {
           }
         }
       } catch (geminiErr) {
-        // Quietly fallback
+        // fallback
       }
     }
 
-    // High-Definition Flux Engine Fallback
     if (!generatedImageUrl) {
       const seed = Math.floor(Math.random() * 1000000);
       const encodedPrompt = encodeURIComponent(enhancedPrompt);

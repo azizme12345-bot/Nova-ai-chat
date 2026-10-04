@@ -388,23 +388,6 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
     </div>
   </div>
 
-  <!-- API Key Modal -->
-  <div class="modal-overlay" id="apiKeyModal">
-    <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <h3 style="margin:0; font-size:16px; font-weight:700;">🔑 Gemini API Key Settings</h3>
-        <button onclick="closeApiKeyModal()" style="background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer;">✕</button>
-      </div>
-      <p style="font-size:12px; color:var(--muted); margin:0 0 14px 0; line-height:1.5;">
-        Paste your Google AI Studio API Key starting with <code>AQ...</code> or <code>AIza...</code> below. It will be used securely across all AI features, microphone transcription, and code analysis.
-      </p>
-      <input type="text" id="modal-api-key-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--line); margin-bottom:14px; font-family:monospace; font-size:12px; background:var(--panel); color:var(--text);" placeholder="Paste Google AI Studio API Key (AQ...) here...">
-      <div style="display:flex; gap:10px; justify-content:flex-end;">
-        <button onclick="closeApiKeyModal()" style="background:none; border:1px solid var(--line); color:var(--text); padding:8px 14px; border-radius:8px;">Cancel</button>
-        <button onclick="saveApiKeyFromModal()" class="side-btn" style="background:var(--accent); color:white; width:auto; padding:8px 16px; justify-content:center;">Save Key</button>
-      </div>
-    </div>
-  </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="appSidebar">
@@ -459,7 +442,6 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
     <button class="side-btn" onclick="openPhotoStudioModal()" style="color:#6a5cff; font-weight:700;">
       <span>🎨</span><span>AI Photo Studio & Editor</span>
     </button>
-    <button class="side-btn" onclick="openApiKeyModal()"><span>🔑</span><span>API Key Settings</span></button>
     <button class="side-btn" onclick="toggleTheme()"><span>◐</span><span>Light / Dark Mode</span></button>
 
     <!-- Voice & Speaker Settings -->
@@ -537,7 +519,6 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
           <span style="position:absolute; top:4px; right:4px; width:7px; height:7px; background:#ff4757; border-radius:50%;"></span>
         </button>
         <button class="icon-btn" onclick="newChat()" title="New Chat" style="color:var(--accent); font-weight:700;">＋</button>
-        <button class="icon-btn" onclick="openApiKeyModal()" title="API Key Settings">🔑</button>
         <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">◐</button>
       </div>
     </header>
@@ -614,6 +595,11 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
           <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">file.jpg</span>
         </div>
         <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
+      </div>
+
+      <div id="mic-permission-banner" style="display:none; justify-content:space-between; align-items:center; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:8px 14px; border-radius:10px; max-width:800px; margin:0 auto 10px; font-size:12px; font-weight:600;">
+        <span id="mic-permission-banner-text">⚠️ Permission Denied: براہ کرم براؤزر سیٹنگز میں مائیکروفون (Microphone) کی اجازت دیں۔</span>
+        <button onclick="hideMicErrorBanner()" style="background:none; border:none; color:#991b1b; font-weight:800; cursor:pointer; margin-left:10px;">✕</button>
       </div>
 
       <div class="composer">
@@ -863,7 +849,6 @@ async function executeBatchEdit() {
 
   const total = batchFilesQueue.length;
   let completedCount = 0;
-  const apiKey = localStorage.getItem('nova_gemini_api_key');
 
   for (let i = 0; i < total; i++) {
     const item = batchFilesQueue[i];
@@ -882,8 +867,7 @@ async function executeBatchEdit() {
         body: JSON.stringify({
           prompt,
           baseImage: item.data,
-          mimeType: item.mime,
-          apiKey: apiKey
+          mimeType: item.mime
         })
       });
 
@@ -991,8 +975,7 @@ async function executeStudioGenerate() {
       body: JSON.stringify({
         prompt,
         style,
-        aspectRatio,
-        apiKey: localStorage.getItem('nova_gemini_api_key')
+        aspectRatio
       })
     });
     const data = await res.json();
@@ -1034,8 +1017,7 @@ async function executeStudioEdit() {
       body: JSON.stringify({
         prompt,
         baseImage: studioBaseImage,
-        mimeType: studioBaseImageMime,
-        apiKey: localStorage.getItem('nova_gemini_api_key')
+        mimeType: studioBaseImageMime
       })
     });
     const data = await res.json();
@@ -1095,27 +1077,6 @@ function generatePhotoFromUserMessage(idx) {
   send();
 }
 
-function openApiKeyModal() {
-  document.getElementById('modal-api-key-input').value = localStorage.getItem('nova_gemini_api_key') || '';
-  document.getElementById('apiKeyModal').classList.add('active');
-  closeSidebar();
-}
-
-function closeApiKeyModal() {
-  document.getElementById('apiKeyModal').classList.remove('active');
-}
-
-function saveApiKeyFromModal() {
-  const key = document.getElementById('modal-api-key-input').value.trim();
-  if (key) {
-    localStorage.setItem('nova_gemini_api_key', key);
-    showToast('✅ Google AI Studio API Key saved successfully!');
-  } else {
-    localStorage.removeItem('nova_gemini_api_key');
-    showToast('Using system default API Key');
-  }
-  closeApiKeyModal();
-}
 
 function saveModelConfig() {
   const model = document.getElementById('modelSelector').value;
@@ -1708,8 +1669,6 @@ async function send() {
   const isPhotoEditRequest = attachmentData && (lower.includes('edit photo') || lower.includes('change photo') || lower.includes('photo edit') || lower.includes('تصویر ایڈٹ'));
 
   try {
-    const apiKey = localStorage.getItem('nova_gemini_api_key');
-
     if (isPhotoGenRequest || isPhotoEditRequest) {
       let promptToUse = text
         .replace(/^(generate photo of|generate image of|create photo of|photo banao|tasveer banao|تصویر بناؤ)/i, '')
@@ -1721,8 +1680,7 @@ async function send() {
         body: JSON.stringify({
           prompt: promptToUse,
           baseImage: attachmentData ? attachmentData.data : null,
-          mimeType: attachmentData ? attachmentData.type : 'image/jpeg',
-          apiKey: apiKey
+          mimeType: attachmentData ? attachmentData.type : 'image/jpeg'
         })
       });
 
@@ -1744,13 +1702,12 @@ async function send() {
       }
     }
 
-    const selectedModel = currentChat.model || 'gemini-3.1-flash-lite';
+    const selectedModel = currentChat.model || 'gemini-3.8-flash';
 
-    const res = await fetch('/api/translate', {
+    const res = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        ...(apiKey ? { 'x-gemini-api-key': apiKey, 'x-goog-api-key': apiKey } : {})
+      headers: {
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         prompt: userMsg.text,
@@ -1758,7 +1715,6 @@ async function send() {
         image: (attachmentData && attachmentData.type !== 'url') ? attachmentData.data : null,
         mimeType: (attachmentData && attachmentData.type !== 'url') ? attachmentData.type : null,
         attachedUrl: (attachmentData && attachmentData.type === 'url') ? attachmentData.data : null,
-        apiKey: apiKey,
         history: currentChat.messages
       })
     });
@@ -1775,7 +1731,7 @@ async function send() {
     const data = await res.json();
     currentChat.messages.push({ 
       role: 'ai', 
-      text: data.text,
+      text: data.text || data.reply,
       timestamp: Date.now()
     });
 
@@ -1788,19 +1744,7 @@ async function send() {
     const loaderEl = document.getElementById('ai-typing-loader');
     if (loaderEl) loaderEl.remove();
 
-    const hasSavedKey = !!localStorage.getItem('nova_gemini_api_key');
-    const errText = (err.message || '').toLowerCase();
-    const isInvalidKey = errText.includes('key') && (errText.includes('invalid') || errText.includes('not valid') || errText.includes('api_key_invalid'));
-    const isQuotaError = errText.includes('quota') || errText.includes('exhausted') || errText.includes('429') || errText.includes('limit');
-
-    let displayMsg = '';
-    if (hasSavedKey && isQuotaError) {
-      displayMsg = `⚠️ **NOVA Notice (Quota Exceeded)**: Your Google AI Studio API Key has temporarily reached its free-tier limit (which allows up to 15-20 requests per day on free Gemini 3.8 keys). \n\nNo action is required! NOVA has automatically fallen back to its **Backup Engines** for this message, so your conversation will continue uninterrupted. 👍`;
-    } else if (isInvalidKey) {
-      displayMsg = `⚠️ **NOVA Notice (Invalid Key)**: ${err.message}. \n\nPlease click 🔑 **API Key Settings** in the sidebar to verify or update your Google AI Studio API key.`;
-    } else {
-      displayMsg = `⚠️ **NOVA Notice**: ${err.message}. \n\n*(Your saved API Key is active, and the background servers are assisting to resolve this connection smoothly).*`;
-    }
+    const displayMsg = `⚠️ **NOVA Notice**: ${err.message || 'Unable to reach backend /api/chat route.'}`;
 
     currentChat.messages.push({ 
       role: 'ai', 
@@ -1819,7 +1763,54 @@ function keySend(e) {
   } 
 }
 
-// DIRECT ZERO-MODAL VOICE DICTATION HANDLER
+// MICROPHONE PERMISSION CHECK & VOICE DICTATION HANDLER
+let speechRecognizedInSession = false;
+
+function showMicErrorBanner(message) {
+  const banner = document.getElementById('mic-permission-banner');
+  const textEl = document.getElementById('mic-permission-banner-text');
+  if (banner && textEl) {
+    textEl.innerText = message;
+    banner.style.display = 'flex';
+  }
+  showToast(message);
+}
+
+function hideMicErrorBanner() {
+  const banner = document.getElementById('mic-permission-banner');
+  if (banner) {
+    banner.style.display = 'none';
+  }
+}
+
+async function checkMicrophonePermission() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showMicErrorBanner('⚠️ آپ کا براؤزر مائیکروفون کو سپورٹ نہیں کرتا (Microphone API not supported in this browser).');
+    return 'unsupported';
+  }
+
+  if (navigator.permissions && navigator.permissions.query) {
+    try {
+      const status = await navigator.permissions.query({ name: 'microphone' });
+      status.onchange = () => {
+        if (status.state === 'granted') {
+          hideMicErrorBanner();
+        } else if (status.state === 'denied') {
+          showMicErrorBanner('⚠️ Permission Denied: مائیکروفون کی اجازت مسترد کر دی گئی ہے۔ براہ کرم براؤزر کے ایڈریس بار (🔒) میں جا کر Microphone کو Allow کریں۔');
+        }
+      };
+      if (status.state === 'denied') {
+        showMicErrorBanner('⚠️ Permission Denied: مائیکروفون کی اجازت مسترد کر دی گئی ہے۔ براہ کرم براؤزر کے ایڈریس بار (🔒) میں جا کر Microphone کو Allow کریں۔');
+        return 'denied';
+      }
+      return status.state; // 'granted' or 'prompt'
+    } catch (e) {
+      // Some browsers do not support querying 'microphone' in navigator.permissions
+    }
+  }
+  return 'prompt';
+}
+
 async function toggleVoiceDictation() {
   const btn = document.getElementById('btn-mic-dictate');
   
@@ -1828,69 +1819,102 @@ async function toggleVoiceDictation() {
     return;
   }
 
-  try {
-    // Explicitly request mic permission first to ensure mobile browser permission prompt triggers
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      activeMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    }
-  } catch (permErr) {
-    console.error('Microphone permission blocked:', permErr);
-    showToast('⚠️ Microphone permission denied. Please allow mic access in browser settings.');
+  hideMicErrorBanner();
+
+  // 1. Browser Permission Check
+  const permState = await checkMicrophonePermission();
+  if (permState === 'denied' || permState === 'unsupported') {
     return;
   }
 
+  // 2. Request Microphone Stream Access
+  try {
+    activeMicStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+  } catch (permErr) {
+    console.error('Microphone permission error:', permErr);
+    const errName = permErr?.name || '';
+    const errMsg = permErr?.message || '';
+    if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError' || errMsg.toLowerCase().includes('permission denied')) {
+      showMicErrorBanner('⚠️ Permission Denied: مائیکروفون کی اجازت نہیں دی گئی۔ براہ کرم براؤزر سیٹنگز میں مائیک کو Allow کریں۔');
+    } else if (errName === 'NotFoundError' || errName === 'DevicesNotFoundError') {
+      showMicErrorBanner('⚠️ کوئی مائیکروفون ڈیوائس نہیں ملی (No microphone found).');
+    } else {
+      showMicErrorBanner('⚠️ مائیکروفون چلانے میں مسئلہ پیش آیا: ' + (errMsg || 'Permission Denied'));
+    }
+    dictationActive = false;
+    if (btn) btn.classList.remove('mic-pulsing');
+    return;
+  }
+
+  // 3. Start reliable MediaRecorder + optional live SpeechRecognition
+  speechRecognizedInSession = false;
+  dictationActive = true;
+  if (btn) btn.classList.add('mic-pulsing');
+
+  const selectedLang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
+  showToast(`🎙️ مائیک آن ہے (${selectedLang}) - اب بولیں، مکمل ہونے پر دوبارہ مائیک دبائیں!`);
+
+  // Start MediaRecorder so audio is always captured and transcribed via /api/transcribe if Web Speech doesn't fire
+  startDirectMediaRecorderWithStream(btn, activeMicStream);
+
+  // Also start Web Speech API for instant live text if browser supports it
   const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (Speech) {
     try {
       recognition = new Speech();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
-
-      recognition.onstart = () => {
-        dictationActive = true;
-        btn.classList.add('mic-pulsing');
-        showToast(`🎙️ Listening (${recognition.lang}) - Speak now!`);
-      };
+      recognition.lang = selectedLang;
 
       recognition.onresult = e => {
         let finalTranscript = '';
         for (let i = e.resultIndex; i < e.results.length; ++i) {
-          if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            finalTranscript += e.results[i][0].transcript;
+          }
         }
         if (finalTranscript) {
+          speechRecognizedInSession = true;
           const txtarea = document.getElementById('input');
           txtarea.value = (txtarea.value + ' ' + finalTranscript).trim();
           adjustTextareaHeight(txtarea);
+          updateEmptyStateVisibility();
         }
       };
 
       recognition.onerror = e => {
-        console.warn('SpeechRecognition error:', e);
-      };
-
-      recognition.onend = () => {
-        if (dictationActive) {
-          stopVoiceDictation();
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          showMicErrorBanner('⚠️ Permission Denied: براؤزر نے مائیکروفون تک رسائی روک دی ہے۔');
         }
       };
 
       recognition.start();
-      dictationActive = true;
-      return;
-
     } catch (err) {
-      console.warn('SpeechRecognition failed, using MediaRecorder:', err);
+      // MediaRecorder is already running as primary recorder
     }
   }
-
-  startDirectMediaRecorderWithStream(btn, activeMicStream);
 }
 
 function startDirectMediaRecorderWithStream(btn, stream) {
   try {
     recordedAudioChunks = [];
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    let mimeType = 'audio/webm';
+    if (typeof MediaRecorder !== 'undefined') {
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        mimeType = 'audio/webm';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      }
+    }
+
     mediaRecorderInstance = new MediaRecorder(stream, { mimeType });
 
     mediaRecorderInstance.ondataavailable = e => {
@@ -1900,9 +1924,15 @@ function startDirectMediaRecorderWithStream(btn, stream) {
     };
 
     mediaRecorderInstance.onstop = async () => {
+      // Only send to backend /api/transcribe if Web Speech API didn't already insert live transcript
+      if (speechRecognizedInSession) {
+        showToast('✅ آواز ٹیکسٹ میں تبدیل ہو گئی!');
+        return;
+      }
+
       const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
-      if (audioBlob.size > 1000) {
-        showToast('⏳ Transcribing your voice...');
+      if (audioBlob.size > 500) {
+        showToast('⏳ آپ کی آواز کو الفاظ میں تبدیل کیا جا رہا ہے (Transcribing)...');
         const reader = new FileReader();
         reader.onload = async (e) => {
           const base64Data = e.target.result;
@@ -1912,9 +1942,8 @@ function startDirectMediaRecorderWithStream(btn, stream) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 audioData: base64Data,
-                mimeType: mimeType,
-                language: localStorage.getItem('nova_speech_lang') || 'ur-PK',
-                apiKey: localStorage.getItem('nova_gemini_api_key')
+                mimeType: mimeType.split(';')[0],
+                language: localStorage.getItem('nova_speech_lang') || 'ur-PK'
               })
             });
             const data = await res.json();
@@ -1922,93 +1951,22 @@ function startDirectMediaRecorderWithStream(btn, stream) {
               const txtarea = document.getElementById('input');
               txtarea.value = (txtarea.value + ' ' + data.transcript).trim();
               adjustTextareaHeight(txtarea);
-              showToast('✅ Voice transcribed into message!');
+              updateEmptyStateVisibility();
+              showToast('✅ آپ کی آواز میسج میں لکھ دی گئی ہے!');
+            } else if (data.error) {
+              showToast('⚠️ ' + data.error);
             }
-          } catch(err) {
-            showToast('Voice transcription complete');
+          } catch (err) {
+            showToast('⚠️ Voice transcription error: ' + (err.message || 'Server error'));
           }
         };
         reader.readAsDataURL(audioBlob);
       }
     };
 
-    mediaRecorderInstance.start();
-    dictationActive = true;
-    btn.classList.add('mic-pulsing');
-    showToast('🎙️ Recording voice... Click mic when finished!');
-
-  } catch(e) {
+    mediaRecorderInstance.start(250);
+  } catch (e) {
     console.error('MediaRecorder error:', e);
-    showToast('⚠️ Microphone recording error.');
-    dictationActive = false;
-    if (btn) btn.classList.remove('mic-pulsing');
-  }
-}
-
-async function startDirectMediaRecorder(btn) {
-  try {
-    if (!activeMicStream && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      activeMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    }
-
-    if (!activeMicStream) return;
-
-    recordedAudioChunks = [];
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
-    mediaRecorderInstance = new MediaRecorder(activeMicStream, { mimeType });
-
-    mediaRecorderInstance.ondataavailable = e => {
-      if (e.data && e.data.size > 0) {
-        recordedAudioChunks.push(e.data);
-      }
-    };
-
-    mediaRecorderInstance.onstop = async () => {
-      const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
-      if (audioBlob.size > 1000) {
-        showToast('⏳ Transcribing your voice...');
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const base64Data = e.target.result;
-          try {
-            const res = await fetch('/api/transcribe', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                audioData: base64Data,
-                mimeType: mimeType,
-                language: localStorage.getItem('nova_speech_lang') || 'ur-PK',
-                apiKey: localStorage.getItem('nova_gemini_api_key')
-              })
-            });
-            const data = await res.json();
-            if (data.transcript) {
-              const txtarea = document.getElementById('input');
-              txtarea.value = (txtarea.value + ' ' + data.transcript).trim();
-              adjustTextareaHeight(txtarea);
-              showToast('✅ Voice transcribed into message!');
-            }
-          } catch(err) {
-            showToast('Voice transcription complete');
-          }
-        };
-        reader.readAsDataURL(audioBlob);
-      }
-    };
-
-    mediaRecorderInstance.start();
-    dictationActive = true;
-    btn.classList.add('mic-pulsing');
-    showToast('🎙️ Recording voice... Click mic when finished!');
-
-  } catch(e) {
-    console.error('Mic error:', e);
-    const msg = (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError' || (e.message && e.message.includes('Permission denied')))
-      ? '⚠️ Microphone permission denied. Please click the camera/mic icon in your browser address bar to allow access.'
-      : '⚠️ Microphone error: ' + (e.message || 'Permission denied');
-    showToast(msg);
-    dictationActive = false;
-    if (btn) btn.classList.remove('mic-pulsing');
   }
 }
 
@@ -2018,22 +1976,20 @@ function stopVoiceDictation() {
   if (btn) btn.classList.remove('mic-pulsing');
 
   if (recognition) {
-    try { recognition.stop(); } catch(e){}
+    try { recognition.stop(); } catch (e) {}
     recognition = null;
   }
 
   if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
-    try { mediaRecorderInstance.stop(); } catch(e){}
+    try { mediaRecorderInstance.stop(); } catch (e) {}
   }
 
   if (activeMicStream) {
     try {
       activeMicStream.getTracks().forEach(track => track.stop());
-    } catch(e){}
+    } catch (e) {}
     activeMicStream = null;
   }
-
-  showToast('Mic stopped');
 }
 
 // PWA Installation Prompt Logic

@@ -2,6 +2,10 @@
   "version": 2,
   "rewrites": [
     {
+      "source": "/api/chat",
+      "destination": "/api/chat.js"
+    },
+    {
       "source": "/api/translate",
       "destination": "/api/translate.js"
     },
@@ -19,6 +23,7 @@
     }
   ],
   "functions": {
+    "api/chat.js": { "maxDuration": 30 },
     "api/translate.js": { "maxDuration": 30 },
     "api/transcribe.js": { "maxDuration": 30 },
     "api/generate-image.js": { "maxDuration": 30 },

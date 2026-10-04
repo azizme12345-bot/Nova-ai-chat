@@ -1,8 +1,13 @@
 {
   "name": "Nova All-in-One AI Assistant",
   "description": "An advanced, pro-level AI solution for code generation, data visualization, web research, UI/UX design, and image generation, supporting multiple languages in a single conversation.",
-  "permissions": [],
+  "permissions": [
+    "microphone"
+  ],
   "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
   ]
 }
