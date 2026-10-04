@@ -14,28 +14,80 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg'],
+        includeAssets: [
+          'favicon.svg',
+          'icon-maskable.svg',
+          'apple-touch-icon.png',
+          'pwa-192x192.png',
+          'pwa-512x512.png',
+          'pwa-maskable-512x512.png'
+        ],
         manifest: {
           id: '/',
-          name: 'NOVA Advanced AI Protocol',
+          name: 'NOVA AI - Advanced Assistant',
           short_name: 'NOVA AI',
-          description: 'Advanced All-in-One Multi-Engine Assistant powered by Gemini and Web Transcriptions.',
-          theme_color: '#10081e',
-          background_color: '#10081e',
+          description: 'Advanced All-in-One AI Assistant supporting chat, multimodal photo/PDF analysis, code generation, and voice dictation.',
+          theme_color: '#7844cc',
+          background_color: '#060916',
           display: 'standalone',
           start_url: '/',
           scope: '/',
           icons: [
             {
+              src: '/pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png',
+              purpose: 'any'
+            },
+            {
+              src: '/pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any'
+            },
+            {
+              src: '/pwa-maskable-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            },
+            {
               src: '/favicon.svg',
               sizes: '192x192 512x512',
               type: 'image/svg+xml',
               purpose: 'any'
+            },
+            {
+              src: '/icon-maskable.svg',
+              sizes: '192x192 512x512',
+              type: 'image/svg+xml',
+              purpose: 'maskable'
+            }
+          ]
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+          navigateFallback: '/index.html',
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
             }
           ]
         },
         devOptions: {
-          enabled: false
+          enabled: true,
+          type: 'module'
         }
       })
     ],

@@ -1,16 +1,44 @@
 {
+  "id": "/",
   "name": "NOVA AI - Advanced Assistant",
   "short_name": "NOVA AI",
+  "description": "Advanced All-in-One AI Assistant supporting chat, multimodal photo/PDF analysis, code generation, and voice dictation.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0b0417",
+  "orientation": "portrait",
+  "background_color": "#060916",
   "theme_color": "#7844cc",
   "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "/favicon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

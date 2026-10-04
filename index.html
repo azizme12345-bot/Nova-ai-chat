@@ -10,11 +10,14 @@
 <meta property="og:description" content="Experience advanced multimodal AI chat, photo & URL analysis, and code generation with NOVA AI.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#7844cc">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NOVA AI">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="manifest" href="/manifest.json">
-<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <script>
-  // Suppress harmless Vite HMR / WebSocket connection warnings/errors and mic permission rejections in preview iframes
   const origError = console.error;
   const origWarn = console.warn;
   console.error = function(...args) {
@@ -35,197 +38,204 @@
 <title>NOVA AI | Advanced All-in-One Assistant</title>
 <style>
 :root{
-  --bg:#f8f7fc;--panel:#efeef5;--panel2:#ffffff;--text:#1e1432;--muted:#7c6f8f;
-  --line:#dcdae6;--accent:#7844cc;--accent-soft:#f2edfa;--user:#e9e2f8;
+  --bg:#f8f7fc;--panel:#efeef5;--panel2:#ffffff;--text:#1e1432;--muted:#6e6082;
+  --line:#dad6e6;--accent:#7844cc;--accent-soft:#f0eafa;--user:#e9e2f8;
 }
 [data-theme="dark"]{
-  --bg:#0b0417;--panel:#140828;--panel2:#0e051c;--text:#f6f2fe;--muted:#a191b8;
-  --line:#2a144c;--accent:#a862ff;--accent-soft:#29104f;--user:#2e1257;
+  --bg:#080412;--panel:#130924;--panel2:#0e061b;--text:#f6f2fe;--muted:#a899bf;
+  --line:#2b164d;--accent:#a862ff;--accent-soft:#261047;--user:#2e1257;
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100vh;overflow:hidden}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;height:100%;height:100dvh;width:100%;overflow:hidden}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-.app{height:100vh;display:flex;position:relative}
-.sidebar{width:270px;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto;z-index:50}
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;padding:9px 8px 14px}
-.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;display:grid;place-items:center;font-weight:800;font-size:16px;box-shadow:0 2px 8px rgba(99,102,241,0.3)}
-.side-btn{width:100%;border:0;background:transparent;color:var(--text);padding:10px 12px;border-radius:9px;text-align:left;display:flex;gap:12px;align-items:center;margin:2px 0;transition:all 0.2s;font-size:13px}
-.side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
-.side-btn span:first-child{width:20px;text-align:center}
-.history{margin-top:14px;color:var(--muted);font-size:11px;padding:0 12px;font-weight:700;letter-spacing:0.5px}
-.history-item{margin-top:4px;padding:8px 12px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s}
-.history-item:hover{background:var(--accent-soft);color:var(--text)}
+.app{height:100%;height:100dvh;width:100%;display:flex;position:relative;overflow:hidden}
+
+/* PWA Splash Screen */
+#pwa-splash-screen{
+  position:fixed;inset:0;z-index:9999;background:#060916;color:#ffffff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity 0.4s ease, visibility 0.4s ease;
+}
+#pwa-splash-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.splash-loader-bar{width:140px;height:4px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden;margin-top:4px}
+.splash-loader-fill{width:100%;height:100%;background:linear-gradient(90deg,#38bdf8,#a855f7);animation:splashLoad 1s ease-in-out infinite}
+@keyframes splashLoad{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* Sidebar */
+.sidebar{width:280px;flex-shrink:0;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;padding:14px;overflow-y:auto;z-index:60}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;padding:6px 6px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.side-btn{width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:11px 12px;border-radius:10px;text-align:left;display:flex;gap:12px;align-items:center;margin:3px 0;transition:all 0.18s;font-size:13.5px;min-height:44px}
+.side-btn:hover,.side-btn.active{background:var(--accent-soft);color:var(--accent);font-weight:700;border-color:var(--line)}
+.side-btn span:first-child{width:22px;text-align:center;font-size:16px}
+.history{margin-top:14px;color:var(--muted);font-size:11px;padding:0 8px;font-weight:700;letter-spacing:0.5px;display:flex;justify-content:space-between;align-items:center}
+.history-item{margin-top:4px;padding:10px 12px;border-radius:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);font-size:13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.15s;min-height:42px;border:1px solid transparent}
+.history-item:hover,.history-item.active{background:var(--accent-soft);color:var(--accent);font-weight:600;border-color:var(--line)}
 .profile{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:10px}
-.avatar{width:34px;height:34px;border-radius:50%;background:#dce8f8;display:grid;place-items:center;color:#31557d;font-weight:700}
-.main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
-.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;justify-content:space-between;background:var(--panel2);z-index:20}
-.top-title{font-weight:650;font-size:16px}
-.icon-btn{border:0;background:transparent;color:var(--text);width:38px;height:38px;border-radius:9px;display:grid;place-items:center}
-.icon-btn:hover{background:var(--panel)}
-.chat{flex:1;overflow-y:auto;scroll-behavior:smooth;padding:34px 20px 150px}
-.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
-.empty .biglogo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1677ff,#6a5cff);color:white;display:grid;place-items:center;font-size:28px;font-weight:800;box-shadow:0 4px 16px rgba(22,119,255,0.35)}
-.empty h1{font-size:24px;margin:5px 0;font-weight:700}
-.empty p{margin:0;color:var(--muted);font-size:14px;max-width:460px;line-height:1.5}
-.messages{max-width:800px;margin:auto}
-.msg{margin:0 0 20px;display:flex;flex-direction:column}
+.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#7844cc);display:grid;place-items:center;color:#ffffff;font-weight:800;flex-shrink:0}
+
+/* Main Workspace */
+.main{flex:1;display:flex;flex-direction:column;height:100%;height:100dvh;min-width:0;position:relative;overflow:hidden}
+.topbar{height:60px;flex-shrink:0;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 12px;justify-content:space-between;background:var(--panel2);z-index:30;gap:8px}
+.top-title{font-weight:800;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:18px;flex-shrink:0;transition:all 0.15s}
+.icon-btn:hover,.icon-btn:active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.top-new-chat-btn{height:42px;padding:0 13px;border-radius:11px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;transition:all 0.15s}
+.top-new-chat-btn:hover{background:var(--accent);color:#ffffff}
+
+/* Dropdown More Menu (⋮) */
+.more-dropdown{display:none;position:absolute;top:56px;right:12px;width:235px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,0.22);padding:8px;z-index:80;flex-direction:column;gap:4px}
+.more-dropdown.active{display:flex}
+
+/* Offline Banner */
+#offline-banner{display:none;background:#f59e0b;color:#ffffff;font-size:12px;font-weight:700;padding:6px 14px;text-align:center;flex-shrink:0;z-index:25}
+
+/* Chat Area */
+.chat{flex:1;min-height:0;overflow-y:auto;scroll-behavior:smooth;padding:20px 16px 24px}
+.empty{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:16px 10px}
+.empty h1{font-size:22px;margin:4px 0;font-weight:800}
+.empty p{margin:0;color:var(--muted);font-size:13.5px;max-width:460px;line-height:1.55}
+.messages{max-width:800px;margin:0 auto;width:100%}
+.msg{margin:0 0 18px;display:flex;flex-direction:column}
 .msg.user{align-items:flex-end}
 .msg.ai{align-items:flex-start}
-.bubble{max-width:85%;padding:14px 18px;border-radius:16px;line-height:1.65;font-size:14px;word-break:break-word}
+.bubble{max-width:86%;padding:13px 16px;border-radius:16px;line-height:1.65;font-size:14px;word-break:break-word}
 .msg.user .bubble{background:var(--user)}
 .msg.ai .bubble{background:var(--panel);border:1px solid var(--line)}
-.composer-wrap{position:fixed;bottom:0;left:270px;right:0;padding:16px 20px 20px;background:linear-gradient(transparent,var(--bg) 28%);z-index:10}
-.composer{max-width:800px;margin:auto;border:1px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 22px rgba(0,0,0,.06);padding:9px}
-textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:8px 9px;min-height:44px;max-height:140px;line-height:1.5}
-.tools{display:flex;align-items:center;gap:6px}
-.tool{border:0;background:transparent;color:var(--muted);width:36px;height:34px;border-radius:8px;display:grid;place-items:center;transition:all 0.15s}
-.tool:hover{background:var(--panel);color:var(--text)}
-.send{margin-left:auto;background:var(--accent);color:white;border:0;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;transition:opacity 0.2s}
-.send:hover{opacity:0.9}
+
+/* Composer Area */
+.composer-wrap{flex-shrink:0;position:relative;padding:10px 14px 10px;background:var(--bg);border-top:1px solid var(--line);z-index:25}
+.composer{max-width:800px;margin:auto;border:1.5px solid var(--line);background:var(--panel2);border-radius:16px;box-shadow:0 4px 18px rgba(0,0,0,.06);padding:8px 10px}
+textarea{width:100%;border:0;outline:0;resize:none;background:transparent;color:var(--text);padding:6px 8px;min-height:42px;max-height:120px;line-height:1.5;font-size:14.5px}
+.tools{display:flex;align-items:center;gap:8px;margin-top:4px}
+.tool{border:1px solid var(--line);background:var(--panel);color:var(--text);width:44px;height:44px;border-radius:12px;display:grid;place-items:center;transition:all 0.15s;font-size:18px;flex-shrink:0}
+.tool:hover,.tool:active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.tool-plus{border:2px solid var(--accent);background:var(--accent-soft);color:var(--accent);font-size:22px;font-weight:800}
+.send{margin-left:auto;background:var(--accent);color:white;border:0;width:46px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:18px;transition:opacity 0.2s;flex-shrink:0}
+.send:hover{opacity:0.92}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav{
+  display:none;flex-shrink:0;height:62px;background:var(--panel2);border-top:1px solid var(--line);
+  grid-template-columns:repeat(5,1fr);align-items:center;padding:0 6px;z-index:35;
+}
+.mob-nav-btn{
+  border:0;background:transparent;color:var(--muted);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;height:52px;border-radius:10px;font-size:10.5px;font-weight:600;transition:all 0.15s;
+}
+.mob-nav-btn span.mob-icon{font-size:18px;line-height:1}
+.mob-nav-btn.active,.mob-nav-btn:hover{color:var(--accent);background:var(--accent-soft);font-weight:700}
 
 /* Modals */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(3px);z-index:99;place-items:center;padding:20px;overflow-y:auto;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);z-index:100;place-items:center;padding:16px;overflow-y:auto}
 .modal-overlay.active{display:grid}
-.modal-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:580px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;}
+.modal-card{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:560px;width:100%;box-shadow:0 12px 36px rgba(0,0,0,0.28);max-height:88dvh;overflow-y:auto}
 
 /* Photo Studio Tabs */
-.studio-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 14px; padding-bottom: 8px; }
-.studio-tab-btn { background: none; border: none; padding: 8px 14px; font-weight: 600; font-size: 13px; color: var(--muted); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-.studio-tab-btn.active { background: var(--accent-soft); color: var(--accent); }
+.studio-tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:14px;padding-bottom:8px}
+.studio-tab-btn{background:none;border:none;padding:8px 14px;font-weight:600;font-size:13px;color:var(--muted);border-radius:8px;cursor:pointer;transition:all 0.2s}
+.studio-tab-btn.active{background:var(--accent-soft);color:var(--accent)}
 
 /* Switch Toggle for Batch Mode */
-.toggle-switch-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  padding: 8px 12px;
-  border-radius: 10px;
-  margin-bottom: 14px;
-}
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 44px;
-  height: 24px;
-}
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute; cursor: pointer; inset: 0;
-  background-color: var(--line);
-  transition: .25s;
-  border-radius: 24px;
-}
-.slider:before {
-  position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-  background-color: white;
-  transition: .25s;
-  border-radius: 50%;
-}
-input:checked + .slider { background-color: var(--accent); }
-input:checked + .slider:before { transform: translateX(20px); }
+.toggle-switch-container{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:10px;margin-bottom:14px}
+.switch{position:relative;display:inline-block;width:44px;height:24px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background-color:var(--line);transition:.25s;border-radius:24px}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:white;transition:.25s;border-radius:50%}
+input:checked + .slider{background-color:var(--accent)}
+input:checked + .slider:before{transform:translateX(20px)}
 
 /* Batch Queue Item Cards */
-.batch-item-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-}
-.batch-badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 12px;
-  text-transform: uppercase;
-}
-.batch-badge.pending { background: var(--panel2); color: var(--muted); border: 1px solid var(--line); }
-.batch-badge.processing { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
-.batch-badge.completed { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-.batch-badge.failed { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.batch-item-card{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px}
+.batch-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;text-transform:uppercase}
+.batch-badge.pending{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.batch-badge.processing{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent)}
+.batch-badge.completed{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
+.batch-badge.failed{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
 
 /* Markdown table styling */
-table.md-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-table.md-table th, table.md-table td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
-table.md-table th { background: var(--panel2); font-weight: 600; }
+table.md-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+table.md-table th,table.md-table td{border:1px solid var(--line);padding:8px 12px;text-align:left}
+table.md-table th{background:var(--panel2);font-weight:600}
 
 /* Mobile Backdrop overlay */
-.sidebar-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(2px);
-  z-index: 45;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
+.sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(2px);z-index:55;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+
+@keyframes pulse-mic{
+  0%{transform:scale(1);filter:drop-shadow(0 0 2px rgba(239,68,68,0.5))}
+  50%{transform:scale(1.14);filter:drop-shadow(0 0 10px rgba(239,68,68,0.9))}
+  100%{transform:scale(1);filter:drop-shadow(0 0 2px rgba(239,68,68,0.5))}
+}
+.mic-pulsing{animation:pulse-mic 1.2s infinite ease-in-out !important;color:#ef4444 !important;border-color:#ef4444 !important;background:#fee2e2 !important}
+
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+/* Hide website-only logos when running as installed standalone PWA */
+@media all and (display-mode: standalone) {
+  .website-only-logo { display: none !important; }
+}
+body.is-standalone-pwa .website-only-logo {
+  display: none !important;
 }
 
-@keyframes pulse-mic {
-  0% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(239,68,68,0.5)); }
-  50% { transform: scale(1.18); filter: drop-shadow(0 0 10px rgba(239,68,68,0.9)); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(239,68,68,0.5)); }
-}
-.mic-pulsing {
-  animation: pulse-mic 1.2s infinite ease-in-out !important;
-  color: #ef4444 !important;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@media(max-width:720px){
- .sidebar{
-   position: fixed;
-   top: 0;
-   bottom: 0;
-   left: 0;
-   width: 280px;
-   max-width: 82vw;
-   z-index: 50;
-   transform: translateX(-100%);
-   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-   box-shadow: 4px 0 25px rgba(0,0,0,0.2);
-   display: flex !important;
- }
- .sidebar.open {
-   transform: translateX(0);
- }
- .sidebar-backdrop {
-   display: block;
- }
- .sidebar-backdrop.active {
-   opacity: 1;
-   pointer-events: auto;
- }
- .composer-wrap{left:0}.topbar{padding:0 12px}.chat{padding-left:13px;padding-right:13px}
- .bubble{max-width:88%}
+@media(max-width:768px){
+  .sidebar{
+    position:fixed;top:0;bottom:0;left:0;width:285px;max-width:84vw;z-index:60;
+    transform:translateX(-100%);transition:transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    box-shadow:4px 0 25px rgba(0,0,0,0.3);display:flex !important;
+  }
+  .sidebar.open{transform:translateX(0)}
+  #sidebar-close-btn{display:grid !important}
+  .sidebar-backdrop{display:block}
+  .sidebar-backdrop.active{opacity:1;pointer-events:auto}
+  .topbar{padding:0 10px;height:58px}
+  .top-new-chat-label{display:none}
+  .chat{padding:14px 12px 18px}
+  .composer-wrap{padding:8px 10px 8px}
+  .bubble{max-width:90%}
+  .mobile-bottom-nav{display:grid}
 }
 </style>
 </head>
 <body>
-<svg style="display:none; width:0; height:0;">
-  <defs>
-    <linearGradient id="planetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#a29bfe" />
-      <stop offset="40%" stop-color="#6c5ce7" />
-      <stop offset="100%" stop-color="#fd79a8" />
-    </linearGradient>
-    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffeaa7" />
-      <stop offset="100%" stop-color="#ff7675" />
-    </linearGradient>
-  </defs>
-</svg>
+<!-- PWA SPLASH SCREEN (Shows brand logo on app launch) -->
+<div id="pwa-splash-screen">
+  <svg viewBox="0 0 120 120" style="width:96px; height:96px; filter: drop-shadow(0 0 24px rgba(56,189,248,0.85));">
+    <defs>
+      <linearGradient id="splashNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#38bdf8"/>
+        <stop offset="50%" stop-color="#0284c7"/>
+        <stop offset="100%" stop-color="#6366f1"/>
+      </linearGradient>
+      <linearGradient id="splashMetal" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="30%" stop-color="#7dd3fc"/>
+        <stop offset="70%" stop-color="#0284c7"/>
+        <stop offset="100%" stop-color="#1e3a8a"/>
+      </linearGradient>
+      <radialGradient id="splashOrb" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="30%" stop-color="#93c5fd"/>
+        <stop offset="70%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#1e40af"/>
+      </radialGradient>
+    </defs>
+    <rect x="8" y="8" width="104" height="104" rx="28" fill="#030712" stroke="url(#splashNeon)" stroke-width="4.5"/>
+    <rect x="12" y="12" width="96" height="96" rx="24" fill="#0b0f19" opacity="0.95"/>
+    <g fill="none" stroke="url(#splashMetal)" stroke-width="7" stroke-linecap="round">
+      <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30"/>
+      <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(120 60 60)"/>
+      <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(240 60 60)"/>
+    </g>
+    <circle cx="60" cy="24" r="7.5" fill="url(#splashOrb)" stroke="#ffffff" stroke-width="1.8"/>
+    <circle cx="91" cy="78" r="7.5" fill="url(#splashOrb)" stroke="#ffffff" stroke-width="1.8"/>
+    <circle cx="29" cy="78" r="7.5" fill="url(#splashOrb)" stroke="#ffffff" stroke-width="1.8"/>
+  </svg>
+  <div style="font-size:20px;font-weight:800;letter-spacing:1px;">NOVA AI</div>
+  <div style="font-size:12px;color:#94a3b8;">Advanced All-in-One AI Assistant</div>
+  <div class="splash-loader-bar"><div class="splash-loader-fill"></div></div>
+</div>
+
 <div class="app">
   <div id="toast-container"></div>
   <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
@@ -388,11 +398,89 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
     </div>
   </div>
 
+  <!-- CONVERSATION HISTORY MODAL (Easy Mobile & Desktop History Access) -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-card" style="max-width:480px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 style="margin:0; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+          <span>🕒</span> <span>Conversation History (چیٹ ہسٹری)</span>
+        </h3>
+        <button onclick="closeHistoryModal()" class="icon-btn" style="width:36px; height:36px;">✕</button>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:12px;">
+        <button onclick="newChat(); closeHistoryModal();" class="side-btn" style="background:var(--accent); color:#ffffff; justify-content:center; font-weight:700; flex:1;">
+          <span>＋</span> <span>Start New Chat (نیا چیٹ)</span>
+        </button>
+        <button onclick="clearAllHistory()" class="side-btn" style="border:1px solid var(--line); width:auto; padding:0 14px; color:#ef4444; font-weight:600; justify-content:center;">
+          🗑️ Clear All
+        </button>
+      </div>
+      <div id="modal-history-list" style="display:flex; flex-direction:column; gap:6px; max-height:55dvh; overflow-y:auto; padding-right:2px;"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL (Dedicated Settings for Mobile & Desktop) -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card" style="max-width:460px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+          <span>⚙️</span> <span>App Settings (سیٹنگز)</span>
+        </h3>
+        <button onclick="closeSettingsModal()" class="icon-btn" style="width:36px; height:36px;">✕</button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;">
+          <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--accent);">🤖 Active AI Model (اے آئی ماڈل):</label>
+          <select id="modalModelSelector" onchange="syncModelFromModal(this.value)" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:10px; font-size:13px; outline:none;">
+            <option value="gemini-3.8-flash">Gemini 3.8 Flash (Multimodal & Fast)</option>
+            <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Ultra Fast)</option>
+            <option value="gemini-flash-latest">Gemini Flash Latest (Auto-Updating)</option>
+            <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Deep Code & STEM)</option>
+          </select>
+        </div>
+
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;">
+          <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--accent);">🎙️ Microphone Language (مائیک کی زبان):</label>
+          <select id="modalMicLanguageSelector" onchange="syncMicLangFromModal(this.value)" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:10px; font-size:13px; outline:none;">
+            <option value="ur-PK">اردو (Urdu - Pakistan)</option>
+            <option value="en-US">English (US / Global)</option>
+            <option value="hi-IN">हिंदी (Hindi - India)</option>
+            <option value="ar-SA">العربية (Arabic)</option>
+          </select>
+        </div>
+
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:13px; font-weight:700;">◐ Dark / Light Theme</div>
+            <div style="font-size:11px; color:var(--muted);">Switch app appearance</div>
+          </div>
+          <button onclick="toggleTheme()" class="side-btn" style="width:auto; background:var(--accent-soft); color:var(--accent); font-weight:700; padding:8px 14px;">
+            Toggle Theme
+          </button>
+        </div>
+
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:13px; font-weight:700;">🔊 Speaker Voice Test</div>
+            <div style="font-size:11px; color:var(--muted);">Verify audio output</div>
+          </div>
+          <button onclick="testSpeakerVoice()" class="side-btn" style="width:auto; border:1px solid var(--line); padding:8px 14px; font-weight:600;">
+            🔊 Test Audio
+          </button>
+        </div>
+
+        <button onclick="triggerPwaInstall()" id="settings-pwa-install-btn" class="side-btn" style="background:var(--accent); color:#ffffff; justify-content:center; font-weight:700;">
+          <span>📲</span> <span>Install NOVA AI App (PWA)</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- SIDEBAR -->
   <aside class="sidebar" id="appSidebar">
     <div class="brand">
-      <svg viewBox="0 0 120 120" style="width:34px; height:34px; filter: drop-shadow(0 0 8px rgba(168,85,247,0.8)); flex-shrink: 0;">
+      <svg class="website-only-logo" viewBox="0 0 120 120" style="width:34px; height:34px; filter: drop-shadow(0 0 8px rgba(168,85,247,0.8)); flex-shrink: 0;">
         <defs>
           <linearGradient id="neonGlowSide" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#d8b4fe"/>
@@ -423,50 +511,57 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
         <circle cx="29" cy="78" r="7" fill="url(#orbGlowSide)" stroke="#f5d0fe" stroke-width="1.5"/>
       </svg>
       <span style="font-weight:800; letter-spacing:0.5px; color:var(--text);">NOVA CORE</span>
-      <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; display:none;" id="sidebar-close-btn">✕</button>
+      <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; display:none; width:36px; height:36px;" id="sidebar-close-btn">✕</button>
     </div>
 
-    <div style="padding: 0 4px; margin-bottom: 12px;">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:600;">ACTIVE ENGINE</div>
+    <button class="side-btn active" onclick="newChat()" style="background:var(--accent); color:#ffffff; font-weight:700; margin-bottom:6px;">
+      <span>＋</span><span>New Chat (نیا چیٹ)</span>
+    </button>
+    <button class="side-btn" onclick="openHistoryModal()">
+      <span>🕒</span><span>Chat History (ہسٹری)</span>
+    </button>
+    <button class="side-btn" onclick="openPhotoStudioModal()" style="color:var(--accent); font-weight:700;">
+      <span>🎨</span><span>AI Photo Studio & Editor</span>
+    </button>
+    <button class="side-btn" onclick="openSettingsModal()">
+      <span>⚙️</span><span>Settings (سیٹنگز)</span>
+    </button>
+    <button class="side-btn" onclick="toggleTheme()">
+      <span>◐</span><span>Light / Dark Mode</span>
+    </button>
+
+    <div style="padding: 10px 4px 4px; margin-top: 6px; border-top: 1px solid var(--line);">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:700;">ACTIVE ENGINE</div>
       <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; outline:none;">
-        <option value="gemini-3.1-flash-lite" selected>Gemini 3.1 Flash Lite (High Free Quota & Ultra Fast)</option>
-        <option value="gemini-flash-latest">Gemini Flash Latest (Official Auto-Updating)</option>
-        <option value="gemini-3.8-flash">Gemini 3.8 Flash (Multimodal & Fast)</option>
-        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Deep Code & STEM Auditor)</option>
+        <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Multimodal & Fast)</option>
+        <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Ultra Fast)</option>
+        <option value="gemini-flash-latest">Gemini Flash Latest (Auto-Updating)</option>
+        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Deep Code & STEM)</option>
       </select>
     </div>
 
-    <button class="side-btn active" onclick="newChat()" style="background:var(--accent-soft); color:var(--accent); font-weight:700;">
-      <span>＋</span><span>New Conversation</span>
-    </button>
-    <button class="side-btn" onclick="openPhotoStudioModal()" style="color:#6a5cff; font-weight:700;">
-      <span>🎨</span><span>AI Photo Studio & Editor</span>
-    </button>
-    <button class="side-btn" onclick="toggleTheme()"><span>◐</span><span>Light / Dark Mode</span></button>
-
     <!-- Voice & Speaker Settings -->
-    <div style="margin-top: 14px; padding: 12px 4px 0; border-top: 1px solid var(--line);">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 600;">AUDIO & SPEAKER</div>
-      <div style="font-size: 10px; color: var(--muted); margin-bottom: 3px;">Microphone Language:</div>
-      <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 11px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px; outline:none; margin-bottom:8px;">
+    <div style="margin-top: 10px; padding: 10px 4px 0; border-top: 1px solid var(--line);">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">MICROPHONE LANGUAGE</div>
+      <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 12px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; outline:none; margin-bottom:8px;">
         <option value="ur-PK" selected>اردو (Urdu)</option>
         <option value="en-US">English (US / Global)</option>
         <option value="hi-IN">हिंदी (Hindi)</option>
         <option value="ar-SA">العربية (Arabic)</option>
       </select>
-      <button onclick="testSpeakerVoice()" class="side-btn" style="font-size:11px; padding:6px 10px; border:1px solid var(--line); justify-content:center; margin-bottom:4px;">
-        🔊 Test Speaker Voice
-      </button>
     </div>
 
-    <div class="history">CONVERSATION HISTORY</div>
-    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:2px; margin-top:6px;"></div>
+    <div class="history">
+      <span>RECENT CHATS</span>
+      <button onclick="openHistoryModal()" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;">View All</button>
+    </div>
+    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:3px; margin-top:6px;"></div>
     
     <div class="profile">
-      <div class="avatar">A</div>
+      <div class="avatar">N</div>
       <div style="overflow:hidden;">
-        <b style="font-size:13px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="profile-user-email">Abdul Aziz</b>
-        <div style="font-size:11px;color:var(--muted)">NOVA AI Assistant</div>
+        <b style="font-size:13px; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="profile-user-email">NOVA AI Workspace</b>
+        <div style="font-size:11px;color:var(--muted)">Production Ready · PWA</div>
       </div>
     </div>
   </aside>
@@ -474,11 +569,10 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
   <!-- MAIN -->
   <main class="main" onclick="handleMainTap()">
     <header class="topbar">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <button class="icon-btn" onclick="toggleSidebar(event)" title="Toggle Menu">☰</button>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <!-- Inline Tri-Loop Logo aligned to top -->
-          <svg viewBox="0 0 120 120" style="width:28px; height:28px; filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); flex-shrink: 0;">
+      <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+        <button class="icon-btn" onclick="toggleSidebar(event)" title="Open Sidebar Menu" aria-label="Menu">☰</button>
+        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+          <svg class="website-only-logo" viewBox="0 0 120 120" style="width:30px; height:30px; filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); flex-shrink: 0;">
             <defs>
               <linearGradient id="neonGlowTop" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -509,25 +603,39 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
             <circle cx="91" cy="78" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
             <circle cx="29" cy="78" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
           </svg>
-          <div class="top-title" id="top-title" style="font-weight:750; font-size:16px; letter-spacing:0.5px;">NOVA CORE AI</div>
+          <div class="top-title" id="top-title">NOVA AI</div>
         </div>
       </div>
-      <div style="display:flex; gap:6px; align-items:center;">
-        <!-- PWA Install Button -->
-        <button id="pwa-install-btn" class="icon-btn" onclick="triggerPwaInstall()" title="Install NOVA App" style="display:none; color:var(--accent); font-weight:bold; position:relative;">
-          📥
-          <span style="position:absolute; top:4px; right:4px; width:7px; height:7px; background:#ff4757; border-radius:50%;"></span>
+
+      <div style="display:flex; gap:6px; align-items:center; position:relative;">
+        <button class="top-new-chat-btn" onclick="newChat()" title="Start New Chat">
+          <span style="font-size:17px;font-weight:800;">＋</span>
+          <span class="top-new-chat-label">New Chat</span>
         </button>
-        <button class="icon-btn" onclick="newChat()" title="New Chat" style="color:var(--accent); font-weight:700;">＋</button>
-        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Theme">◐</button>
+        <button class="icon-btn" onclick="openHistoryModal()" title="Conversation History">🕒</button>
+        <button class="icon-btn" onclick="openSettingsModal()" title="Settings">⚙️</button>
+        <button class="icon-btn" id="pwa-install-btn" onclick="triggerPwaInstall()" title="Install NOVA App" style="display:none; color:var(--accent); border-color:var(--accent);">📲</button>
+        <button class="icon-btn" onclick="toggleMoreMenu(event)" title="More Options" style="font-size:22px; font-weight:900;">⋮</button>
+
+        <!-- MORE OPTIONS DROPDOWN MENU (⋮) -->
+        <div class="more-dropdown" id="top-more-menu" onclick="event.stopPropagation()">
+          <button class="side-btn" onclick="newChat(); closeMoreMenu();"><span>＋</span><span>New Chat (نیا چیٹ)</span></button>
+          <button class="side-btn" onclick="openHistoryModal(); closeMoreMenu();"><span>🕒</span><span>Chat History (ہسٹری)</span></button>
+          <button class="side-btn" onclick="openPhotoStudioModal(); closeMoreMenu();"><span>🎨</span><span>AI Photo Studio</span></button>
+          <button class="side-btn" onclick="openSettingsModal(); closeMoreMenu();"><span>⚙️</span><span>Settings (سیٹنگز)</span></button>
+          <button class="side-btn" onclick="toggleTheme(); closeMoreMenu();"><span>◐</span><span>Dark / Light Theme</span></button>
+          <button class="side-btn" onclick="triggerPwaInstall(); closeMoreMenu();"><span>📲</span><span>Install App (PWA)</span></button>
+        </div>
       </div>
     </header>
 
+    <div id="offline-banner">⚡ Offline Mode — آپ آف لائن ہیں۔ محفوظ شدہ چیٹ ہسٹری دستیاب ہے۔</div>
+
     <section class="chat active" id="workspace-chat">
-      <div class="empty" id="empty" style="justify-content:flex-start; padding-top:40px;">
-        <!-- Persistent Logo: Always Visible -->
-        <div id="empty-logo-wrap" style="display:flex; flex-direction:column; align-items:center; margin-bottom:14px;">
-          <svg viewBox="0 0 120 120" style="width:108px; height:108px; filter: drop-shadow(0 0 22px rgba(56,189,248,0.8));">
+      <div class="empty" id="empty">
+        <!-- Website Logo: Visible on Website, Hidden in Installed Standalone App after Splash -->
+        <div id="empty-logo-wrap" class="website-only-logo" style="display:flex; flex-direction:column; align-items:center; margin-bottom:8px;">
+          <svg viewBox="0 0 120 120" style="width:98px; height:98px; filter: drop-shadow(0 0 22px rgba(56,189,248,0.8));">
             <defs>
               <linearGradient id="neonGlowCenter" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#38bdf8"/>
@@ -549,69 +657,92 @@ table.md-table th { background: var(--panel2); font-weight: 600; }
             </defs>
             <rect x="8" y="8" width="104" height="104" rx="28" fill="#030712" stroke="url(#neonGlowCenter)" stroke-width="4.5"/>
             <rect x="12" y="12" width="96" height="96" rx="24" fill="#0b0f19" opacity="0.95"/>
-            <!-- Sparkles -->
             <circle cx="28" cy="32" r="1.2" fill="#7dd3fc" opacity="0.9"/>
             <circle cx="92" cy="38" r="1.5" fill="#ffffff" opacity="0.9"/>
             <circle cx="34" cy="88" r="1.2" fill="#93c5fd" opacity="0.8"/>
             <circle cx="86" cy="82" r="1.8" fill="#7dd3fc" opacity="0.9"/>
-            <!-- Arches with vibrant blue inner glow -->
             <g fill="none" stroke="url(#metalBlueCenter)" stroke-width="7" stroke-linecap="round" style="filter: drop-shadow(0 0 6px rgba(56,189,248,0.9));">
               <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30"/>
               <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(120 60 60)"/>
               <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(240 60 60)"/>
             </g>
-            <!-- 3 Glowing Vertices Orbs -->
             <circle cx="60" cy="24" r="7.5" fill="url(#orbGlowCenter)" stroke="#ffffff" stroke-width="1.8"/>
             <circle cx="91" cy="78" r="7.5" fill="url(#orbGlowCenter)" stroke="#ffffff" stroke-width="1.8"/>
             <circle cx="29" cy="78" r="7.5" fill="url(#orbGlowCenter)" stroke="#ffffff" stroke-width="1.8"/>
           </svg>
         </div>
 
-        <!-- Intro Text & Quick Actions: Hides when typing or chatting -->
         <div id="empty-intro-wrap" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;">
           <h1>How can I help you today?</h1>
-          <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate Quranic calligraphy, or transcribe voice dictations.</p>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
-            <button onclick="promptPhotoInChat('A high-resolution image featuring a solid green background with white text. At top center, calligraphic text Al-Quran Al-Kareem. In middle, Surah Al-Jumu\'ah Verses 9-10. At bottom, Bismillah ir-Rahman ir-Rahim')" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">🎨 Quran Calligraphy Poster</button>
-            <button onclick="openPhotoStudioModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12px; padding:6px 12px;">⚡ Batch Edit Photos</button>
+          <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate artwork, or transcribe voice dictations.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:8px;">
+            <button onclick="newChat()" class="side-btn" style="width:auto; background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent); font-size:12.5px; padding:8px 14px; font-weight:700;">＋ New Chat</button>
+            <button onclick="openPhotoStudioModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12.5px; padding:8px 14px; font-weight:600;">🎨 AI Photo Studio</button>
+            <button onclick="openHistoryModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12.5px; padding:8px 14px; font-weight:600;">🕒 History</button>
+            <button onclick="openSettingsModal()" class="side-btn" style="width:auto; border:1px solid var(--line); font-size:12.5px; padding:8px 14px; font-weight:600;">⚙️ Settings</button>
           </div>
         </div>
       </div>
       <div class="messages" id="messages-list"></div>
     </section>
 
-    <div class="composer-wrap" style="position:relative;">
+    <div class="composer-wrap">
       <!-- PLUS ATTACHMENT MENU -->
-      <div id="plus-menu" style="display:none; position:absolute; bottom:82px; left:20px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); padding:8px; z-index:30; flex-direction:column; gap:4px; width:190px;">
-        <button onclick="triggerAttachment('camera')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">📸</span><span>Camera</span></button>
-        <button onclick="triggerAttachment('gallery')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">🖼️</span><span>Gallery / Photo</span></button>
-        <button onclick="triggerAttachment('pdf')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">📄</span><span>PDF / Document</span></button>
-        <button onclick="triggerAttachment('link')" class="side-btn" style="margin:0; font-size:12.5px; padding:8px 12px; cursor:pointer;"><span style="margin-right:8px;">🔗</span><span>Attach Website Link</span></button>
+      <div id="plus-menu" style="display:none; position:absolute; bottom:90px; left:18px; background:var(--panel2); border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 28px rgba(0,0,0,0.22); padding:8px; z-index:40; flex-direction:column; gap:4px; width:215px;">
+        <button onclick="triggerAttachment('camera')" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px;"><span style="margin-right:8px;">📸</span><span>Camera Photo</span></button>
+        <button onclick="triggerAttachment('gallery')" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px;"><span style="margin-right:8px;">🖼️</span><span>Gallery / Screenshot</span></button>
+        <button onclick="triggerAttachment('pdf')" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px;"><span style="margin-right:8px;">📄</span><span>PDF / Code File</span></button>
+        <button onclick="triggerAttachment('link')" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px;"><span style="margin-right:8px;">🔗</span><span>Attach Website Link</span></button>
+        <button onclick="openPhotoStudioModal()" class="side-btn" style="margin:0; font-size:13px; padding:9px 12px; color:var(--accent); font-weight:700;"><span style="margin-right:8px;">🎨</span><span>AI Photo Studio</span></button>
       </div>
 
-      <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:800px; margin:0 auto 10px; font-size:11px;">
+      <div id="composer-attachment-panel" style="display:none; justify-content:space-between; align-items:center; background:var(--accent-soft); border:1px solid var(--line); padding:6px 12px; border-radius:10px; max-width:800px; margin:0 auto 8px; font-size:12px;">
         <div style="display:flex; align-items:center; gap:6px;">
           <span id="composer-attachment-icon">📎</span>
-          <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:250px;">file.jpg</span>
+          <span id="composer-attachment-name" style="font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:240px;">file.jpg</span>
         </div>
-        <button onclick="clearComposerAttachment()" style="color:red; background:none; border:none; text-decoration:underline; cursor:pointer;">Remove</button>
+        <button onclick="clearComposerAttachment()" style="color:#ef4444; background:none; border:none; font-weight:700; cursor:pointer;">✕ Remove</button>
       </div>
 
-      <div id="mic-permission-banner" style="display:none; justify-content:space-between; align-items:center; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:8px 14px; border-radius:10px; max-width:800px; margin:0 auto 10px; font-size:12px; font-weight:600;">
+      <div id="mic-permission-banner" style="display:none; justify-content:space-between; align-items:center; background:#fee2e2; color:#991b1b; border:1px solid #fecaca; padding:8px 14px; border-radius:10px; max-width:800px; margin:0 auto 8px; font-size:12px; font-weight:600;">
         <span id="mic-permission-banner-text">⚠️ Permission Denied: براہ کرم براؤزر سیٹنگز میں مائیکروفون (Microphone) کی اجازت دیں۔</span>
         <button onclick="hideMicErrorBanner()" style="background:none; border:none; color:#991b1b; font-weight:800; cursor:pointer; margin-left:10px;">✕</button>
       </div>
 
       <div class="composer">
-        <textarea id="input" placeholder="Asking nova..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
+        <textarea id="input" placeholder="Ask NOVA anything..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
         <div class="tools">
-          <button class="tool" onclick="togglePlusMenu(event)" title="Add Attachments" style="font-size: 15px; font-weight:700;">➕</button>
-          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Voice Input (Microphone)">🎙️</button>
-          <button class="send" onclick="send()" title="Send message">➤</button>
+          <button class="tool tool-plus" id="btn-plus-attach" onclick="togglePlusMenu(event)" title="Add Attachment (+)" aria-label="Add Attachment">＋</button>
+          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Voice Input (Microphone)" aria-label="Voice Input">🎙️</button>
+          <button class="tool" onclick="openPhotoStudioModal()" title="AI Photo Studio" aria-label="Photo Studio">🎨</button>
+          <button class="send" onclick="send()" title="Send message" aria-label="Send">➤</button>
         </div>
       </div>
-      <div style="text-align:center;color:var(--muted);font-size:10px;margin-top:7px">NOVA AI Advanced Core · Powered by Google Gemini</div>
     </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Chat + New Chat + History + Studio + Settings) -->
+    <nav class="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <button class="mob-nav-btn active" id="mob-tab-chat" onclick="focusChatWorkspace()">
+        <span class="mob-icon">💬</span>
+        <span>Chat</span>
+      </button>
+      <button class="mob-nav-btn" id="mob-tab-new" onclick="newChat()">
+        <span class="mob-icon">➕</span>
+        <span>New Chat</span>
+      </button>
+      <button class="mob-nav-btn" id="mob-tab-history" onclick="openHistoryModal()">
+        <span class="mob-icon">🕒</span>
+        <span>History</span>
+      </button>
+      <button class="mob-nav-btn" id="mob-tab-studio" onclick="openPhotoStudioModal()">
+        <span class="mob-icon">🎨</span>
+        <span>Studio</span>
+      </button>
+      <button class="mob-nav-btn" id="mob-tab-settings" onclick="openSettingsModal()">
+        <span class="mob-icon">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </nav>
     
     <!-- Multi Hidden Inputs -->
     <input id="input-camera" type="file" accept="image/*" capture="environment" hidden onchange="handlePlusFileSelected(this, 'Camera Photo')">
@@ -1080,6 +1211,8 @@ function generatePhotoFromUserMessage(idx) {
 
 function saveModelConfig() {
   const model = document.getElementById('modelSelector').value;
+  const modalSelect = document.getElementById('modalModelSelector');
+  if (modalSelect) modalSelect.value = model;
   const currentChat = chats.find(c => c.id === currentChatId);
   if (currentChat) {
     currentChat.model = model;
@@ -1088,14 +1221,98 @@ function saveModelConfig() {
   showToast(`Routed to: ${model}`);
 }
 
+function syncModelFromModal(model) {
+  const sideSelect = document.getElementById('modelSelector');
+  if (sideSelect) sideSelect.value = model;
+  saveModelConfig();
+}
+
 function saveMicLanguage() {
   const lang = document.getElementById('micLanguageSelector').value;
+  const modalMic = document.getElementById('modalMicLanguageSelector');
+  if (modalMic) modalMic.value = lang;
   localStorage.setItem('nova_speech_lang', lang);
   showToast(`Mic language set to: ${lang}`);
 }
 
+function syncMicLangFromModal(lang) {
+  const sideMic = document.getElementById('micLanguageSelector');
+  if (sideMic) sideMic.value = lang;
+  saveMicLanguage();
+}
+
+function setActiveMobileTab(tabId) {
+  document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.id === tabId);
+  });
+}
+
+function focusChatWorkspace() {
+  closeHistoryModal();
+  closeSettingsModal();
+  closePhotoStudioModal();
+  closeSidebar();
+  closeMoreMenu();
+  setActiveMobileTab('mob-tab-chat');
+  const inputEl = document.getElementById('input');
+  if (inputEl) inputEl.focus();
+}
+
+function openHistoryModal() {
+  renderHistory();
+  document.getElementById('historyModal').classList.add('active');
+  closeSidebar();
+  closeMoreMenu();
+  setActiveMobileTab('mob-tab-history');
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.remove('active');
+  setActiveMobileTab('mob-tab-chat');
+}
+
+function clearAllHistory() {
+  stopSpeechPlayback(false);
+  chats = [];
+  newChat();
+  closeHistoryModal();
+  showToast('🗑️ All conversation history cleared');
+}
+
+function openSettingsModal() {
+  const sideModel = document.getElementById('modelSelector');
+  const modalModel = document.getElementById('modalModelSelector');
+  if (sideModel && modalModel) modalModel.value = sideModel.value;
+
+  const sideMic = document.getElementById('micLanguageSelector');
+  const modalMic = document.getElementById('modalMicLanguageSelector');
+  if (sideMic && modalMic) modalMic.value = sideMic.value;
+
+  document.getElementById('settingsModal').classList.add('active');
+  closeSidebar();
+  closeMoreMenu();
+  setActiveMobileTab('mob-tab-settings');
+}
+
+function closeSettingsModal() {
+  document.getElementById('settingsModal').classList.remove('active');
+  setActiveMobileTab('mob-tab-chat');
+}
+
+function toggleMoreMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('top-more-menu');
+  if (menu) menu.classList.toggle('active');
+}
+
+function closeMoreMenu() {
+  const menu = document.getElementById('top-more-menu');
+  if (menu) menu.classList.remove('active');
+}
+
 function toggleSidebar(e) {
   if (e) e.stopPropagation();
+  closeMoreMenu();
   const sidebar = document.getElementById('appSidebar');
   const backdrop = document.getElementById('sidebarBackdrop');
   sidebar.classList.toggle('open');
@@ -1110,7 +1327,8 @@ function closeSidebar() {
 }
 
 function handleMainTap() {
-  if (window.innerWidth <= 720) closeSidebar();
+  if (window.innerWidth <= 768) closeSidebar();
+  closeMoreMenu();
 }
 
 function newChat() {
@@ -1121,20 +1339,23 @@ function newChat() {
     id, 
     title: 'New Conversation', 
     model: selectedModel,
-    messages: [] 
+    messages: [],
+    updatedAt: Date.now()
   });
   currentChatId = id;
   saveChats();
   renderHistory();
   loadMessages();
   closeSidebar();
+  closeMoreMenu();
+  setActiveMobileTab('mob-tab-chat');
   
   const inputEl = document.getElementById('input');
   if (inputEl) {
     inputEl.value = '';
     inputEl.focus();
   }
-  showToast('✨ Started clean conversation');
+  showToast('✨ Started new conversation');
 }
 
 function saveChats() {
@@ -1144,31 +1365,68 @@ function saveChats() {
 
 function renderHistory() {
   const container = document.getElementById('chat-history-list');
-  container.innerHTML = '';
-  chats.slice().reverse().forEach(chat => {
-    const isActive = chat.id === currentChatId;
-    const item = document.createElement('div');
-    item.className = `history-item ${isActive ? 'active' : ''}`;
-    if (isActive) item.style.background = 'var(--accent-soft)';
-    
-    let titleText = chat.title || 'Conversation';
-    if (titleText.length > 22) titleText = titleText.substring(0, 20) + '...';
+  const modalContainer = document.getElementById('modal-history-list');
+  if (container) container.innerHTML = '';
+  if (modalContainer) modalContainer.innerHTML = '';
 
-    item.innerHTML = `
-      <span>💬 ${titleText}</span>
-      <button onclick="deleteChatSession(event, '${chat.id}')" style="background:none; border:none; color:var(--muted); font-size:11px; cursor:pointer;">✕</button>
-    `;
-    item.onclick = (e) => { 
-      if (e.target.tagName !== 'BUTTON') {
-        stopSpeechPlayback(false);
-        currentChatId = chat.id; 
-        saveChats(); 
-        loadMessages(); 
-        closeSidebar(); 
-      }
-    };
-    container.appendChild(item);
+  const reversed = chats.slice().reverse();
+
+  if (modalContainer && reversed.length === 0) {
+    modalContainer.innerHTML = `<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px;">No conversation history yet.</div>`;
+  }
+
+  reversed.forEach(chat => {
+    const isActive = chat.id === currentChatId;
+    let titleText = chat.title || 'New Conversation';
+    const msgCount = (chat.messages || []).length;
+
+    // 1. Sidebar item
+    if (container) {
+      const item = document.createElement('div');
+      item.className = `history-item ${isActive ? 'active' : ''}`;
+      const shortTitle = titleText.length > 23 ? titleText.substring(0, 21) + '...' : titleText;
+      item.innerHTML = `
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">💬 ${shortTitle}</span>
+        <button onclick="deleteChatSession(event, '${chat.id}')" title="Delete Chat" style="background:none; border:none; color:var(--muted); font-size:12px; cursor:pointer; padding:2px 6px;">✕</button>
+      `;
+      item.onclick = (e) => { 
+        if (e.target.tagName !== 'BUTTON') {
+          selectChatSession(chat.id);
+        }
+      };
+      container.appendChild(item);
+    }
+
+    // 2. History Modal item (Full view with message count)
+    if (modalContainer) {
+      const mItem = document.createElement('div');
+      mItem.className = `history-item ${isActive ? 'active' : ''}`;
+      mItem.style.padding = '12px 14px';
+      mItem.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;">
+          <div style="font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">💬 ${titleText}</div>
+          <div style="font-size:11px;color:var(--muted);">${msgCount} message${msgCount === 1 ? '' : 's'} · ${chat.model || 'gemini-3.8-flash'}</div>
+        </div>
+        <button onclick="deleteChatSession(event, '${chat.id}')" title="Delete Conversation" style="background:none; border:1px solid var(--line); border-radius:8px; color:#ef4444; font-size:12px; cursor:pointer; padding:6px 10px; flex-shrink:0;">🗑️</button>
+      `;
+      mItem.onclick = (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+          selectChatSession(chat.id);
+          closeHistoryModal();
+        }
+      };
+      modalContainer.appendChild(mItem);
+    }
   });
+}
+
+function selectChatSession(id) {
+  stopSpeechPlayback(false);
+  currentChatId = id;
+  saveChats();
+  renderHistory();
+  loadMessages();
+  closeSidebar();
 }
 
 function deleteChatSession(e, id) {
@@ -1415,10 +1673,11 @@ function togglePlusMenu(e) {
   }
 }
 
-// Close plus menu if user taps outside
+// Close plus menu and more dropdown if user taps outside
 document.addEventListener('click', () => {
   const menu = document.getElementById('plus-menu');
   if (menu) menu.style.display = 'none';
+  closeMoreMenu();
 });
 
 function triggerAttachment(type) {
@@ -1992,8 +2251,41 @@ function stopVoiceDictation() {
   }
 }
 
-// PWA Installation Prompt Logic
+// PWA Installation, Standalone Logo Control, Splash Screen & Offline Mode Logic
 let deferredPrompt = null;
+
+function checkStandalonePwaMode() {
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  if (isStandalone) {
+    document.body.classList.add('is-standalone-pwa');
+    const pwaInstallBtn = document.getElementById('pwa-install-btn');
+    const settingsInstallBtn = document.getElementById('settings-pwa-install-btn');
+    if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+    if (settingsInstallBtn) settingsInstallBtn.style.display = 'none';
+  }
+}
+
+function updateOnlineOfflineBanner() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  if (navigator.onLine) {
+    banner.style.display = 'none';
+  } else {
+    banner.style.display = 'block';
+  }
+}
+
+window.addEventListener('online', () => {
+  updateOnlineOfflineBanner();
+  showToast('🌐 Back Online! All AI services connected.');
+});
+
+window.addEventListener('offline', () => {
+  updateOnlineOfflineBanner();
+  showToast('⚡ Offline Mode: Saved chats & history are available.');
+});
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
@@ -2009,9 +2301,9 @@ async function triggerPwaInstall() {
   if (!deferredPrompt) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     if (isIOS) {
-      showToast('📲 To install: Tap the "Share" icon in Safari, scroll down, and tap "Add to Home Screen"!');
+      showToast('📲 To install on iOS: Tap the "Share" icon in Safari, then tap "Add to Home Screen"!');
     } else {
-      showToast('ℹ️ Open browser menu (vertical dots) and click "Install App" to download!');
+      showToast('ℹ️ Open browser menu (⋮) and tap "Install App" or "Add to Home Screen"!');
     }
     return;
   }
@@ -2026,17 +2318,53 @@ async function triggerPwaInstall() {
 
 window.addEventListener('appinstalled', () => {
   showToast('🚀 NOVA AI Installed successfully!');
+  document.body.classList.add('is-standalone-pwa');
   const pwaInstallBtn = document.getElementById('pwa-install-btn');
   if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
 });
 
+// Register offline Service Worker for full PWA offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw-offline.js').catch(() => {});
+  });
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('nova_theme') === 'dark') document.body.dataset.theme = 'dark';
-  const savedMicLang = localStorage.getItem('nova_speech_lang');
-  if (savedMicLang && document.getElementById('micLanguageSelector')) {
-    document.getElementById('micLanguageSelector').value = savedMicLang;
+  checkStandalonePwaMode();
+  updateOnlineOfflineBanner();
+
+  // Hide PWA Splash Screen smoothly after launch
+  const splash = document.getElementById('pwa-splash-screen');
+  if (splash) {
+    setTimeout(() => {
+      splash.classList.add('hidden');
+    }, 650);
   }
-  if (chats.length === 0) newChat();
+
+  // Apply saved theme (default to dark if not set or if dark)
+  const savedTheme = localStorage.getItem('nova_theme');
+  if (savedTheme === 'dark' || savedTheme === null) {
+    document.body.dataset.theme = 'dark';
+  }
+
+  const savedMicLang = localStorage.getItem('nova_speech_lang');
+  if (savedMicLang) {
+    if (document.getElementById('micLanguageSelector')) {
+      document.getElementById('micLanguageSelector').value = savedMicLang;
+    }
+    if (document.getElementById('modalMicLanguageSelector')) {
+      document.getElementById('modalMicLanguageSelector').value = savedMicLang;
+    }
+  }
+
+  if (chats.length === 0) {
+    newChat();
+  } else if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
+    currentChatId = chats[chats.length - 1].id;
+    saveChats();
+  }
+
   renderHistory();
   loadMessages();
 
