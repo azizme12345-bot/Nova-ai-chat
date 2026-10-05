@@ -22,7 +22,30 @@ function isValidApiKey(val) {
   );
 }
 
+import fs from 'fs';
+import path from 'path';
+
+function getUserApiKey() {
+  if (process.env.USER_GEMINI_API_KEY && isValidApiKey(process.env.USER_GEMINI_API_KEY)) {
+    return process.env.USER_GEMINI_API_KEY.trim();
+  }
+  try {
+    const keyPath = path.resolve(process.cwd(), 'user_api_key.txt');
+    if (fs.existsSync(keyPath)) {
+      const key = fs.readFileSync(keyPath, 'utf-8').trim();
+      if (isValidApiKey(key)) {
+        process.env.USER_GEMINI_API_KEY = key;
+        return key;
+      }
+    }
+  } catch (e) {}
+  return '';
+}
+
 function getServerApiKey() {
+  const userKey = getUserApiKey();
+  if (userKey) return userKey;
+
   const candidates = [
     process.env.GEMINI_API_KEY,
     process.env.GOOGLE_API_KEY,
@@ -92,10 +115,8 @@ export default async function handler(req, res) {
       });
 
       const candidateModels = [
-        'gemini-2.5-flash',
-        'gemini-3-flash-preview',
-        'gemini-3.1-flash-lite-preview',
-        'gemini-flash-latest'
+        'gemini-3.5-transcribe',
+        'gemini-3.8-flash'
       ];
       for (const mName of candidateModels) {
         try {

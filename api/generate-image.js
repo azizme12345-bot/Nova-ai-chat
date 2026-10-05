@@ -39,7 +39,42 @@ IMPORTANT RULES:
 ✓ Preserve lighting consistency
 ✓ Don't modify what user didn't ask for`;
 
+import fs from 'fs';
+import path from 'path';
+
+function isValidApiKey(val) {
+  if (!val || typeof val !== 'string') return false;
+  const trimmed = val.trim();
+  return (
+    trimmed.length > 10 &&
+    trimmed !== 'MY_GOOGLE_API_KEY' &&
+    trimmed !== 'MY_GEMINI_API_KEY' &&
+    trimmed !== 'dummy' &&
+    !trimmed.startsWith('YOUR_')
+  );
+}
+
+function getUserApiKey() {
+  if (process.env.USER_GEMINI_API_KEY && isValidApiKey(process.env.USER_GEMINI_API_KEY)) {
+    return process.env.USER_GEMINI_API_KEY.trim();
+  }
+  try {
+    const keyPath = path.resolve(process.cwd(), 'user_api_key.txt');
+    if (fs.existsSync(keyPath)) {
+      const key = fs.readFileSync(keyPath, 'utf-8').trim();
+      if (isValidApiKey(key)) {
+        process.env.USER_GEMINI_API_KEY = key;
+        return key;
+      }
+    }
+  } catch (e) {}
+  return '';
+}
+
 function getServerApiKey() {
+  const userKey = getUserApiKey();
+  if (userKey) return userKey;
+
   const candidates = [
     process.env.GEMINI_API_KEY,
     process.env.GOOGLE_API_KEY,
@@ -49,7 +84,7 @@ function getServerApiKey() {
   for (const c of candidates) {
     if (c && typeof c === 'string') {
       const t = c.trim();
-      if (t.length > 10 && t !== 'MY_GOOGLE_API_KEY' && t !== 'MY_GEMINI_API_KEY' && t !== 'dummy') {
+      if (isValidApiKey(t)) {
         return t;
       }
     }

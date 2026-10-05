@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 
@@ -36,7 +37,29 @@ function isValidApiKey(val?: string): boolean {
   );
 }
 
+function getUserApiKey(): string {
+  // First check in-memory process.env
+  if (process.env.USER_GEMINI_API_KEY && isValidApiKey(process.env.USER_GEMINI_API_KEY)) {
+    return process.env.USER_GEMINI_API_KEY.trim();
+  }
+  // Then check persistent user_api_key.txt file
+  const keyPath = path.resolve(process.cwd(), 'user_api_key.txt');
+  if (fs.existsSync(keyPath)) {
+    const key = fs.readFileSync(keyPath, 'utf-8').trim();
+    if (isValidApiKey(key)) {
+      process.env.USER_GEMINI_API_KEY = key;
+      return key;
+    }
+  }
+  return '';
+}
+
 function getServerApiKey(): string {
+  // Always prefer user-provided custom API key!
+  const userKey = getUserApiKey();
+  if (userKey) return userKey;
+
+  // Otherwise fallback to system default keys if absolutely necessary
   const candidates = [
     process.env.GEMINI_API_KEY,
     process.env.GOOGLE_API_KEY,
@@ -665,7 +688,7 @@ app.post('/api/video-style', async (req: Request, res: Response) => {
   }
 });
 
-// Voice Transcription Endpoint
+// Voice / Speech-to-Text Transcription Endpoint (Gemini Audio STT)
 app.post('/api/transcribe', async (req: Request, res: Response) => {
   try {
     let parsedBody = req.body;
@@ -675,31 +698,44 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
       } catch (e) {}
     }
 
-    const { audioData, mimeType = 'audio/webm', language = 'ur-PK' } = parsedBody || {};
+    const { audioData, mimeType = 'audio/webm', language = 'ur-PK', customApiKey } = parsedBody || {};
 
     if (!audioData) {
       return res.status(400).json({ error: 'Missing audioData parameter' });
     }
 
     let cleanBase64 = audioData;
-    const match = audioData.match(/^data:([^;]+);base64,(.+)$/);
-    if (match) {
-      cleanBase64 = match[2];
+    const commaIndex = audioData.indexOf(',');
+    if (commaIndex !== -1 && audioData.startsWith('data:')) {
+      cleanBase64 = audioData.substring(commaIndex + 1);
     }
 
     const isUrdu = language.startsWith('ur');
-    const targetLang = isUrdu ? 'Urdu (اردو)' : language.startsWith('hi') ? 'Hindi (हिंदी)' : language.startsWith('ar') ? 'Arabic' : 'English';
+    const isHindi = language.startsWith('hi');
+    const isArabic = language.startsWith('ar');
+    const targetLang = isUrdu ? 'Urdu (اردو)' : isHindi ? 'Hindi (हिंदी)' : isArabic ? 'Arabic (العربية)' : 'English';
 
     let transcriptText = '';
 
-    const ai = getGeminiClient();
+    // If client supplied customApiKey, prioritize it
+    let ai = getGeminiClient();
+    if (customApiKey && isValidApiKey(customApiKey)) {
+      ai = new GoogleGenAI({ apiKey: customApiKey.trim() });
+    }
+
     if (ai) {
       const candidateModels = [
-        'gemini-3.5-transcribe',
         'gemini-3.8-flash',
         'gemini-3.1-flash-lite',
         'gemini-flash-latest'
       ];
+
+      // Sanitize mimeType for Gemini API
+      let sanitizedMime = (mimeType || 'audio/webm').split(';')[0].trim().toLowerCase();
+      if (!sanitizedMime.startsWith('audio/')) {
+        sanitizedMime = 'audio/webm';
+      }
+
       for (const mName of candidateModels) {
         try {
           const response = await ai.models.generateContent({
@@ -710,37 +746,44 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
                 parts: [
                   {
                     inlineData: {
-                      mimeType: (mimeType || 'audio/webm').split(';')[0],
+                      mimeType: sanitizedMime,
                       data: cleanBase64
                     }
                   },
                   {
-                    text: `Transcribe the spoken human voice in this audio clip accurately (preferred script: ${targetLang}, or English/Hindi/Urdu as spoken). If there is only silence or background noise with no clear words, return ONLY the word SILENCE. Otherwise return ONLY the exact transcribed text with zero commentary.`
+                    text: `You are an expert Speech-to-Text transcription AI. Transcribe the spoken human audio verbatim in its original language and script (e.g., Urdu in Urdu Nastaliq/Arabic script, Hindi in Devanagari script, English in English). Preferred language: ${targetLang}. If there is only silence, breathing, or background noise with no words spoken, respond ONLY with "SILENCE". Otherwise return ONLY the exact transcribed text without quotes, commentary, markdown headers, or explanations.`
                   }
                 ]
               }
             ]
           });
 
-          const rawOut = (response.text || '').trim();
-          if (rawOut && rawOut.toUpperCase() !== 'SILENCE' && !rawOut.toLowerCase().includes('no speech')) {
+          let rawOut = (response.text || '').trim();
+          // Remove surrounding quotes or backticks if any
+          rawOut = rawOut.replace(/^["'`]|["'`]$/g, '').trim();
+
+          if (rawOut && rawOut.toUpperCase() !== 'SILENCE' && !rawOut.toLowerCase().includes('no speech') && !rawOut.toLowerCase().includes('silence')) {
             transcriptText = rawOut;
+            console.log(`[NOVA Audio STT] Successfully transcribed audio via ${mName}: "${transcriptText.substring(0, 60)}..."`);
             break;
           }
-        } catch (mErr) {
-          console.warn(`Transcribe model ${mName} failed:`, mErr);
+        } catch (mErr: any) {
+          console.warn(`[NOVA Audio STT] Model ${mName} attempt failed:`, mErr.message);
         }
       }
     }
 
     return res.status(200).json({
       transcript: transcriptText,
+      success: !!transcriptText,
       useBrowserSpeech: !transcriptText
     });
 
   } catch (error: any) {
+    console.error('Transcribe endpoint error:', error);
     return res.status(200).json({
       transcript: '',
+      success: false,
       useBrowserSpeech: true,
       details: error.message
     });
@@ -987,12 +1030,15 @@ async function handleChatRequest(req: Request, res: Response) {
       videoMeta,
       attachedUrl,
       language, 
-      history = []
+      history = [],
+      multipleFiles,
+      fontName,
+      fontColor
     } = parsedBody || {};
 
     const userPrompt = prompt || message || (history.length > 0 ? history[history.length - 1].text : '');
 
-    if (!userPrompt && !image && !videoMeta && (!Array.isArray(videoFrames) || videoFrames.length === 0)) {
+    if (!userPrompt && !image && !videoMeta && (!Array.isArray(videoFrames) || videoFrames.length === 0) && (!Array.isArray(multipleFiles) || multipleFiles.length === 0)) {
       return res.status(400).json({ error: 'Missing prompt parameter' });
     }
 
@@ -1050,6 +1096,26 @@ Please use these exact measurements along with the attached video frames to give
     }
     if (videoTelemetryContext) {
       finalPrompt = `${finalPrompt}${videoTelemetryContext}`;
+    }
+
+    let multipleFilesContext = '';
+    if (Array.isArray(multipleFiles) && multipleFiles.length > 0) {
+      let photoCount = 0;
+      let videoCount = 0;
+      multipleFiles.forEach((f: any) => {
+        if (f.type === 'video') videoCount++;
+        else photoCount++;
+      });
+      multipleFilesContext = `\n\n[UPLOADED MULTIPLE FILES]:
+- Font Name: ${fontName || 'Poppins Bold'}
+- Font Color: ${fontColor || 'White'}
+- Total Files: ${multipleFiles.length} (${photoCount} Photos, ${videoCount} Videos)
+Files List:`;
+      multipleFiles.forEach((f: any, idx: number) => {
+        multipleFilesContext += `\n${idx + 1}. File: ${f.name} (Type: ${f.type})${f.caption ? ` - Caption: "${f.caption}"` : ''}`;
+      });
+      multipleFilesContext += `\n\nPlease use these files and instructions for processing the request.\n\n`;
+      finalPrompt = `${finalPrompt}${multipleFilesContext}`;
     }
 
     const langInstruction = language ? `Strictly respond in ${language}.` : `Respond naturally in the same language as the user's message (Urdu, Hindi, English, etc.).`;
@@ -1191,17 +1257,67 @@ Please use these exact measurements along with the attached video frames to give
           });
         }
       }
+      if (Array.isArray(multipleFiles)) {
+        multipleFiles.forEach((f: any) => {
+          if (f.type === 'image' && typeof f.data === 'string' && f.data.startsWith('data:')) {
+            const match = f.data.match(/^data:([^;]+);base64,(.+)$/);
+            if (match) {
+              parts.push({
+                inlineData: {
+                  mimeType: match[1],
+                  data: match[2]
+                }
+              });
+            }
+          }
+        });
+      }
       normalizedContents.push({ role: 'user', parts });
     } else {
-      // Ensure the latest user turn includes videoTelemetryContext
+      // Ensure the latest user turn includes videoTelemetryContext and multipleFilesContext
       const lastEntry = normalizedContents[normalizedContents.length - 1];
-      if (lastEntry.role === 'user' && videoTelemetryContext) {
-        lastEntry.parts[0].text = `${lastEntry.parts[0].text}\n${videoTelemetryContext}`;
+      if (lastEntry.role === 'user') {
+        let updatedText = lastEntry.parts[0].text;
+        if (videoTelemetryContext) updatedText = `${updatedText}\n${videoTelemetryContext}`;
+        if (multipleFilesContext) updatedText = `${updatedText}\n${multipleFilesContext}`;
+        lastEntry.parts[0].text = updatedText;
+
+        if (Array.isArray(multipleFiles)) {
+          multipleFiles.forEach((f: any) => {
+            if (f.type === 'image' && typeof f.data === 'string' && f.data.startsWith('data:')) {
+              const match = f.data.match(/^data:([^;]+);base64,(.+)$/);
+              if (match) {
+                lastEntry.parts.push({
+                  inlineData: {
+                    mimeType: match[1],
+                    data: match[2]
+                  }
+                });
+              }
+            }
+          });
+        }
       }
     }
 
     if (normalizedContents[normalizedContents.length - 1].role !== 'user') {
-      normalizedContents.push({ role: 'user', parts: [{ text: finalPrompt }] });
+      const parts: any[] = [{ text: finalPrompt }];
+      if (Array.isArray(multipleFiles)) {
+        multipleFiles.forEach((f: any) => {
+          if (f.type === 'image' && typeof f.data === 'string' && f.data.startsWith('data:')) {
+            const match = f.data.match(/^data:([^;]+);base64,(.+)$/);
+            if (match) {
+              parts.push({
+                inlineData: {
+                  mimeType: match[1],
+                  data: match[2]
+                }
+              });
+            }
+          }
+        });
+      }
+      normalizedContents.push({ role: 'user', parts });
     }
 
     // Attach extracted video keyframes to the latest user turn so Gemini inspects beginning (Hook), middle, and end frames
@@ -1295,6 +1411,12 @@ Please use these exact measurements along with the attached video frames to give
         : generateFallbackResponse(finalPrompt, language);
     }
 
+    if (Array.isArray(multipleFiles) && multipleFiles.length > 0) {
+      const fileLines = multipleFiles.map((f: any) => `• ${f.name}`).join('\n');
+      const hasCaptions = multipleFiles.some((f: any) => !!f.caption);
+      aiText = `📊 Processing Complete\n\n📁 Files Used:\n${fileLines}\n\n⚙️ Settings:\n• Font: ${fontName || 'Poppins Bold'}\n• Color: ${fontColor || 'White'}\n• Captions: ${hasCaptions ? 'Added' : 'None'}\n\n📝 Output:\n${aiText}`;
+    }
+
     return res.json({ text: aiText, reply: aiText });
 
   } catch (error: any) {
@@ -1308,6 +1430,53 @@ Please use these exact measurements along with the attached video frames to give
 
 app.post('/api/chat', handleChatRequest);
 app.post('/api/translate', handleChatRequest);
+
+app.get('/api/check-key', (req, res) => {
+  const userKey = getUserApiKey();
+  return res.json({ configured: !!userKey });
+});
+
+app.post('/api/save-key', (req, res) => {
+  try {
+    let parsedBody = req.body;
+    if (typeof parsedBody === 'string') {
+      try {
+        parsedBody = JSON.parse(parsedBody);
+      } catch (e) {}
+    }
+    const { apiKey } = parsedBody || {};
+    if (!apiKey || typeof apiKey !== 'string' || apiKey.trim().length < 10) {
+      return res.status(400).json({ error: 'Invalid API Key' });
+    }
+
+    const trimmedKey = apiKey.trim();
+    process.env.USER_GEMINI_API_KEY = trimmedKey;
+    process.env.GOOGLE_API_KEY = trimmedKey;
+    process.env.GEMINI_API_KEY = trimmedKey;
+
+    // Save to user_api_key.txt persistently
+    const keyPath = path.resolve(process.cwd(), 'user_api_key.txt');
+    fs.writeFileSync(keyPath, trimmedKey, 'utf-8');
+
+    // Save persistently to .env file in root
+    const envPath = path.resolve(process.cwd(), '.env');
+    let envContent = '';
+    if (fs.existsSync(envPath)) {
+      envContent = fs.readFileSync(envPath, 'utf-8');
+    }
+    const lines = envContent.split('\n').filter(line => !line.startsWith('GOOGLE_API_KEY=') && !line.startsWith('GEMINI_API_KEY=') && !line.startsWith('USER_GEMINI_API_KEY='));
+    lines.push(`USER_GEMINI_API_KEY=${trimmedKey}`);
+    lines.push(`GOOGLE_API_KEY=${trimmedKey}`);
+    lines.push(`GEMINI_API_KEY=${trimmedKey}`);
+    fs.writeFileSync(envPath, lines.join('\n'), 'utf-8');
+
+    console.log('📡 [Server Config] Custom User API Key saved persistently on the server!');
+    return res.json({ success: true, message: 'Google API Key saved persistently on the backend!' });
+  } catch (err: any) {
+    console.error('Error saving API Key:', err);
+    return res.status(500).json({ error: 'Internal Server Error', details: err.message });
+  }
+});
 
 const isProd = process.env.NODE_ENV === 'production';
 
