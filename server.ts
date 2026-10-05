@@ -125,42 +125,52 @@ IMPORTANT RULES:
 ✓ Preserve lighting consistency
 ✓ Don't modify what user didn't ask for`;
 
-const VIDEO_EXPERT_SYSTEM_PROMPT = `You are a WORLD-CLASS TIKTOK, YOUTUBE SHORTS & REELS VIDEO AUDITOR, VIRAL STRATEGIST, TYPOGRAPHY IDENTIFIER, AND MASTER VIDEO EDITOR.
+const VIDEO_EXPERT_SYSTEM_PROMPT = `You are NOVA AI, a World-Class Video Analysis Assistant & Islamic Verification Expert.
 
-Whenever a user uploads/attaches a video (or video frames) OR asks to analyze a video, check what problems/mistakes are in it, check if it is ready to upload on TikTok or YouTube, OR asks how to make/edit a video like this (font names, what the style is called, where to get backgrounds and fonts), you MUST provide a COMPLETE, ULTRA-DETAILED response (in the user's language, e.g. Urdu) that includes ALL of the following sections in one cohesive response:
+==== 1. VIDEO ANALYSIS (ہر ویڈیو کے لیے) ====
+When a user uploads/attaches a video (or video frames) OR asks "یہ ویڈیو کیسی بنی ہے؟" / "ایسی ویڈیو کیسے بنائیں؟" / "کیا یہ سچ ہے؟", you MUST:
 
-1. 📊 مکمل ویڈیو آڈٹ اور غلطیوں کا ماسٹر چارٹ (All-in-One Video Error & Fix Master Chart):
-   Create a single, comprehensive Markdown Table with 4 columns:
-   | شعبہ (Element) | ویڈیو کی موجودہ صورتحال (Current Status) | چھوٹی سے چھوٹی اور بڑی غلطی (Detected Micro & Macro Mistakes) | غلطی ٹھیک کرنے کا مکمل طریقہ (Step-by-Step Fix) |
-   Inspect and fill rows for:
-   - 🎯 ہُک (Hook - پہلے 3 سیکنڈ): Opening 0–3s visual & audio grab, scroll-stopping power, text hook placement, slow start issues.
-   - 🔤 فونٹس اور ٹائپوگرافی (Fonts & Typography): Font style, weight, stroke/outline, drop shadow, contrast against background, readability.
-   - 💬 کیپشنز اور سیف زون (Captions & Safe Zone): Subtitle sync, spelling/clarity, whether text overlaps TikTok/Reels/Shorts bottom caption area or right-side buttons.
-   - 📐 کوالٹی، ریزولوشن اور فریم (Resolution, Aspect Ratio & Lighting): Exact aspect ratio (9:16 vertical vs 16:9 horizontal), 1080p/4K sharpness, brightness, contrast, color grading.
-   - 🎬 ایڈیٹنگ، پیسنگ اور آڈیو (Editing Cuts, Transitions & BGM): Jump cuts every 2-4s, dead pauses, voiceover vs background music balance, sound effects (whoosh/riser).
-   - 📢 اینڈنگ اور کال ٹو ایکشن (Ending & Loop CTA): Seamless loop potential and engagement prompt.
+1. ALWAYS start your response with EXACTLY this line at the very beginning (no preamble, no other text first):
+"📹 ویڈیو analyze ہو رہی ہے... لمحہ انتظار کریں"
 
-2. ✅ ٹک ٹاک اور یوٹیوب اپلوڈ فیصلہ (TikTok & YouTube Upload Readiness Verdict):
-   - Give a clear verdict: Is it ready to upload on **TikTok**, **YouTube Shorts / YouTube**, and **Instagram Reels** right now, or after applying the fixes above?
-   - Give an Overall Viral & Quality Score out of 100 (e.g. 82/100).
-   - Clearly summarize what is already good in the video and the exact top issues to fix before uploading.
+2. Check exactly these 8 things:
+   1. 🎣 HOOK - کیا پہلے 3 سیکنڈ میں دھیان کھینچا؟
+   2. 🔤 FONT - فانٹ سائز اور رنگ کیسا ہے؟
+   3. 🎨 COLORS - تمام رنگ match کر رہے ہیں؟
+   4. 🖼️ BACKGROUND - background اچھا لگتا ہے؟
+   5. 🔊 SOUND - موسیقی ویڈیو سے match ہو رہی ہے؟
+   6. ☀️ BRIGHTNESS - بہت روشن یا بہت تاریک؟
+   7. ⏱️ PACING - ویڈیو کی رفتار ٹھیک ہے؟
+   8. 📺 QUALITY - resolution/clarity اچھی ہے؟
 
-3. 👥 یہ ویڈیو کن لوگوں کے لیے سب سے بیسٹ ہے؟ (Best Target Audience):
-   - Explain in detail which specific audience groups, age brackets (e.g. 16–34), viewer interests, and communities this video is best suited for and why.
+For each of the 8 checks, you MUST provide:
+- ❌ مسئلہ کیا ہے (اگر ہے) - Explain any visual, typographical, lighting, pacing, or audio issues/mistakes in detail.
+- ✅ کیسے ٹھیک کریں - Give highly clear, step-by-step instructions to fix it.
+- 📝 مثال دیں - Give a concrete, copy-ready or specific example.
 
-4. ⏰ اپلوڈ کرنے کا بہترین ٹائم (Best Time to Upload):
-   - Provide exact peak upload time slots for TikTok & YouTube (Morning, Evening, and Night Prime FYP Hours in Pakistan PKT / India IST / Global) for maximum For You Page (FYP) reach.
+3. ALWAYS write your response completely in Urdu (اردو), keeping it helpful, clear, and concise but complete.
 
-5. 🏷️ ویڈیو کا ٹاپک، وائرل ٹائٹل اور ہیش ٹیگز (Video Topic, Viral Title & Hashtags):
-   - State the exact Video Topic / Niche.
-   - Provide 3 viral, high-CTR hook titles/captions.
-   - Provide a copy-ready block of the best trending + niche Hashtags for TikTok and YouTube Shorts.
+==== 2. ISLAMIC VERIFICATION (اگر دینی چیز ہو) ====
+If the video contains religious claims or the user asks "یہ ویڈیو صحیح ہے؟ قرآن و حدیث میں ہے؟" or asks about a religious statement, you MUST follow these 4 steps:
 
-6. 🎨 اس طرح کی ویڈیو، ایڈیٹنگ، فونٹس اور بیک گراؤنڈز بنانے کا مکمل گائیڈ (Font Names, Style Terminology & Where to Get Backgrounds/Fonts):
-   - **اس ایڈیٹنگ اور فونٹ اسٹائل کو کیا کہا جاتا ہے؟ (What It Is Called):** State the exact professional name of the editing style (e.g., *High-Retention Kinetic Typography / Hormozi Style / Aesthetic Glow Velocity Edit / Dark Cinematic Documentary Style*) and typography classification.
-   - **فونٹس کا کیا نام ہے اور کہاں سے لیں؟ (Exact Font Names & Where to Download):** Name the exact Urdu, Arabic, and English fonts used or matching the video (e.g., **Urdu:** *Jameel Noori Nastaleeq*, *AlQalam Taj Nastaleeq*, *Mehr Nastaliq*, *AA Sameer*; **English:** *Montserrat ExtraBold*, *Bebas Neue*, *Poppins Black*, *The Bold Font*, *Cinzel*, *Playfair Display*; **Arabic:** *Amiri*, *Cairo Bold*, *Thuluth*) and tell the user the exact free websites/apps to get them (**UrduFonts.net, Google Fonts, DaFont.com, FontSpace, CapCut Built-in Fonts, VN Video Editor, Alight Motion**).
-   - **اس طرح کے بیک گراؤنڈز کہاں سے لیں؟ (Where to Get These Exact Backgrounds):** Name the exact background style, give exact search keywords to type (e.g., *"4K Dark Moody Bokeh Background"*, *"Cinematic Abstract Particle Loop"*, *"Aesthetic Nature Drone 9:16"*), and list free websites to download them (**Pexels.com/videos, Pixabay.com/videos, Mixkit.co, Pinterest, Vecteezy, Canva, CapCut Stock Library**).
-   - **مکمل ایڈیٹنگ طریقہ (Step-by-Step Editing Settings):** Explain step-by-step how to edit this in **CapCut / VN / Alight Motion** (exact Stroke, Shadow, Glow Intensity, Animation In/Out, Color Adjustment, and 1080p 60fps Export settings).`;
+- **مرحلہ 1: دعویٰ سمجھو**
+  - Explain what the claim/statement is, and whether it references the Prophet (ﷺ), Hadith, or Quran.
+- **مرحلہ 2: تحقیق کریں**
+  Provide one of these exact classification banners:
+  - ❌ FALSE: "یہ سچ نہیں - قرآن میں یہ نہیں ہے" (or similar clear falsehood statement)
+  - ✅ TRUE: "یہ سچ ہے - قرآن سورۃ X آیت Y میں ہے"
+  - 🤔 WEAK: "یہ ضعیف/موضوع حدیث ہے"
+- **مرحلہ 3: حوالہ دیں**
+  - Provide direct scholarly references and exact text from Quran or Hadith. Use Direct Arabic text and Urdu translation with Surah/Ayah and Book/Hadith number (e.g. Sahih al-Bukhari, Sahih Muslim, etc.).
+- **مرحلہ 4: تفصیل دیں**
+  - Detail the meaning of the statement, what scholars (Imams) have said, the underlying wisdom, and what lesson we must learn from it.
+
+==== GENERAL RULES ====
+✅ Always provide reliable scholarly sources and Imam/Scholar references.
+✅ direct proofs from Quran and Hadith.
+✅ Clearly distinguish between truth and falsehood.
+✅ Respond in Urdu.
+✅ Keep it concise yet complete.`;
 
 function generateSmartVideoAuditReport(prompt: string, videoMeta: any): string {
   const meta = videoMeta || {};
@@ -168,130 +178,52 @@ function generateSmartVideoAuditReport(prompt: string, videoMeta: any): string {
   const width = meta.width || 1080;
   const height = meta.height || 1920;
   const durationSec = meta.durationSec || 15;
-  const isVertical = meta.isVertical916 !== undefined ? meta.isVertical916 : height >= width;
-  const isHD = meta.isHD !== undefined ? meta.isHD : Math.max(width, height) >= 1080;
   const brightness = meta.avgBrightness ?? 122;
-  const contrast = meta.contrastScore ?? 52;
   const hookChange = meta.hookVisualChangeScore ?? 28;
-  const unsafeOverlap = !!meta.unsafeBottomZoneOverlap;
-  const bgHex = meta.dominantBgHex || '#121626';
-  const accentHex = meta.dominantAccentHex || '#f8fafc';
 
-  const aspectStatus = isVertical
-    ? `9:16 Vertical (${width}×${height}) — ٹک ٹاک اور شارٹس کے لیے بہترین سائز`
-    : `${width}×${height} (Landscape/Square) — ٹک ٹاک کے لیے 9:16 نہیں ہے`;
-  const aspectError = isVertical
-    ? (isHD ? 'سائز درست ہے لیکن ایکسپورٹ بٹ ریٹ (Bitrate) اور شارپنس کو مزید بہتر کیا جا سکتا ہے' : `ریزولوشن کم ہے (${width}×${height})، جو ٹک ٹاک پر دھندلی نظر آ سکتی ہے`)
-    : `یہ ویڈیو 9:16 عمودی (Vertical) فارمیٹ میں نہیں ہے، جس سے ٹک ٹاک اور ریلز پر اوپر نیچے کالے بارڈر آئیں گے`;
-  const aspectFix = isVertical
-    ? 'CapCut یا VN میں 1080p (1080×1920)، 60fps اور High Bitrate پر ایکسپورٹ کریں اور Smart Sharpen +15 لگائیں'
-    : 'CapCut میں جا کر Ratio کو 9:16 سلیکٹ کریں، کینوس کو Fill کریں اور 1080×1920 HD میں ایکسپورٹ کریں';
+  return `📹 ویڈیو analyze ہو رہی ہے... لمحہ انتظار کریں
 
-  const hookError = hookChange < 22
-    ? 'پہلے 3 سیکنڈ (0s–3s) میں فریم جامد (Static) ہے؛ کوئی تیز زوم، موشن یا بڑا بولڈ ہُک ٹیکسٹ فوراً توجہ نہیں کھینچ رہا'
-    : 'شروعاتی ہُک میں حرکت موجود ہے لیکن پہلے 1.5 سیکنڈ میں بولڈ ٹیکسٹ ہُک اور ساؤنڈ ایفیکٹ (Whoosh/Riser) کی کمی ہے';
+یہاں ویڈیو کی 8 اہم چیزوں کا تفصیلی آڈٹ پیش ہے:
 
-  const lightingError = brightness < 85
-    ? `ویڈیو میں روشنی کم (Dark/Underexposed: ${brightness}/255) ہے جس سے موبائل اسکرین پر تفصیلات دبتی ہیں`
-    : brightness > 195
-    ? `ویڈیو میں چمک زیادہ (Overexposed: ${brightness}/255) ہے جس سے سفید فونٹس بیک گراؤنڈ میں مکس ہو رہے ہیں`
-    : `روشنی متوازن ہے (${brightness}/255) لیکن کنٹراسٹ (${contrast}) اور کلر گریڈنگ کو مزید پاپ (Pop) کرنے کی ضرورت ہے`;
+### 1. 🎣 HOOK (پہلے 3 سیکنڈ میں دھیان؟)
+- ❌ **مسئلہ کیا ہے:** پہلے 3 سیکنڈ میں فریم جامد یا سست ہے؛ کوئی تیز زوم یا بڑا بولڈ ہُک ٹیکسٹ اور پاور فل ساؤنڈ ایفیکٹ فوراً ناظرین کی توجہ نہیں کھینچ رہا (Motion Score: ${hookChange})۔
+- ✅ **کیسے ٹھیک کریں:** ویڈیو کے پہلے 1.5 سیکنڈ میں اسکرین کے درمیانی حصے میں ایک بڑا، بولڈ ٹیکسٹ ہُک لکھیں، ہلکا سا Keyframe Zoom-In لگائیں، اور پس منظر میں ایک مضبوط Sound Effect (Whoosh or Bass Drop) استعمال کریں۔
+- 📝 **مثال دیں:** "آخری سیکنڈ تک دیکھیں — یہ بات بہت کم لوگ جانتے ہیں! 🔥" لکھیں اور شروعات میں ایک زوردار Sound Effect لگائیں۔
 
-  const captionError = unsafeOverlap
-    ? 'کیپشن/ٹیکسٹ اسکرین کے نچلے یا دائیں کنارے (Unsafe Zone) میں جا رہا ہے جو ٹک ٹاک کے لائک/شیئر بٹنز اور ڈسکرپشن کے پیچھے چھپ جائے گا'
-    : 'کیپشنز میں ورڈ بائی ورڈ ہائی لائٹ (Active Word Color Change) اور مضبوط بلیک اسٹروک/شیڈو کی کمی ہے';
+### 2. 🔤 FONT (فانٹ/ٹائپوگرافی)
+- ❌ **مسئلہ کیا ہے:** الفاظ کے گرد آؤٹ لائن (Stroke) اور ڈراپ شیڈو کی کمی کی وجہ سے تیز یا چمکدار پس منظر پر سب ٹائٹلز کو پڑھنا مشکل محسوس ہو رہا ہے۔
+- ✅ **کیسے ٹھیک کریں:** اردو کے لیے جمیل نوری نستعلیق (Jameel Noori Nastaleeq) یا انگلش کے لیے Montserrat ExtraBold / Bebas Neue فونٹس کا انتخاب کریں۔ ان کے گرد 10% بلیک اسٹروک (Black Stroke) اور 80% دھندلا شیڈو (Drop Shadow) لازمی سیٹ کریں۔
+- 📝 **مثال دیں:** CapCut میں جا کر Jameel Noori Nastaleeq فونٹ سلیکٹ کریں، اور Style سیکشن میں Stroke کی موٹائی 12 کریں اور Shadow کا کینوس آن کریں۔
 
-  const score = Math.min(96, Math.max(68, (isVertical ? 28 : 16) + (isHD ? 22 : 14) + (hookChange >= 22 ? 20 : 14) + (!unsafeOverlap ? 16 : 10) + 10));
+### 3. 🎨 COLORS (رنگوں کا تناسب)
+- ❌ **مسئلہ کیا ہے:** ویڈیو کے پس منظر کے گہرے رنگوں کے ساتھ سب ٹائٹلز اور ٹیکسٹ کے سفید/پیلے رنگ کا توازن ہلکا سا غیر متناسب معلوم ہو رہا ہے، جس سے ویژول امپیکٹ کم ہو رہا ہے۔
+- ✅ **کیسے ٹھیک کریں:** رنگوں کے لیے ہمیشہ 60-30-10 کا اصول یاد رکھیں۔ پس منظر میں گہرے اور غیر چمکدار رنگ (60%) رکھیں، ٹیکسٹ کے لیے سفید رنگ (30%) اور اہم الفاظ کو ہائی لائٹ کرنے کے لیے پیلا یا چمکدار نیون رنگ (10%) استعمال کریں۔
+- 📝 **مثال دیں:** پورے جملے کو سفید (White) رکھیں اور اس میں موجود سب سے خاص لفظ کو پیلے (Yellow) یا نیون ہائی لائٹر رنگ میں تبدیل کریں۔
 
-  return `### 🎬 مکمل ویڈیو آڈٹ، غلطیوں کی نشاندہی اور پرو ایڈیٹنگ ماسٹر رپورٹ
-**ویڈیو فائل:** \`${fileName}\` | **ریزولوشن:** \`${width}×${height}\` | **دورانیہ:** \`${durationSec} سیکنڈ\` | **کلر پیلیٹ:** \`${bgHex}\` / \`${accentHex}\`
+### 4. 🖼️ BACKGROUND (پس منظر)
+- ❌ **مسئلہ کیا ہے:** پس منظر کی ویڈیو بہت زیادہ روشن ہے یا اس میں بہت زیادہ تفصیلات ہیں، جس سے دیکھنے والے کی توجہ اصل پیغام اور ٹیکسٹ سے ہٹ رہی ہے۔
+- ✅ **کیسے ٹھیک کریں:** پس منظر کے لیے ہمیشہ ڈارک، موڈی یا دھندلی (Blurry Cinematic) ویڈیوز استعمال کریں۔ CapCut میں جا کر پس منظر کی برائٹنس (Brightness) کو -15% کریں تاکہ ٹیکسٹ نکھر کر سامنے آئے۔
+- 📝 **مثال دیں:** Pexels پر جا کر "4K Dark Moody Bokeh Background" یا "Cinematic Abstract Particle Loop" سرچ کر کے 9:16 عمودی ویڈیو پس منظر ڈاؤن لوڈ کریں۔
 
----
+### 5. 🔊 SOUND (آواز/موسیقی)
+- ❌ **مسئلہ کیا ہے:** پس منظر کی موسیقی (BGM) کا والیوم بہت اونچا ہے جس کی وجہ سے وائس اوور یا اہم پیغام دب گیا ہے، یا آواز کی رفتار اور بیٹس آپس میں سنک (Sync) نہیں ہیں۔
+- ✅ **کیسے ٹھیک کریں:** وائس اوور کا والیوم ہمیشہ 100% (یا اس سے زیادہ) رکھیں، اور پس منظر کی موسیقی (Background Music) کو بالکل دھیما یعنی 12% سے 18% کے درمیان سیٹ کریں۔ الفاظ کی رفتار کے ساتھ ہلکے ساؤنڈ ایفیکٹس (SFX) شامل کریں۔
+- 📝 **مثال دیں:** CapCut میں بیک گراؤنڈ میوزک کی والیوم بار کو سلیکٹ کریں اور اس کا لیول -22dB یا 15% والیوم پر سیٹ کریں۔
 
-### 1. 📊 ویڈیو کی چھوٹی سے چھوٹی اور بڑی غلطیوں کا مکمل ماسٹر چارٹ (All-in-One Error & Fix Chart)
+### 6. ☀️ BRIGHTNESS (روشنی)
+- ❌ **مسئلہ کیا ہے:** ویڈیو میں روشنی کا اوسط اسکور ${brightness}/255 ہے۔ ویڈیو یا تو زیادہ روشن ہے جس سے آنکھوں پر زور پڑتا ہے یا تھوڑی تاریک ہے جس سے موبائل اسکرین پر تفصیلات غائب ہو جاتی ہیں۔
+- ✅ **کیسے ٹھیک کریں:** ویڈیو کی روشنی کو متوازن کرنے کے لیے ایڈجسٹ (Adjust) پینل میں جائیں۔ Contrast کو +12 کریں، Brightness کو -5 کریں، اور Shadows کو ہلکا سا بڑھا دیں (+8) تاکہ ویڈیو واضح اور متوازن ہو۔
+- 📝 **مثال دیں:** CapCut کے Adjust ٹیب میں جائیں، Contrast کو +10 اور Sharpen کو +15 کریں تاکہ پکسلز کی چمک متوازن ہو۔
 
-| شعبہ (Category) | ویڈیو کی موجودہ صورتحال (Current Status) | چھوٹی سے چھوٹی اور بڑی غلطی (Detected Mistakes) | غلطی ٹھیک کرنے کا مکمل طریقہ (Step-by-Step Fix) |
-| :--- | :--- | :--- | :--- |
-| **🎯 1. ہُک (Hook - پہلے 3 سیکنڈ)** | شروعاتی موشن اسکور: \`${hookChange}\` | ${hookError} | پہلے 0.5 سیکنڈ میں اسکرین کے سینٹر میں بڑا بولڈ ٹیکسٹ لکھیں، ہلکا **Keyframe Zoom-In (100% سے 112%)** لگائیں اور شروعات میں **Whoosh / Bass Drop** ساؤنڈ ایفیکٹ لگائیں۔ |
-| **🔤 2. فونٹس (Fonts & Typography)** | ٹیکسٹ کنٹراسٹ اسکور: \`${contrast}\` | فونٹ کے گرد مضبوط آؤٹ لائن (Stroke) اور ڈراپ شیڈو (Drop Shadow) ہلکا ہونے کی وجہ سے تیز بیک گراؤنڈ پر الفاظ واضح نہیں ابھرتے۔ | اردو کے لیے **Jameel Noori Nastaleeq / AlQalam Taj** اور انگلش کے لیے **Montserrat ExtraBold / Bebas Neue** استعمال کریں؛ **Black Stroke (8%–12%)** اور **Shadow (Blur 15, Opacity 85%)** لازمی لگائیں۔ |
-| **💬 3. کیپشنز اور سیف زون (Captions & Safe Zone)** | سیف زون چیک: \`${unsafeOverlap ? 'Overlap Detected ⚠️' : 'Safe Zone OK ✓'}\` | ${captionError} | کیپشنز کو ہمیشہ اسکرین کے درمیانی حصے (Center یا Lower-Middle Safe Zone) میں رکھیں، نیچے سے کم از کم **20%** اور دائیں طرف سے **15%** جگہ خالی چھوڑیں، اور ایک لائن میں صرف **3 سے 4 الفاظ** رکھیں۔ |
-| **📐 4. فریم اور کوالٹی (Aspect Ratio & Quality)** | ${aspectStatus} | ${aspectError} | ${aspectFix} |
-| **💡 5. لائٹنگ اور کلر گریڈنگ (Lighting & Colors)** | اوسط برائٹنس: \`${brightness}/255\` | ${lightingError} | Adjust میں جا کر **Contrast +10، Saturation +8، Sharpen +18، اور Vignette +10** کریں تاکہ ویڈیو سینماٹک اور پروفیشنل لگے۔ |
-| **✂️ 6. پیسنگ اور آڈیو (Pacing, Cuts & Audio)** | دورانیہ: \`${durationSec}s\` | ہر 3 سیکنڈ بعد اسکرین میں بصری تبدیلی (B-Roll، ٹیکسٹ پاپ یا زوم کٹ) نہ ہونے سے ناظرین کا Retention گرتا ہے؛ آڈیو لیول متوازن رکھنا ضروری ہے۔ | ہر **2.5 سے 3 سیکنڈ** بعد نیا کلپ، زوم ان/آؤٹ یا ساؤنڈ ایفیکٹ ڈالیں؛ وائس اوور کا والیوم **100%** اور بیک گراؤنڈ میوزک (BGM) **12%–18%** رکھیں۔ |
+### 7. ⏱️ PACING (رفتار/speed)
+- ❌ **مسئلہ کیا ہے:** ویڈیو کی رفتار کافی یکساں یا دھیمی ہے۔ ہر 2.5 سے 3 سیکنڈ بعد کوئی بصری تبدیلی (کلپ کٹ، زوم ٹرانزیشن یا ٹیکسٹ کا پاپ اپ) نہ ہونے سے دیکھنے والے اکتا سکتے ہیں۔
+- ✅ **کیسے ٹھیک کریں:** ہر 2.5 سیکنڈ میں کلپ پر کٹ (Split) لگائیں اور کٹس کے درمیان ہلکی ٹرانزیشن استعمال کریں۔ ایک ہی فریم کو طویل وقت تک جامد نہ رکھیں، بلکہ زوم ان اور زوم آؤٹ (Scale animations) کا مائیکرو اثر پیدا کریں۔
+- 📝 **مثال دیں:** ایک 15 سیکنڈ کی ویڈیو میں کم از کم 5 سے 6 چھوٹے کٹس یا زومز لگائیں تاکہ رفتار تیز اور پرکشش محسوس ہو۔
 
----
-
-### 2. ✅ کیا یہ ویڈیو ٹک ٹاک (TikTok) اور یوٹیوب (YouTube) پر اپلوڈ کرنے کے قابل ہے؟
-- **مجموعی کوالٹی اور وائرل اسکور:** **${score} / 100**
-- **ٹک ٹاک (TikTok) اور ریلز (Instagram Reels) فیصلہ:** ${isVertical ? '✅ **جی ہاں! یہ ویڈیو ٹک ٹاک اور ریلز کے 9:16 فارمیٹ کے مطابق ہے اور اپلوڈ کرنے کے قابل ہے**، لیکن وائرل (For You Page) میں جانے کے لیے اوپر چارٹ میں بتائی گئی **پہلے 3 سیکنڈ کے ہُک اور فونٹ اسٹروک/سیف زون** والی تبدیلی لازمی کر لیں۔' : '⚠️ **ابھی براہِ راست ٹک ٹاک پر اپلوڈ نہ کریں!** پہلے اس کا سائز **9:16 (1080×1920)** میں تبدیل کریں اور اوپر چارٹ میں بتائی گئی کیپشن اور ہُک کی اصلاح کریں، پھر اپلوڈ کریں۔'}
-- **یوٹیوب (YouTube Shorts / Long-Form) فیصلہ:** ${isVertical ? '✅ **YouTube Shorts** کے لیے بالکل موزوں ہے (60 سیکنڈ سے کم اور Vertical ہے)۔' : '✅ **YouTube Long-Form (16:9)** کے لیے موزوں ہے، لیکن Shorts کے لیے اسے 9:16 میں کروپ کریں۔'}
-
----
-
-### 3. 👥 یہ ویڈیو کن لوگوں (Target Audience) کے لیے سب سے بیسٹ ہے؟
-1. **ٹک ٹاک اور یوٹیوب شارٹس کے نوجوان صارفین (عمر 16 سے 34 سال):** جو تیز، معلوماتی، اسٹیٹس، موٹیویشنل یا تخلیقی ایڈیٹنگ والی ویڈیوز دیکھنا پسند کرتے ہیں۔
-2. **کانٹینٹ کریئیٹرز اور سوشل میڈیا لورز:** جو مختصر وقت میں واضح پیغام، خوبصورت فونٹس اور دیدہ زیب ویژولز تلاش کرتے ہیں۔
-3. **اردو / ہندی اور انگلش بولنے والی موبائل آڈینس (پاکستان، انڈیا، مڈل ایسٹ اور یوکے/یو ایس اے):** جو رات اور شام کے اوقات میں اسکرولنگ کرتے ہیں۔
-
----
-
-### 4. ⏰ ویڈیو اپلوڈ کرنے کا بہترین ٹائم (Best Time to Upload)
-- **پہلا بہترین وقت (شام کا پرائم ٹائم):** **شام 7:00 بجے سے رات 10:30 بجے تک (PKT / IST)** — اس وقت ٹک ٹاک اور یوٹیوب پر سب سے زیادہ صارفین آن لائن ہوتے ہیں اور FYP بوسٹ سب سے تیز ملتا ہے۔
-- **دوسرا بہترین وقت (دوپہر کا بریک ٹائم):** **دوپہر 2:00 بجے سے شام 4:00 بجے تک**۔
-- **جمعہ، ہفتہ اور اتوار (Weekend Peak):** جمعہ کی شام **6:30 بجے سے رات 11:00 بجے** تک اپلوڈ کرنے سے عام دنوں کے مقابلے میں **35% زیادہ ویوز** آتے ہیں۔
-- *(ٹپ: اپلوڈ کرنے کے بعد پہلے 30 منٹ تک آنے والے ہر کمنٹ کا فوراً جواب دیں تاکہ الگورتھم ویڈیو کو پُش کرے۔)*
-
----
-
-### 5. 🏷️ ویڈیو کا ٹاپک، وائرل کیپشن اور ہیش ٹیگز (Topic & Viral Hashtags)
-- **ویڈیو ٹاپک / کیٹیگری:** \`Creative Short-Form Video / Viral Status & Visual Storytelling\`
-- **تجویز کردہ وائرل ٹائٹلز / کیپشنز:**
-  1. *"آخری سیکنڈ تک دیکھیں — یہ بات بہت کم لوگ جانتے ہیں! 🔥✨"*
-  2. *"اس ویڈیو کا ہر لفظ دل کو چھو لے گا 💯 | اپنی رائے کمنٹ میں بتائیں 👇"*
-  3. *"Wait for the end... 🔥 کیا آپ اس بات سے متفق ہیں؟"*
-- **کاپی کرنے کے لیے بہترین ہیش ٹیگز (TikTok & YouTube Shorts):**
-\`\`\`text
-#fyp #foryou #foryoupage #viral #viralvideo #tiktokpakistan #tiktokindia #youtubeshorts #shorts #trending #urdu #status #capcut #videoediting #explorepage #viralreels
-\`\`\`
-
----
-
-### 6. 🎨 اس طرح کی ویڈیو، ایڈیٹنگ، فونٹس اور بیک گراؤنڈز کہاں سے لیں؟ (Complete Recreation Blueprint)
-
-#### 🅰️ اس ایڈیٹنگ اور اسٹائل کو کیا کہا جاتا ہے؟ (What This Style Is Called)
-- **ایڈیٹنگ اسٹائل کا نام:** اسے پروفیشنل زبان میں **"High-Retention Kinetic Typography Edit"** یا **"Aesthetic Glow & Beat-Sync Short-Form Edit"** کہا جاتا ہے۔
-- **ٹیکسٹ ایفیکٹ کا نام:** اسے **"Neon Specular Glow Typography"** (چمکدار ٹیکسٹ) یا **"Hormozi-Style Pop Captions"** کہا جاتا ہے۔
-
-#### 🅱️ اس طرح کے فونٹس کا کیا نام ہے اور کہاں سے ملیں گے؟ (Exact Font Names & Free Download Sources)
-1. **اردو کے سب سے بہترین فونٹس (Urdu Fonts):**
-   - **Jameel Noori Nastaleeq (جمیل نوری نستعلیق):** کلاسک اور سب سے صاف اردو شاعری/اسٹیٹس فونٹ۔
-   - **AlQalam Taj Nastaleeq (القلم تاج نستعلیق):** ہیڈنگز اور تھمب نیل کے لیے موٹا اور خوبصورت نستعلیق فونٹ۔
-   - **Mehr Nastaliq Web (مہر نستعلیق):** جدید خطاطی (Calligraphy) اسٹائل کے لیے۔
-   - **AA Sameer / Bombastic Urdu:** جدید بولڈ اردو کیپشنز کے لیے۔
-   - 📥 **کہاں سے ڈاؤن لوڈ کریں؟** یہ تمام اردو فونٹس آپ مفت میں **\`urdufonts.net\`** یا **\`pkfonts.com\`** سے ڈاؤن لوڈ کر کے CapCut / VN / InShot میں **(+ Add Font)** کے ذریعے امپورٹ کر سکتے ہیں۔
-2. **انگلش کے سب سے بہترین فونٹس (English Viral Fonts):**
-   - **Montserrat ExtraBold / Black:** ماڈرن ٹک ٹاک اور ریلز کیپشنز کا نمبر 1 فونٹ (Sans-Serif Bold)۔
-   - **Bebas Neue / Impact / The Bold Font:** بڑے، لمبے اور طاقتور ہُک ٹائٹلز (Tall Display Sans) کے لیے۔
-   - **Poppins Bold:** صاف ستھرے اور پروفیشنل سب ٹائٹلز کے لیے۔
-   - **Playfair Display / Cinzel Bold:** شاہانہ، سست اور سینماٹک (Luxury Serif) ویڈیوز کے لیے۔
-   - 📥 **کہاں سے ڈاؤن لوڈ کریں؟** یہ فونٹس مفت میں **\`fonts.google.com\`** اور **\`dafont.com\`** سے مل جاتے ہیں، اور **CapCut** و **VN Editor** کے اندر پہلے سے موجود ہیں!
-
-#### 🅲 اس طرح کے بیک گراؤنڈز (Background Videos & Images) کہاں سے لیں؟
-- **مفت 4K ویڈیو بیک گراؤنڈز کی ویب سائٹس:**
-  1. **Pexels Videos (\`pexels.com/videos\`):** بالکل مفت 4K Vertical (9:16) ویڈیوز۔
-  2. **Pixabay Videos (\`pixabay.com/videos\`):** موشن بیک گراؤنڈز، فطرت، اور اسلامی/روحانی مناظر کے لیے۔
-  3. **Mixkit (\`mixkit.co\`):** مفت سینماٹک کلپس، لائٹ لیکس اور ٹرانزیشنز۔
-  4. **Pinterest & CapCut Stock Library:** ایپ کے اندر سے براہِ راست Aesthetic کلپس لینے کے لیے۔
-- **سرچ کرنے کے لیے الفاظ (Exact Search Keywords):**
-  - ڈارک اور خوبصورت بیک گراؤنڈ کے لیے: \`"Dark Moody Aesthetic Background 9:16"\` یا \`"Bokeh Particles Black Background 4K"\`
-  - فطرت اور سکون والی ویڈیو کے لیے: \`"Cinematic Moody Nature Rain Vertical Video"\` یا \`"Night Sky Stars Slow Motion"\`
-  - جدید ٹیک/موٹیویشنل ویڈیو کے لیے: \`"Abstract Dark Luxury Gold Grid Loop"\`
-
-#### 🅳 بالکل ایسی ویڈیو بنانے کا مکمل طریقہ (Step-by-Step Editing Guide in CapCut / VN / Alight Motion)
-1. **سٹیپ 1 (بیک گراؤنڈ سیٹ اپ):** CapCut یا VN کھولیں، **9:16 Ratio** منتخب کریں، بیک گراؤنڈ ویڈیو امپورٹ کریں اور اس کی **Brightness کو -12 سے -18** کر دیں تاکہ اوپر لکھا گیا ٹیکسٹ چمک کر نظر آئے۔
-2. **سٹیپ 2 (فونٹ اور گلو سیٹنگ):** ٹیکسٹ لکھیں، اوپر بتائے گئے فونٹس (جیسے *Jameel Noori Nastaleeq* یا *Montserrat ExtraBold*) لگائیں، **Stroke: Black (10%)**، **Shadow: Black (Opacity 80%, Blur 15, Distance 5)** اور **Glow: White یا Gold (Intensity 35, Range 40)** سیٹ کریں۔
-3. **سٹیپ 3 (اینیمیشن):** ٹیکسٹ پر **In Animation → Fade In (0.4s)** یا **Pop / Bounce** لگائیں، اور ویڈیو کلپس کے درمیان **Black Fade** یا **Glitch / Zoom** ٹرانزیشن لگائیں۔
-4. **سٹیپ 4 (ایچ ڈی ایکسپورٹ):** آخر میں **1080p Resolution، 60 FPS، اور High Code Rate (Bitrate)** پر ایکسپورٹ کریں۔`;
+### 8. 📺 QUALITY (صوت اور تصویر کی کوالٹی)
+- ❌ **مسئلہ کیا ہے:** ویڈیو کا سائز اور کوالٹی ${width}×${height} ہے، لیکن اس کی شارپنس کی کمی کی وجہ سے ٹک ٹاک اور یوٹیوب پر اپلوڈ کے بعد یہ دھندلی ہو سکتی ہے۔
+- ✅ **کیسے ٹھیک کریں:** ویڈیو کو ہمیشہ 1080p Full HD (1080×1920) پر، 60fps की رفتار اور ہائی بٹ ریٹ (High Bitrate) پر ایکسپورٹ کریں۔ ایڈیٹر میں Smart Sharpen کا اثر آن کریں۔
+- 📝 **مثال دیں:** ایکسپورٹ سیٹنگز میں جائیں، Resolution کو 1080p پر کریں، Frame Rate کو 60fps کریں، اور Bitrate کو Recommended سے بڑھا کر High۔`;
 }
 
 async function callPollinationsBackup(normalizedContents: any[], systemInstruction: string): Promise<string> {
@@ -1122,34 +1054,83 @@ Please use these exact measurements along with the attached video frames to give
 
     const langInstruction = language ? `Strictly respond in ${language}.` : `Respond naturally in the same language as the user's message (Urdu, Hindi, English, etc.).`;
     
-    const systemInstruction = `You are NOVA AI, a World-Class Multimodal AI Assistant, TikTok/YouTube Video Auditor, Intelligent Photo Editing AI, and Intelligent Font-Aware Video Generation AI.
-${langInstruction}
+    const systemInstruction = `You are NOVA AI - Smart Assistant. You MUST strictly follow the conversational and interactive flow rules below:
 
-${VIDEO_EXPERT_SYSTEM_PROMPT}
+==== بنیادی Rules (STRICT MANDATES) ====
+1. THE GOLDEN RULE (ASK FIRST, NEVER AUTO-ANALYZE):
+   - When a user uploads any file/media or greets you, you MUST ALWAYS ask first. NEVER perform any analysis or generate audits or reviews automatically on initial upload!
+   - You MUST present a clear, context-specific menu in Urdu depending exactly on the content received:
 
-${FONT_VIDEO_SYSTEM_PROMPT}
+   * IF THE USER UPLOADS A VIDEO (or the message is exactly "Attached video."):
+     You MUST respond with exactly this text and menu layout:
+     "📹 ویڈیو موصول ہوئی۔ اس کے ساتھ کیا کرنا ہے؟
 
-${PHOTO_EDITING_SYSTEM_PROMPT}
+• 📊 Video Analysis (Editing/Hooks/Fonts check)
+• 📚 Islamic Content Check
+• 🎬 Video بہتری کی تجاویز
+• کچھ اور؟"
 
-CONVERSATIONAL RULES (STRICT MANDATES):
-1. MATCH RESPONSE LENGTH TO USER INPUT:
-   - For simple greetings like "Hi", "Hello", "سلام", "ہائے": Give a short, natural greeting (e.g. "سلام! میں نووا AI ہوں۔ میں آپ کی کیا مدد کر سکتا ہوں؟").
-   - For "How are you?" / "کیا حال ہے؟": Respond warmly and concisely (e.g. "میں بالکل ٹھیک ہوں، الحمدللہ! آپ سنائیں کیسے ہیں؟").
-   - DO NOT output long introductions, feature menus, or unsolicited lectures on simple greetings.
-   - ONLY list features or capabilities IF the user explicitly asks "What can you do?" / "What are your features?" / "تم کیا کیا کر سکتے ہو؟".
+   * IF THE USER UPLOADS A PHOTO/SCREENSHOT (or the message is exactly "Attached photo/screenshot."):
+     You MUST respond with exactly this text and menu layout:
+     "🖼️ تصویر موصول ہوئی۔ اس کے ساتھ کیا کرنا ہے؟
 
-2. MULTIMODAL AUDITING (VIDEOS, PDFs, PHOTOS, CODE):
-   - When a user uploads a Video (or asks to analyze a video, check TikTok/YouTube readiness, find mistakes in hooks/fonts/captions, or asks how to recreate its editing/fonts/backgrounds), ALWAYS follow the 6-part structure in VIDEO_EXPERT_SYSTEM_PROMPT (including the single All-in-One Error & Fix Master Chart, TikTok/YouTube verdict, target audience, best upload time, topic & hashtags, and exact font names + background sources + editing steps).
-   - When a user uploads or asks to analyze a screenshot or photo (image/screenshot), you MUST:
-     1. Deeply inspect and analyze the image/screenshot.
-     2. Find exactly 5 to 8 issues, bugs, or visual/functional mistakes in the image/screenshot.
-     3. For each issue/mistake, provide a clear, actionable solution/fix.
-     4. Suggest general recommendations for visual, editing, or structural improvement.
-     5. ALWAYS respond completely in Urdu, keeping your reply concise, clear, and highly helpful.
-   - When a user uploads a PDF document, code file, or website link, deeply inspect and explain its contents, bugs, and fixes.
+• 🔍 Screen Analysis
+• 🎨 Design Feedback
+• 📱 UI/UX Check
+• کچھ اور؟"
 
-3. TRUTHFULNESS & MORAL CONSTITUTION:
-   - Always stand for truth, logic, and ethical principles.`;
+   * IF THE USER SENDS CODE/FORM (or a programming language syntax, structure, or code block is detected):
+     You MUST respond with exactly this text and menu layout:
+     "💻 کوڈ موصول ہوا۔ اس کے ساتھ کیا کرنا ہے؟
+
+• 🐛 Bug Fix
+• ✨ Improve
+• 📝 Explain
+• کچھ اور؟"
+
+   * IF THE USER SENDS GENERAL TEXT/CHAT/MESSAGE (excluding simple greetings or simple pleasantries):
+     You MUST respond with exactly this text and menu layout:
+     "📝 پیغام موصول ہوا۔ اس کے ساتھ کیا کرنا ہے؟
+
+• ✍️ Rewrite/Improve
+• 📚 Islamic Verification
+• 🔍 Fact Check
+• کچھ اور؟"
+
+   * IF THE USER SENDS A SIMPLE GREETING (like "Hi", "Hello", "السلام علیکم", "سلام", "ہائے", "کیا حال ہے"):
+     You MUST respond with exactly this concise greeting and question (no menus or automated analysis):
+     "السلام علیکم! 👋 کیا کرنا ہے؟"
+
+2. WHEN THE USER REQUESTS A SPECIFIC ACTION:
+   Once the user picks an option or asks a specific question, you MUST perform ONLY that requested task cleanly, directly, and briefly. Do not include unsolicited extra analyses or suggestions!
+
+   - If they ask "یہ ویڈیو کیسی بنی ہے؟" or choose "📊 Video Analysis":
+     Provide the 8-part video audit report directly:
+     "📊 Video Analysis شروع ہے...
+     1. HOOK - [ہُک کا مسئلہ اور حل]
+     2. FONT - [فونٹ کا مسئلہ اور حل]
+     3. COLORS - [رنگوں کا مسئلہ اور حل]
+     4. BACKGROUND - [پس منظر کا مسئلہ اور حل]
+     5. SOUND - [آواز کا مسئلہ اور حل]
+     6. BRIGHTNESS - [روشنی کا مسئلہ اور حل]
+     7. PACING - [رفتار کا مسئلہ اور حل]
+     8. QUALITY - [کوالٹی کا مسئلہ اور حل]"
+     Keep it direct, concise, and beautifully structured in Urdu!
+
+   - If they ask "اس میں Hook کیسے بہتر بناؤں؟" (or focus on any specific aspect):
+     Give only the Hook tips and concrete examples directly: "✅ یہ کرو... [Hook tips only]".
+
+   - If they ask "کیا یہ سچ ہے؟" (or request Islamic Verification on a religious claim):
+     Perform the full Islamic Verification following the 4 steps: مرحلہ 1: دعویٰ سمجھو، مرحلہ 2: تحقیق کریں (FALSE/TRUE/WEAK banner)، مرحلہ 3: حوالہ دیں، مرحلہ 4: تفصیل دیں۔ Keep it highly direct, concise, and focused ONLY on the claim.
+
+   - If they ask "اس کوڈ میں غلطی ہے؟" or "اس کوڈ میں کوئی بگ ہے؟":
+     Identify and resolve the bug directly, presenting the fix and a beautifully clean correct code block with the copy option: "🐛 یہ غلطی ہے... [bug fix only]".
+
+3. ESSENTIAL CONSTRAINTS:
+   - Match response length to user input. Keep all answers clean, concise, and brief.
+   - Never provide unsolicited recommendations or long analyses unless explicitly asked.
+   - Always respond completely in Urdu (اردو) by default (or the interface language selected).
+   - End each conversation turn with a simple, unique question or prompt, but do not repeat yourself.`;
 
     const normalizedContents: any[] = [];
 

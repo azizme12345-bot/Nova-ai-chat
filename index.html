@@ -930,6 +930,35 @@ Try کر کے بتا!</pre>
 
 <script>
 let chats = [];
+
+async function safeFetchJson(url, options) {
+  const res = await fetch(url, options);
+  const contentType = res.headers.get('content-type') || '';
+  
+  if (!res.ok) {
+    let errMsg = `Server error (Status ${res.status})`;
+    if (contentType.includes('application/json')) {
+      try {
+        const errData = await res.json();
+        errMsg = errData.error || errData.message || errMsg;
+      } catch (e) {}
+    } else {
+      try {
+        const text = await res.text();
+        if (text && text.length < 200) {
+          errMsg = text;
+        }
+      } catch (e) {}
+    }
+    throw new Error(errMsg);
+  }
+  
+  if (!contentType.includes('application/json')) {
+    throw new Error(`Expected JSON response but received: ${contentType || 'text/html'}`);
+  }
+  
+  return await res.json();
+}
 try {
   chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
 } catch (e) {
@@ -1268,7 +1297,7 @@ async function executeStudioGenerate() {
   btn.disabled = true;
 
   try {
-    const res = await fetch('/api/generate-image', {
+    const data = await safeFetchJson('/api/generate-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1277,7 +1306,6 @@ async function executeStudioGenerate() {
         aspectRatio
       })
     });
-    const data = await res.json();
     if (data.imageUrl) {
       latestStudioResult = data.imageUrl;
       document.getElementById('studio-result-img').src = data.imageUrl;
@@ -1310,7 +1338,7 @@ async function executeStudioEdit() {
   btn.disabled = true;
 
   try {
-    const res = await fetch('/api/generate-image', {
+    const data = await safeFetchJson('/api/generate-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1319,7 +1347,6 @@ async function executeStudioEdit() {
         mimeType: studioBaseImageMime
       })
     });
-    const data = await res.json();
     if (data.imageUrl) {
       let finalImg = data.imageUrl;
       if (data.useClientSmartEdit) {
@@ -1781,8 +1808,8 @@ function formatMarkdown(text) {
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel2); padding:6px 14px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted); font-family:monospace;">
           <span style="font-weight:700; color:var(--accent); text-transform:uppercase;">${displayLang}</span>
           <div style="display:flex; align-items:center; gap:12px;">
-            <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">📋 کاپی کریں (Copy)</button>
-            <button onclick="downloadPreCodeBlock('${id}', '${displayLang.toLowerCase()}')" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">💾 ڈاؤن لوڈ کریں (Download)</button>
+            <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">📋 کاپی کریں</button>
+            <button onclick="downloadPreCodeBlock('${id}', '${displayLang.toLowerCase()}')" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">💾 ڈاؤن لوڈ کریں</button>
           </div>
         </div>
         <pre style="padding:14px; margin:0; overflow-x:auto; font-size:12px; font-family:monospace; line-height:1.6; background:var(--panel); color:var(--text);"><code id="${id}">${code}</code></pre>
@@ -2960,8 +2987,10 @@ async function send() {
   );
 
   const defaultPromptForAttachment = isVideoUploadedNow
-    ? 'اس ویڈیو کو مکمل اینالائز کرو: اس میں ہُکس، فونٹس، کیپشنز اور کوالٹی کی چھوٹی سے چھوٹی اور بڑی سے بڑی غلطیاں اور ان کو ٹھیک کرنے کا طریقہ ایک ہی چارٹ میں بتاؤ، کیا یہ ٹک ٹاک اور یوٹیوب پر اپلوڈ کرنے کے قابل ہے، کن لوگوں کے لیے سب سے بیسٹ ہے، اپلوڈ کرنے کا بہترین ٹائم، ٹاپک اور ہیش ٹیگز بتاؤ، اور اس طرح کی ایڈیٹنگ، فونٹس کے نام اور بیک گراؤنڈز کہاں سے ملیں گے یہ بھی مکمل بتاؤ۔'
-    : 'Analyzed file.';
+    ? 'Attached video.'
+    : (currentAttachment && currentAttachment.type && currentAttachment.type.startsWith('image/'))
+      ? 'Attached photo/screenshot.'
+      : 'Attached file.';
 
   const userMsg = { 
     role: 'user', 
@@ -3079,12 +3108,11 @@ async function send() {
       const statusEl = document.getElementById('ai-typing-status-text');
       if (statusEl) statusEl.innerText = '✓ Analyzing font, mood & creating video...';
 
-      const vidRes = await fetch('/api/video-style', {
+      const vidSpec = await safeFetchJson('/api/video-style', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: text })
       });
-      const vidSpec = await vidRes.json();
 
       clearInterval(scrollInterval);
       const loaderEl = document.getElementById('ai-typing-loader');
@@ -3123,7 +3151,7 @@ async function send() {
         .replace(/^(generate photo of|generate image of|create photo of|photo banao|tasveer banao|تصویر بناؤ)/i, '')
         .trim() || text;
 
-      const imgRes = await fetch('/api/generate-image', {
+      const imgData = await safeFetchJson('/api/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3132,8 +3160,6 @@ async function send() {
           mimeType: attachmentData ? attachmentData.type : 'image/jpeg'
         })
       });
-
-      const imgData = await imgRes.json();
 
       let finalImageUrl = imgData.imageUrl;
       if (isPhotoEditRequest && imgData.useClientSmartEdit && attachmentData?.data) {
@@ -3203,7 +3229,7 @@ async function send() {
       (latestVideoMsg && latestVideoMsg.videoMeta) ||
       null;
 
-    const res = await fetch('/api/chat', {
+    const data = await safeFetchJson('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -3224,13 +3250,6 @@ async function send() {
     clearInterval(scrollInterval);
     const loaderEl = document.getElementById('ai-typing-loader');
     if (loaderEl) loaderEl.remove();
-
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Server error');
-    }
-
-    const data = await res.json();
     currentChat.messages.push({ 
       role: 'ai', 
       text: data.text || data.reply,
@@ -3453,7 +3472,7 @@ async function startIframeAudioStream(lang) {
         const reader = new FileReader();
         reader.onload = async (ev) => {
           try {
-            const res = await fetch('/api/transcribe', {
+            const data = await safeFetchJson('/api/transcribe', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -3462,7 +3481,6 @@ async function startIframeAudioStream(lang) {
                 language: lang
               })
             });
-            const data = await res.json();
             if (data && data.transcript && data.transcript.trim()) {
               dictationBaseText = (dictationBaseText + ' ' + data.transcript.trim()).trim() + ' ';
               updateSearchBar(dictationBaseText.trim());
