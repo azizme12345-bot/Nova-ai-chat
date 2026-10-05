@@ -10,17 +10,29 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+function isValidApiKey(val) {
+  if (!val || typeof val !== 'string') return false;
+  const trimmed = val.trim();
+  return (
+    trimmed.length > 10 &&
+    trimmed !== 'MY_GOOGLE_API_KEY' &&
+    trimmed !== 'MY_GEMINI_API_KEY' &&
+    trimmed !== 'dummy' &&
+    !trimmed.startsWith('YOUR_')
+  );
+}
+
 function getServerApiKey() {
-  const key = (
-    process.env.GOOGLE_API_KEY ||
-    process.env.GEMINI_API_KEY ||
-    process.env.VITE_GEMINI_API_KEY ||
-    ''
-  ).trim();
-  if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
-    return '';
+  const candidates = [
+    process.env.GEMINI_API_KEY,
+    process.env.GOOGLE_API_KEY,
+    process.env.API_KEY,
+    process.env.VITE_GEMINI_API_KEY
+  ];
+  for (const c of candidates) {
+    if (isValidApiKey(c)) return c.trim();
   }
-  return key;
+  return '';
 }
 
 export default async function handler(req, res) {
@@ -62,9 +74,9 @@ export default async function handler(req, res) {
 
     const isUrdu = language.startsWith('ur');
     const targetLang = isUrdu
-      ? 'Urdu'
+      ? 'Urdu (اردو)'
       : language.startsWith('hi')
-      ? 'Hindi'
+      ? 'Hindi (हिंदी)'
       : language.startsWith('pa')
       ? 'Punjabi'
       : language.startsWith('ar')
@@ -89,23 +101,27 @@ export default async function handler(req, res) {
         try {
           const response = await ai.models.generateContent({
             model: mName,
-            contents: {
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: mimeType || 'audio/webm',
-                    data: cleanBase64
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: (mimeType || 'audio/webm').split(';')[0],
+                      data: cleanBase64
+                    }
+                  },
+                  {
+                    text: `Transcribe the spoken human voice in this audio clip accurately (preferred script: ${targetLang}, or English/Hindi/Urdu as spoken). If there is only silence or background noise with no clear words, return ONLY the word SILENCE. Otherwise return ONLY the exact transcribed text with zero commentary.`
                   }
-                },
-                {
-                  text: `Transcribe this spoken audio accurately in ${targetLang}. Return ONLY verbatim transcribed text without any extra commentary.`
-                }
-              ]
-            }
+                ]
+              }
+            ]
           });
 
-          if (response.text && response.text.trim()) {
-            transcriptText = response.text.trim();
+          const rawOut = (response.text || '').trim();
+          if (rawOut && rawOut.toUpperCase() !== 'SILENCE' && !rawOut.toLowerCase().includes('no speech')) {
+            transcriptText = rawOut;
             break;
           }
         } catch (mErr) {

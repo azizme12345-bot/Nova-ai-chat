@@ -12,9 +12,25 @@
           msg.includes('WebSocket') ||
           msg.includes('ws://') ||
           msg.includes('wss://') ||
-          msg.includes('vite') && msg.includes('hmr') ||
+          (msg.includes('vite') && msg.includes('hmr')) ||
           msg.includes('Permission denied') ||
-          msg.includes('NotAllowedError')
+          msg.includes('NotAllowedError') ||
+          msg.includes('SpeechRecognition error') ||
+          msg.includes('Speech error')
+        );
+      } catch (e) {
+        return false;
+      }
+    };
+    const shouldIgnoreVite = (args) => {
+      try {
+        const msg = Array.from(args).map(a => (typeof a === 'string' ? a : (a && a.message) || String(a))).join(' ');
+        return (
+          msg.includes('[vite]') ||
+          msg.includes('WebSocket') ||
+          msg.includes('ws://') ||
+          msg.includes('wss://') ||
+          (msg.includes('vite') && msg.includes('hmr'))
         );
       } catch (e) {
         return false;
@@ -29,15 +45,15 @@
       origError.apply(console, args);
     };
     console.warn = function(...args) {
-      if (shouldIgnore(args)) return;
+      if (shouldIgnoreVite(args)) return;
       origWarn.apply(console, args);
     };
     console.log = function(...args) {
-      if (shouldIgnore(args)) return;
+      if (shouldIgnoreVite(args)) return;
       origLog.apply(console, args);
     };
     console.debug = function(...args) {
-      if (shouldIgnore(args)) return;
+      if (shouldIgnoreVite(args)) return;
       origDebug.apply(console, args);
     };
     window.addEventListener('error', function(e) {
@@ -131,18 +147,44 @@ button{cursor:pointer}
 /* Offline Banner */
 #offline-banner{display:none;background:#f59e0b;color:#ffffff;font-size:12px;font-weight:700;padding:6px 14px;text-align:center;flex-shrink:0;z-index:25}
 
-/* Chat Area */
-.chat{flex:1;min-height:0;overflow-y:auto;scroll-behavior:smooth;padding:20px 16px 24px}
+/* Chat Area - Flowing Messages (ChatGPT Style, No Chat Boxes) */
+.chat{flex:1;min-height:0;overflow-y:auto;scroll-behavior:smooth;padding:20px 16px 28px}
 .empty{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:16px 10px}
 .empty h1{font-size:22px;margin:4px 0;font-weight:800}
 .empty p{margin:0;color:var(--muted);font-size:13.5px;max-width:460px;line-height:1.55}
-.messages{max-width:800px;margin:0 auto;width:100%}
-.msg{margin:0 0 18px;display:flex;flex-direction:column}
-.msg.user{align-items:flex-end}
+.messages{max-width:760px;margin:0 auto;width:100%}
+.msg{margin:0 0 20px;padding:0 0 14px;display:flex;flex-direction:column;align-items:flex-start;border-bottom:1px solid var(--line)}
+.msg:last-child{border-bottom:none}
+.msg.user{align-items:flex-start}
 .msg.ai{align-items:flex-start}
-.bubble{max-width:86%;padding:13px 16px;border-radius:16px;line-height:1.65;font-size:14px;word-break:break-word}
-.msg.user .bubble{background:var(--user)}
-.msg.ai .bubble{background:var(--panel);border:1px solid var(--line)}
+.msg-role-label{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;letter-spacing:0.2px}
+.msg.user .msg-role-label{color:var(--accent)}
+.bubble{width:100%;max-width:100%;padding:2px 0;border:none;border-radius:0;background:transparent !important;line-height:1.7;font-size:14.5px;word-break:break-word}
+.msg.user .bubble{background:transparent !important;border:none;font-weight:500}
+.msg.ai .bubble{background:transparent !important;border:none}
+
+/* Message Action Bar: 👍 👎 🔊 📤 📋 ⋮ */
+.msg-actions{display:flex;align-items:center;gap:6px;margin-top:8px;position:relative;flex-wrap:wrap}
+.msg-action-btn{background:transparent;border:none;color:var(--muted);font-size:15px;padding:5px 8px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background 0.15s, color 0.15s, transform 0.12s;line-height:1}
+.msg-action-btn:hover,.msg-action-btn:active{background:var(--accent-soft);color:var(--accent)}
+.msg-action-btn.active-feedback{color:var(--accent);background:var(--accent-soft)}
+.msg-more-popup{display:none;position:absolute;bottom:34px;left:140px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);padding:6px;z-index:50;min-width:170px;flex-direction:column;gap:2px}
+.msg-more-popup.open{display:flex}
+.msg-more-item{background:transparent;border:none;color:var(--text);font-size:12.5px;padding:8px 10px;border-radius:8px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%}
+.msg-more-item:hover{background:var(--accent-soft);color:var(--accent);font-weight:600}
+
+/* Cap all chat and preview images at 200px max */
+.chat img,.messages img,.msg img,#studio-result-img{max-width:200px !important;max-height:200px !important;width:auto;height:auto;object-fit:cover;border-radius:10px}
+
+/* Interactive Suggestion Pills and Hover Effects */
+.suggestion-pill{
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, border-color 0.2s;
+}
+.suggestion-pill:hover{
+  transform: translateY(-2px) scale(1.02);
+  background: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+}
 
 /* Composer Area */
 .composer-wrap{flex-shrink:0;position:relative;padding:10px 14px 12px;background:var(--bg);border-top:1px solid var(--line);z-index:25}
@@ -209,10 +251,10 @@ body.is-standalone-pwa .website-only-logo {
 }
 
 @media(max-width:768px){
-  .topbar{padding:0 10px;height:58px}
-  .chat{padding:14px 12px 18px}
+  .topbar{padding:0 12px;height:56px}
+  .chat{padding:14px 14px 18px}
   .composer-wrap{padding:8px 10px 10px}
-  .bubble{max-width:90%}
+  .bubble{max-width:100%}
 }
 </style>
 </head>
@@ -394,7 +436,7 @@ body.is-standalone-pwa .website-only-logo {
       <div id="studio-result-panel" style="display:none; margin-top:16px; border-top:1px solid var(--line); padding-top:14px;">
         <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--accent);">Generated Result:</div>
         <div style="text-align:center; background:var(--panel); border-radius:10px; padding:8px; margin-bottom:10px;">
-          <img id="studio-result-img" src="" alt="AI Output" style="max-width:100%; max-height:280px; border-radius:8px; object-fit:contain; display:inline-block;" referrerPolicy="no-referrer">
+          <img id="studio-result-img" src="" alt="AI Output" style="max-width:200px; max-height:200px; border-radius:8px; object-fit:contain; display:inline-block;" referrerPolicy="no-referrer">
         </div>
         <div style="display:flex; gap:8px;">
           <button onclick="downloadStudioImage()" class="side-btn" style="border:1px solid var(--line); justify-content:center; font-size:11px; padding:8px;">⬇️ Download HD</button>
@@ -462,11 +504,49 @@ body.is-standalone-pwa .website-only-logo {
         <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;">
           <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--accent);">🎙️ Microphone Language (مائیک کی زبان):</label>
           <select id="modalMicLanguageSelector" onchange="syncMicLangFromModal(this.value)" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:10px; font-size:13px; outline:none;">
-            <option value="ur-PK">اردو (Urdu - Pakistan)</option>
-            <option value="en-US">English (US / Global)</option>
-            <option value="hi-IN">हिंदी (Hindi - India)</option>
-            <option value="ar-SA">العربية (Arabic)</option>
+            <option value="ur-PK" selected>🇵🇰 اردو (Urdu)</option>
+            <option value="en-US">🇬🇧 English</option>
+            <option value="zh-CN">🇨🇳 中文 (Chinese)</option>
+            <option value="ja-JP">🇯🇵 日本語 (Japanese)</option>
+            <option value="ar-SA">🇸🇦 العربية (Arabic)</option>
+            <option value="hi-IN">🇮🇳 हिंदी (Hindi)</option>
+            <option value="es-ES">🇪🇸 Español (Spanish)</option>
+            <option value="fr-FR">🇫🇷 Français (French)</option>
+            <option value="de-DE">🇩🇪 Deutsch (German)</option>
+            <option value="pt-PT">🇵🇹 Português (Portuguese)</option>
+            <option value="ru-RU">🇷🇺 Русский (Russian)</option>
+            <option value="th-TH">🇹🇭 ไทย (Thai)</option>
+            <option value="vi-VN">🇻🇳 Tiếng Việt (Vietnamese)</option>
+            <option value="id-ID">🇮🇩 Bahasa (Indonesian)</option>
+            <option value="tl-PH">🇵🇭 Tagalog (Filipino)</option>
+            <option value="ko-KR">🇰🇷 한국어 (Korean)</option>
+            <option value="tr-TR">🇹🇷 Türkçe (Turkish)</option>
+            <option value="fa-IR">🇮🇷 فارسی (Persian)</option>
+            <option value="af-ZA">🇿🇦 Afrikaans</option>
+            <option value="el-GR">🇬🇷 Ελληνικά (Greek)</option>
           </select>
+        </div>
+
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label for="modalSpeechRateSlider" style="font-size:12px; font-weight:700; color:var(--accent);">🗣️ Speech Synthesis Rate (آواز کی رفتار):</label>
+            <span id="speechRateValueLabel" style="font-size:12px; font-weight:800; background:var(--accent-soft); color:var(--accent); padding:2px 8px; border-radius:6px; border:1px solid var(--line);">1.0x</span>
+          </div>
+          <input
+            type="range"
+            id="modalSpeechRateSlider"
+            min="0.5"
+            max="2.0"
+            step="0.1"
+            value="1.0"
+            oninput="updateSpeechRate(this.value)"
+            style="width:100%; accent-color:var(--accent); cursor:pointer; margin:4px 0;"
+          >
+          <div style="display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted); font-weight:600;">
+            <span>0.5x (Slow)</span>
+            <span>1.0x (Normal)</span>
+            <span>2.0x (Fast)</span>
+          </div>
         </div>
 
         <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
@@ -622,67 +702,80 @@ Try کر کے بتا!</pre>
       <button class="icon-btn" onclick="closeSidebar()" style="margin-left:auto; width:36px; height:36px;" id="sidebar-close-btn">✕</button>
     </div>
 
-    <!-- MAIN SIDEBAR MENU OPTIONS -->
-    <button class="side-btn active" onclick="newChat()" style="background:var(--accent); color:#ffffff; font-weight:700; margin-bottom:6px;">
-      <span>＋</span><span>New Chat</span>
+    <!-- MAIN 3-LINES MENU: History & Settings Menu -->
+    <button class="side-btn" onclick="goToHomePage()" style="border:1px solid var(--line); margin-bottom:8px; font-weight:700;">
+      <span>🏠</span><span>Home Page (ہوم پیج)</span>
     </button>
+    <button class="side-btn active" onclick="newChat()" style="background:var(--accent); color:#ffffff; font-weight:700; margin-bottom:8px;">
+      <span>＋</span><span>New Chat (نیا چیٹ)</span>
+    </button>
+
+    <div class="side-section-label">
+      <span>MENU (ہسٹری اور سیٹنگز)</span>
+    </div>
     <button class="side-btn" onclick="openHistoryModal()">
-      <span>⏱</span><span>History</span>
+      <span>🕒</span><span>History (چیٹ ہسٹری)</span>
     </button>
     <button class="side-btn" onclick="openSettingsModal()">
-      <span>⚙️</span><span>Settings</span>
+      <span>⚙️</span><span>Settings (سیٹنگز)</span>
     </button>
 
-    <!-- FEATURES SECTION IN SIDEBAR -->
-    <div class="side-section-label">
-      <span>FEATURES</span>
+    <!-- RECENT HISTORY IN 3-LINES SIDEBAR -->
+    <div class="history">
+      <span>RECENT HISTORY</span>
+      <button onclick="openHistoryModal()" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;">View All</button>
     </div>
-    <button class="side-btn" onclick="triggerFeatureInChat('video')">
-      <span>🎬</span><span>Video Generation</span>
-    </button>
-    <button class="side-btn" onclick="openPhotoStudioModal()">
-      <span>🎨</span><span>AI Photo Studio & Editor</span>
-    </button>
-    <button class="side-btn" onclick="openVoiceToolModal()">
-      <span>🎤</span><span>Voice to Text Tool (اردو)</span>
-    </button>
-    <button class="side-btn" onclick="triggerAttachment('gallery'); closeSidebar();">
-      <span>🖼️</span><span>Image / File Analysis</span>
-    </button>
-    <button class="side-btn" onclick="triggerAttachment('link'); closeSidebar();">
-      <span>🔗</span><span>Website Link Analysis</span>
-    </button>
+    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:3px; margin-top:6px; max-height:170px; overflow-y:auto;"></div>
 
-    <!-- SETTINGS CONTROLS INSIDE SIDEBAR -->
-    <div style="padding: 10px 4px 4px; margin-top: 8px; border-top: 1px solid var(--line);">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:700;">AI MODEL (SETTINGS)</div>
-      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; outline:none;">
+    <!-- QUICK SETTINGS IN 3-LINES SIDEBAR -->
+    <div style="padding: 10px 4px 4px; margin-top: 10px; border-top: 1px solid var(--line);">
+      <div style="font-size: 11px; color: var(--muted); margin-bottom: 5px; font-weight:700;">SETTINGS (سیٹنگز)</div>
+      <select id="modelSelector" onchange="saveModelConfig()" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; outline:none; margin-bottom:6px;">
         <option value="gemini-3.8-flash" selected>Gemini 3.8 Flash (Multimodal & Fast)</option>
         <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Ultra Fast)</option>
         <option value="gemini-flash-latest">Gemini Flash Latest (Auto-Updating)</option>
         <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Deep Code & STEM)</option>
       </select>
-    </div>
-
-    <div style="margin-top: 8px; padding: 8px 4px 0;">
-      <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">MICROPHONE LANGUAGE</div>
       <select id="micLanguageSelector" onchange="saveMicLanguage()" style="width: 100%; font-size: 12px; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 8px; outline:none; margin-bottom:6px;">
-        <option value="ur-PK" selected>اردو (Urdu)</option>
-        <option value="en-US">English (US / Global)</option>
-        <option value="hi-IN">हिंदी (Hindi)</option>
-        <option value="ar-SA">العربية (Arabic)</option>
+        <option value="ur-PK" selected>🇵🇰 اردو (Urdu)</option>
+        <option value="en-US">🇬🇧 English</option>
+        <option value="zh-CN">🇨🇳 中文 (Chinese)</option>
+        <option value="ja-JP">🇯🇵 日本語 (Japanese)</option>
+        <option value="ar-SA">🇸🇦 العربية (Arabic)</option>
+        <option value="hi-IN">🇮🇳 हिंदी (Hindi)</option>
+        <option value="es-ES">🇪🇸 Español (Spanish)</option>
+        <option value="fr-FR">🇫🇷 Français (French)</option>
+        <option value="de-DE">🇩🇪 Deutsch (German)</option>
+        <option value="pt-PT">🇵🇹 Português (Portuguese)</option>
+        <option value="ru-RU">🇷🇺 Русский (Russian)</option>
+        <option value="th-TH">🇹🇭 ไทย (Thai)</option>
+        <option value="vi-VN">🇻🇳 Tiếng Việt (Vietnamese)</option>
+        <option value="id-ID">🇮🇩 Bahasa (Indonesian)</option>
+        <option value="tl-PH">🇵🇭 Tagalog (Filipino)</option>
+        <option value="ko-KR">🇰🇷 한국어 (Korean)</option>
+        <option value="tr-TR">🇹🇷 Türkçe (Turkish)</option>
+        <option value="fa-IR">🇮🇷 فارسی (Persian)</option>
+        <option value="af-ZA">🇿🇦 Afrikaans</option>
+        <option value="el-GR">🇬🇷 Ελληνικά (Greek)</option>
       </select>
       <button class="side-btn" onclick="toggleTheme()" style="margin-top:2px;">
         <span>◐</span><span>Dark / Light Theme</span>
       </button>
     </div>
 
-    <!-- RECENT HISTORY IN SIDEBAR -->
-    <div class="history">
-      <span>HISTORY</span>
-      <button onclick="openHistoryModal()" style="background:none;border:none;color:var(--accent);font-size:11px;font-weight:700;cursor:pointer;">View All</button>
+    <!-- TOOLS & FEATURES IN 3-LINES SIDEBAR -->
+    <div class="side-section-label">
+      <span>TOOLS</span>
     </div>
-    <div id="chat-history-list" style="display:flex; flex-direction:column; gap:3px; margin-top:6px;"></div>
+    <button class="side-btn" onclick="openPhotoStudioModal()">
+      <span>🎨</span><span>AI Photo Studio & Editor</span>
+    </button>
+    <button class="side-btn" onclick="openVoiceToolModal()">
+      <span>🎤</span><span>Voice to Text Tool (اردو)</span>
+    </button>
+    <button class="side-btn" onclick="triggerFeatureInChat('video')">
+      <span>🎬</span><span>Video Generation</span>
+    </button>
     
     <div class="profile">
       <div class="avatar">N</div>
@@ -695,64 +788,15 @@ Try کر کے بتا!</pre>
 
   <!-- MAIN -->
   <main class="main" onclick="handleMainTap()">
-    <!-- TOPBAR: Hamburger (≡) + "NOVA AI" + Plus (+) + ⏱ + ⚙️ + ⋮ -->
+    <!-- HEADER: Only 3 Lines (☰) + Name (NOVA AI) + Profile Icon -->
     <header class="topbar">
-      <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-        <button class="icon-btn" onclick="toggleSidebar(event)" title="Open Sidebar Menu (≡)" aria-label="Menu" style="font-size:20px; font-weight:800;">☰</button>
-        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
-          <svg class="website-only-logo" viewBox="0 0 120 120" style="width:30px; height:30px; filter: drop-shadow(0 0 8px rgba(56,189,248,0.8)); flex-shrink: 0;">
-            <defs>
-              <linearGradient id="neonGlowTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8"/>
-                <stop offset="50%" stop-color="#0284c7"/>
-                <stop offset="100%" stop-color="#1d4ed8"/>
-              </linearGradient>
-              <linearGradient id="metalBlueTop" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="30%" stop-color="#7dd3fc"/>
-                <stop offset="70%" stop-color="#0284c7"/>
-                <stop offset="100%" stop-color="#1e3a8a"/>
-              </linearGradient>
-              <radialGradient id="orbGlowTop" cx="35%" cy="35%" r="65%">
-                <stop offset="0%" stop-color="#ffffff"/>
-                <stop offset="30%" stop-color="#93c5fd"/>
-                <stop offset="70%" stop-color="#3b82f6"/>
-                <stop offset="100%" stop-color="#1e40af"/>
-              </radialGradient>
-            </defs>
-            <rect x="8" y="8" width="104" height="104" rx="28" fill="#030712" stroke="url(#neonGlowTop)" stroke-width="4.5"/>
-            <rect x="12" y="12" width="96" height="96" rx="24" fill="#0b0f19" opacity="0.95"/>
-            <g fill="none" stroke="url(#metalBlueTop)" stroke-width="7" stroke-linecap="round">
-              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30"/>
-              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(120 60 60)"/>
-              <path d="M 60 30 A 28 28 0 1 1 35 73 A 22 22 0 0 0 60 30" transform="rotate(240 60 60)"/>
-            </g>
-            <circle cx="60" cy="24" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
-            <circle cx="91" cy="78" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
-            <circle cx="29" cy="78" r="7.5" fill="url(#orbGlowTop)" stroke="#ffffff" stroke-width="1.5"/>
-          </svg>
-          <div class="top-title" id="top-title">NOVA AI</div>
-        </div>
-      </div>
+      <button class="icon-btn" onclick="toggleSidebar(event)" title="Menu: History & Settings (☰)" aria-label="Menu" style="font-size:20px; font-weight:800; border:none; background:transparent;">☰</button>
 
-      <div style="display:flex; gap:6px; align-items:center; position:relative;">
-        <button class="icon-btn" onclick="newChat()" title="New Chat (+)" aria-label="New Chat" style="font-size:20px; font-weight:800; color:var(--accent); border-color:var(--accent); background:var(--accent-soft);">＋</button>
-        <button class="icon-btn" onclick="openHistoryModal()" title="History (⏱)" aria-label="History">⏱</button>
-        <button class="icon-btn" onclick="openSettingsModal()" title="Settings (⚙️)" aria-label="Settings">⚙️</button>
-        <button class="icon-btn" onclick="toggleMoreMenu(event)" title="More Options (⋮)" aria-label="More Options" style="font-size:22px; font-weight:900;">⋮</button>
+      <div class="top-title" id="top-title" style="font-size:16px; font-weight:800; letter-spacing:0.4px;">NOVA AI</div>
 
-        <!-- MORE OPTIONS DROPDOWN MENU (⋮) -->
-        <div class="more-dropdown" id="top-more-menu" onclick="event.stopPropagation()">
-          <button class="side-btn" onclick="newChat(); closeMoreMenu();"><span>＋</span><span>New Chat</span></button>
-          <button class="side-btn" onclick="openHistoryModal(); closeMoreMenu();"><span>⏱</span><span>History</span></button>
-          <button class="side-btn" onclick="openSettingsModal(); closeMoreMenu();"><span>⚙️</span><span>Settings</span></button>
-          <button class="side-btn" onclick="triggerFeatureInChat('video'); closeMoreMenu();"><span>🎬</span><span>Video Generation</span></button>
-          <button class="side-btn" onclick="openPhotoStudioModal(); closeMoreMenu();"><span>🎨</span><span>AI Photo Studio</span></button>
-          <button class="side-btn" onclick="openVoiceToolModal(); closeMoreMenu();"><span>🎤</span><span>Voice to Text Tool (اردو)</span></button>
-          <button class="side-btn" onclick="toggleTheme(); closeMoreMenu();"><span>◐</span><span>Dark / Light Theme</span></button>
-          <button class="side-btn" onclick="triggerPwaInstall(); closeMoreMenu();"><span>📲</span><span>Install App (PWA)</span></button>
-        </div>
-      </div>
+      <button class="avatar" onclick="openSettingsModal()" title="Profile" aria-label="Profile" style="border:1px solid var(--line); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; cursor:pointer; font-size:15px;">
+        👤
+      </button>
     </header>
 
     <div id="offline-banner">⚡ Offline Mode — آپ آف لائن ہیں۔ محفوظ شدہ چیٹ ہسٹری دستیاب ہے۔</div>
@@ -800,8 +844,24 @@ Try کر کے بتا!</pre>
         </div>
 
         <div id="empty-intro-wrap" style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;">
-          <h1>How can I help you today?</h1>
-          <p>Ask NOVA anything in Urdu, Hindi, or English. Analyze code screenshots, debug websites, generate artwork, or transcribe voice dictations.</p>
+          <h1 style="font-weight: 800; font-size: 24px; color: var(--accent);">NOVA AI</h1>
+          <p style="font-size: 13.5px; color: var(--muted); max-width: 460px;">اردو، ہندی یا انگریزی میں پوچھیں۔ اسکرین شاٹس اینالائز کریں، کوڈ ریویو کریں، اور وائرل ویڈیوز بنائیں۔</p>
+        </div>
+
+        <!-- 3-4 Suggestions below the welcome greeting on Home Page -->
+        <div id="empty-suggestions-wrap" style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:440px; margin-top:20px;">
+          <div onclick="submitHomeSuggestion('Screen Analysis')" style="background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 18px; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px;" class="suggestion-pill">
+            <b style="font-size:14px; color:var(--text); font-weight:700;">🔍 Screen Analysis</b>
+          </div>
+          <div onclick="submitHomeSuggestion('Video Editing')" style="background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 18px; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px;" class="suggestion-pill">
+            <b style="font-size:14px; color:var(--text); font-weight:700;">🎬 Video Editing</b>
+          </div>
+          <div onclick="submitHomeSuggestion('Background Search')" style="background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 18px; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px;" class="suggestion-pill">
+            <b style="font-size:14px; color:var(--text); font-weight:700;">🖼️ Background Search</b>
+          </div>
+          <div onclick="submitHomeSuggestion('Code Writing')" style="background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px 18px; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px;" class="suggestion-pill">
+            <b style="font-size:14px; color:var(--text); font-weight:700;">📝 Code Writing</b>
+          </div>
         </div>
       </div>
       <div class="messages" id="messages-list"></div>
@@ -836,16 +896,17 @@ Try کر کے بتا!</pre>
         <textarea id="input" placeholder="Ask NOVA anything..." rows="1" onkeydown="keySend(event)" oninput="adjustTextareaHeight(this)"></textarea>
         <div class="tools">
           <button class="tool tool-plus" id="btn-plus-attach" onclick="togglePlusMenu(event)" title="Plus (+)" aria-label="Plus">＋</button>
-          <button class="tool" id="btn-mic-dictate" onclick="toggleVoiceDictation()" title="Microphone" aria-label="Microphone">🎙️</button>
+          <button class="tool" id="btn-mic-dictate" onclick="startTranscription()" title="Microphone" aria-label="Microphone">🎙️</button>
+          <canvas id="waveformCanvas" width="76" height="32" style="display:none; width:76px; height:32px; border-radius:8px; background:var(--accent-soft); border:1px solid var(--accent); flex-shrink:0;"></canvas>
           <button class="tool" onclick="triggerAttachment('gallery')" title="Image / File Upload" aria-label="Image or File">🖼️</button>
           <button class="send" onclick="send()" title="Send Message" aria-label="Send">➤</button>
         </div>
       </div>
     </div>
     
-    <!-- Multi Hidden Inputs -->
-    <input id="input-camera" type="file" accept="image/*" capture="environment" hidden onchange="handlePlusFileSelected(this, 'Camera Photo')">
-    <input id="input-gallery" type="file" accept="image/*" hidden onchange="handlePlusFileSelected(this, 'Gallery Photo')">
+    <!-- Multi Hidden Inputs (Supports both Images & Videos when pressing Image/Gallery button) -->
+    <input id="input-camera" type="file" accept="image/*,video/*" capture="environment" hidden onchange="handlePlusFileSelected(this, 'Camera Media')">
+    <input id="input-gallery" type="file" accept="image/*,video/*,.mp4,.mov,.webm,.mkv,.avi,.m4v" hidden onchange="handlePlusFileSelected(this, 'Gallery Image / Video')">
     <input id="input-pdf" type="file" accept="application/pdf,text/*,.js,.ts,.py,.html,.css,.json" hidden onchange="handlePlusFileSelected(this, 'Document / File')">
 
     <!-- Link Attachment Modal -->
@@ -868,7 +929,12 @@ Try کر کے بتا!</pre>
 </div>
 
 <script>
-let chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
+let chats = [];
+try {
+  chats = JSON.parse(localStorage.getItem('nova_chats')) || [];
+} catch (e) {
+  chats = [];
+}
 chats.forEach(c => {
   if (!c.model || c.model === 'gemini-1.5-flash' || c.model === 'gemini-2.0-flash' || c.model === 'gemini-2.5-flash' || c.model === 'gemini-3.5-flash') {
     c.model = 'gemini-3.1-flash-lite';
@@ -876,7 +942,6 @@ chats.forEach(c => {
     c.model = 'gemini-3.1-pro-preview';
   }
 });
-localStorage.setItem('nova_chats', JSON.stringify(chats));
 let currentChatId = localStorage.getItem('nova_current_chat_id') || '';
 let dictationActive = false;
 let recognition = null;
@@ -1334,12 +1399,42 @@ function syncModelFromModal(model) {
   saveModelConfig();
 }
 
+function applyLanguageDirection(lang) {
+  const rtlLangs = ['ur-PK', 'ar-SA', 'fa-IR'];
+  const isRTL = rtlLangs.includes(lang);
+
+  const chatSection = document.getElementById('workspace-chat');
+  const inputEl = document.getElementById('input');
+  const msgList = document.getElementById('messages-list');
+
+  if (chatSection) {
+    chatSection.style.direction = isRTL ? 'rtl' : 'ltr';
+    chatSection.style.textAlign = isRTL ? 'right' : 'left';
+  }
+  if (inputEl) {
+    inputEl.style.direction = isRTL ? 'rtl' : 'ltr';
+    inputEl.style.textAlign = isRTL ? 'right' : 'left';
+    if (isRTL) {
+      inputEl.placeholder = "مجھ سے کچھ بھی پوچھیں (Ask NOVA)...";
+    } else {
+      inputEl.placeholder = "Ask NOVA anything...";
+    }
+  }
+  if (msgList) {
+    msgList.style.direction = isRTL ? 'rtl' : 'ltr';
+    msgList.style.textAlign = isRTL ? 'right' : 'left';
+  }
+}
+
 function saveMicLanguage() {
   const lang = document.getElementById('micLanguageSelector').value;
   const modalMic = document.getElementById('modalMicLanguageSelector');
   if (modalMic) modalMic.value = lang;
   localStorage.setItem('nova_speech_lang', lang);
-  showToast(`Mic language set to: ${lang}`);
+
+  applyLanguageDirection(lang);
+
+  showToast(`Language set to: ${lang}`);
 }
 
 function syncMicLangFromModal(lang) {
@@ -1381,6 +1476,32 @@ function clearAllHistory() {
   showToast('🗑️ All conversation history cleared');
 }
 
+function getSpeechSynthesisRate() {
+  const raw = parseFloat(localStorage.getItem('nova_speech_rate') || '1.0');
+  if (isNaN(raw)) return 1.0;
+  return Math.min(2.0, Math.max(0.5, Math.round(raw * 10) / 10));
+}
+
+function updateSpeechRate(val) {
+  const rate = Math.min(2.0, Math.max(0.5, Math.round((parseFloat(val) || 1.0) * 10) / 10));
+  const formatted = rate.toFixed(1);
+  localStorage.setItem('nova_speech_rate', formatted);
+
+  const label = document.getElementById('speechRateValueLabel');
+  if (label) label.innerText = `${formatted}x`;
+
+  const slider = document.getElementById('modalSpeechRateSlider');
+  if (slider && slider.value !== String(rate)) {
+    slider.value = formatted;
+  }
+
+  if (currentAudioPlayer) {
+    try {
+      currentAudioPlayer.playbackRate = rate;
+    } catch (e) {}
+  }
+}
+
 function openSettingsModal() {
   const sideModel = document.getElementById('modelSelector');
   const modalModel = document.getElementById('modalModelSelector');
@@ -1389,6 +1510,12 @@ function openSettingsModal() {
   const sideMic = document.getElementById('micLanguageSelector');
   const modalMic = document.getElementById('modalMicLanguageSelector');
   if (sideMic && modalMic) modalMic.value = sideMic.value;
+
+  const savedRate = getSpeechSynthesisRate().toFixed(1);
+  const rateSlider = document.getElementById('modalSpeechRateSlider');
+  const rateLabel = document.getElementById('speechRateValueLabel');
+  if (rateSlider) rateSlider.value = savedRate;
+  if (rateLabel) rateLabel.innerText = `${savedRate}x`;
 
   document.getElementById('settingsModal').classList.add('active');
   closeSidebar();
@@ -1431,15 +1558,16 @@ function handleMainTap() {
   closeMoreMenu();
 }
 
-function newChat() {
+function newChat(isHome = false) {
   stopSpeechPlayback(false);
   const id = 'chat_' + Date.now();
   const selectedModel = document.getElementById('modelSelector') ? document.getElementById('modelSelector').value : 'gemini-3.8-flash';
   chats.push({ 
     id, 
-    title: 'New Conversation', 
+    title: isHome ? 'Home Page' : 'New Conversation', 
     model: selectedModel,
     messages: [],
+    isBlankNewChat: !isHome,
     updatedAt: Date.now()
   });
   currentChatId = id;
@@ -1454,12 +1582,105 @@ function newChat() {
     inputEl.value = '';
     inputEl.focus();
   }
-  showToast('✨ Started new conversation');
+  showToast(isHome ? '🏠 ہوم پیج (Home Page)' : '✨ نیا چیٹ شروع ہو گیا (New Chat)');
+}
+
+function goToHomePage() {
+  newChat(true);
+}
+
+function submitHomeSuggestion(topic) {
+  const inputEl = document.getElementById('input');
+  if (!inputEl) return;
+
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (currentChat) {
+    currentChat.isBlankNewChat = false;
+  }
+
+  if (topic === 'Screen Analysis') {
+    inputEl.value = 'اسکرین شاٹ کو اینالائز کریں اور اس میں موجود مسائل اور ان کا حل تلاش کریں۔';
+  } else if (topic === 'Video Editing') {
+    inputEl.value = 'شارٹ ویڈیوز (TikTok/Shorts) کے لیے وائرل ویڈیو ایڈیٹنگ کی تجاویز اور بہترین فارمیٹس بتائیں۔';
+  } else if (topic === 'Background Search') {
+    inputEl.value = 'ویڈیو ایڈیٹنگ کے لیے خوبصورت موشن پس منظر اور بیک گراؤنڈز کہاں سے ڈاؤن لوڈ کریں؟';
+  } else if (topic === 'Code Writing') {
+    inputEl.value = 'کوڈ رائٹنگ: میرے لیے ایک مفید سورس کوڈ لکھیں یا اس کو بہتر بنائیں۔';
+  } else {
+    inputEl.value = topic;
+  }
+
+  adjustTextareaHeight(inputEl);
+  updateEmptyStateVisibility();
+  inputEl.focus();
+  send();
 }
 
 function saveChats() {
-  localStorage.setItem('nova_chats', JSON.stringify(chats));
-  localStorage.setItem('nova_current_chat_id', currentChatId);
+  try {
+    localStorage.setItem('nova_current_chat_id', currentChatId || '');
+  } catch (e) {}
+
+  try {
+    // 1. Try saving full chats if total payload is under ~3.5MB
+    const rawJson = JSON.stringify(chats);
+    if (rawJson.length < 3500000) {
+      localStorage.setItem('nova_chats', rawJson);
+      return;
+    }
+  } catch (quotaErr) {
+    // Fall through to compact storage below
+  }
+
+  try {
+    // 2. Compact heavy Base64 attachments/generatedImages from older messages while keeping in-memory `chats` intact
+    const recentChats = chats.slice(-20);
+    const compactedChats = recentChats.map((chat, cIdx) => {
+      const isCurrentChat = chat.id === currentChatId || cIdx === recentChats.length - 1;
+      const msgs = Array.isArray(chat.messages) ? chat.messages.slice(-30) : [];
+      return {
+        ...chat,
+        messages: msgs.map((m, mIdx) => {
+          const isVeryRecentMsg = isCurrentChat && mIdx >= msgs.length - 2;
+          const isVideoMsg = m.attachmentMimeType && m.attachmentMimeType.startsWith('video/');
+          const cleanAttachment =
+            isVideoMsg
+              ? (m.attachmentPoster || null)
+              : (m.attachment && m.attachment.length > 90000 && !isVeryRecentMsg ? null : m.attachment);
+          const cleanGenerated =
+            m.generatedImage && m.generatedImage.length > 90000 && !isVeryRecentMsg ? null : m.generatedImage;
+          return {
+            ...m,
+            attachment: cleanAttachment,
+            attachmentPreviewUrl: null,
+            videoFrames: isVeryRecentMsg && Array.isArray(m.videoFrames) ? m.videoFrames.slice(0, 3) : null,
+            generatedImage: cleanGenerated
+          };
+        })
+      };
+    });
+    localStorage.setItem('nova_chats', JSON.stringify(compactedChats));
+  } catch (err2) {
+    try {
+      // 3. Final fallback: store text-only history + videoMeta if storage is tight
+      const textOnlyChats = chats.slice(-15).map((chat) => ({
+        ...chat,
+        messages: (chat.messages || []).slice(-25).map((m) => ({
+          role: m.role,
+          text: m.text,
+          attachmentMimeType: m.attachmentMimeType || null,
+          videoMeta: m.videoMeta || null,
+          videoSpec: m.videoSpec,
+          timestamp: m.timestamp
+        }))
+      }));
+      localStorage.setItem('nova_chats', JSON.stringify(textOnlyChats));
+    } catch (err3) {
+      try {
+        localStorage.removeItem('nova_chats');
+      } catch (e) {}
+    }
+  }
 }
 
 function renderHistory() {
@@ -1551,7 +1772,7 @@ function formatMarkdown(text) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-  // Multi-line code blocks with copy button
+  // Multi-line code blocks with copy & download buttons
   html = html.replace(/```([a-zA-Z0-9_\-#+]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
     const id = 'code_' + Math.floor(Math.random() * 1000000);
     const displayLang = lang || 'code';
@@ -1559,7 +1780,10 @@ function formatMarkdown(text) {
       <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel2); padding:6px 14px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted); font-family:monospace;">
           <span style="font-weight:700; color:var(--accent); text-transform:uppercase;">${displayLang}</span>
-          <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer; font-size:11px;">📋 Copy Code</button>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">📋 کاپی کریں (Copy)</button>
+            <button onclick="downloadPreCodeBlock('${id}', '${displayLang.toLowerCase()}')" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">💾 ڈاؤن لوڈ کریں (Download)</button>
+          </div>
         </div>
         <pre style="padding:14px; margin:0; overflow-x:auto; font-size:12px; font-family:monospace; line-height:1.6; background:var(--panel); color:var(--text);"><code id="${id}">${code}</code></pre>
       </div>
@@ -1595,10 +1819,23 @@ function copyPreCodeBlock(id, btn) {
   const code = document.getElementById(id).innerText;
   navigator.clipboard.writeText(code).then(() => {
     const original = btn.innerHTML;
-    btn.innerHTML = '✓ Copied!';
+    btn.innerHTML = '✓ کاپی ہو گیا!';
     setTimeout(() => { btn.innerHTML = original; }, 2000);
-    showToast('Code copied to clipboard');
+    showToast('✅ کوڈ کامیابی سے کاپی ہو گیا!');
   });
+}
+
+function downloadPreCodeBlock(id, lang) {
+  const code = document.getElementById(id).innerText;
+  const ext = lang === 'html' ? 'html' : lang === 'css' ? 'css' : lang === 'js' ? 'js' : lang === 'py' ? 'py' : 'txt';
+  const blob = new Blob([code], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nova_file_${Date.now()}.${ext}`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 فائل کامیابی سے ڈاؤن لوڈ ہو گئی ہے!');
 }
 
 function copyProseTextByIndex(idx) {
@@ -1640,13 +1877,19 @@ function stopSpeechPlayback(showNotice = false) {
 
 function testSpeakerVoice() {
   stopSpeechPlayback(false);
-  showToast('🔊 Playing speaker test audio...');
+  const rate = getSpeechSynthesisRate();
+  showToast(`🔊 Playing speaker test audio (${rate.toFixed(1)}x)...`);
   try {
     const audio = new Audio('/api/tts?text=' + encodeURIComponent('NOVA AI speaker is active and speaking clearly.') + '&lang=en');
+    audio.playbackRate = rate;
     currentAudioPlayer = audio;
+    audio.onplay = () => {
+      try { audio.playbackRate = getSpeechSynthesisRate(); } catch (e) {}
+    };
     audio.play().catch(() => {
       if ('speechSynthesis' in window) {
         const u = new SpeechSynthesisUtterance('NOVA AI speaker is fully working.');
+        u.rate = getSpeechSynthesisRate();
         window.speechSynthesis.speak(u);
       }
     });
@@ -1679,15 +1922,18 @@ async function handleSpeakerButtonClick(idx) {
 
   const isUrdu = /[\u0600-\u06FF]/.test(cleanText);
   const langCode = isUrdu ? 'ur' : 'en';
+  const rate = getSpeechSynthesisRate();
 
-  showToast('🔊 Speaking response...');
+  showToast(`🔊 Speaking response (${rate.toFixed(1)}x)...`);
 
   try {
     const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText.substring(0, 400))}&lang=${langCode}`;
     const audio = new Audio(streamUrl);
+    audio.playbackRate = rate;
     currentAudioPlayer = audio;
 
     audio.onplay = () => {
+      try { audio.playbackRate = getSpeechSynthesisRate(); } catch (e) {}
       updateSpeechButtons();
     };
 
@@ -1720,6 +1966,7 @@ function fallbackToWebSpeech(cleanText, isUrdu, idx) {
     }
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = isUrdu ? 'ur-PK' : 'en-US';
+    utterance.rate = getSpeechSynthesisRate();
     utterance.onend = () => {
       activeSpeakingMsgIndex = null;
       updateSpeechButtons();
@@ -1740,15 +1987,79 @@ function updateSpeechButtons() {
     const msgIdx = parseInt(btn.getAttribute('data-index'), 10);
     const isPlaying = activeSpeakingMsgIndex === msgIdx;
     if (isPlaying) {
-      btn.innerHTML = '⏹ Stop';
+      btn.innerHTML = '⏹';
       btn.style.color = '#ef4444';
-      btn.style.fontWeight = '700';
+      btn.classList.add('active-feedback');
     } else {
-      btn.innerHTML = '🔊 Listen';
-      btn.style.color = 'var(--muted)';
-      btn.style.fontWeight = '600';
+      btn.innerHTML = '🔊';
+      btn.style.color = '';
+      btn.classList.remove('active-feedback');
     }
   });
+}
+
+function handleMsgFeedback(idx, type, btnEl) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
+  const current = currentChat.messages[idx].feedback;
+  currentChat.messages[idx].feedback = current === type ? null : type;
+  saveChats();
+  loadMessages();
+  if (currentChat.messages[idx].feedback === 'up') {
+    showToast('👍 پسند کرنے کا شکریہ!');
+  } else if (currentChat.messages[idx].feedback === 'down') {
+    showToast('👎 فیڈ بیک محفوظ کر لیا گیا');
+  }
+}
+
+async function shareMessageByIndex(idx) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
+  const text = currentChat.messages[idx].text || '';
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: 'NOVA AI Message',
+        text: text
+      });
+      return;
+    } catch (e) {}
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📤 پیغام شیئر کے لیے کاپی ہو گیا!');
+  });
+}
+
+function toggleMsgMoreMenu(e, idx) {
+  if (e) e.stopPropagation();
+  document.querySelectorAll('.msg-more-popup').forEach(el => {
+    if (el.id !== `msg-more-popup-${idx}`) el.classList.remove('open');
+  });
+  const popup = document.getElementById(`msg-more-popup-${idx}`);
+  if (popup) popup.classList.toggle('open');
+}
+
+function deleteSingleMessage(idx) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
+  currentChat.messages.splice(idx, 1);
+  saveChats();
+  loadMessages();
+  showToast('🗑️ پیغام ہٹا دیا گیا');
+}
+
+function regenerateFromMessage(idx) {
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (!currentChat || !currentChat.messages[idx]) return;
+  let promptText = currentChat.messages[idx].text || '';
+  if (currentChat.messages[idx].role === 'ai' && idx > 0 && currentChat.messages[idx - 1].role === 'user') {
+    promptText = currentChat.messages[idx - 1].text || '';
+  }
+  const inputEl = document.getElementById('input');
+  if (inputEl && promptText) {
+    inputEl.value = promptText;
+    send();
+  }
 }
 
 function adjustTextareaHeight(el) {
@@ -1772,11 +2083,12 @@ function togglePlusMenu(e) {
   }
 }
 
-// Close plus menu and more dropdown if user taps outside
+// Close plus menu, more dropdown, and per-message menus if user taps outside
 document.addEventListener('click', () => {
   const menu = document.getElementById('plus-menu');
   if (menu) menu.style.display = 'none';
   closeMoreMenu();
+  document.querySelectorAll('.msg-more-popup').forEach(el => el.classList.remove('open'));
 });
 
 function triggerAttachment(type) {
@@ -1795,13 +2107,291 @@ function triggerAttachment(type) {
   }
 }
 
-function handlePlusFileSelected(input, typeName) {
+function rgbToHexColor(r, g, b) {
+  return '#' + [r, g, b].map(x => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
+}
+
+async function extractVideoMetadataAndFrames(file) {
+  return new Promise((resolve) => {
+    const blobUrl = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+    video.playsInline = true;
+    video.src = blobUrl;
+
+    let resolved = false;
+    const finish = (result) => {
+      if (resolved) return;
+      resolved = true;
+      resolve(result);
+    };
+
+    const timeoutId = setTimeout(() => {
+      finish({
+        blobUrl,
+        frames: [],
+        posterFrame: null,
+        meta: {
+          fileName: file.name,
+          fileSizeMB: Number((file.size / (1024 * 1024)).toFixed(2)),
+          mimeType: file.type || 'video/mp4',
+          width: 1080,
+          height: 1920,
+          durationSec: 15,
+          aspectRatioLabel: '9:16 Vertical (TikTok / YouTube Shorts / Reels)',
+          isVertical916: true,
+          isHD: true,
+          avgBrightness: 128,
+          contrastScore: 52,
+          hookVisualChangeScore: 34,
+          captionZoneDensity: 28,
+          unsafeBottomZoneOverlap: false,
+          dominantBgHex: '#121626',
+          dominantAccentHex: '#f8fafc'
+        }
+      });
+    }, 8000);
+
+    video.onloadedmetadata = async () => {
+      try {
+        const width = video.videoWidth || 1080;
+        const height = video.videoHeight || 1920;
+        const rawDuration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 12;
+        const durationSec = Number(rawDuration.toFixed(1));
+
+        let aspectRatioLabel = '1:1 Square';
+        if (height > width * 1.15) {
+          aspectRatioLabel = '9:16 Vertical (TikTok / YouTube Shorts / Reels)';
+        } else if (width > height * 1.15) {
+          aspectRatioLabel = '16:9 Horizontal (YouTube Long-Form / Landscape)';
+        }
+
+        const maxDim = 540;
+        const scale = Math.min(1, maxDim / Math.max(width, height));
+        const cw = Math.max(160, Math.round(width * scale));
+        const ch = Math.max(160, Math.round(height * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = cw;
+        canvas.height = ch;
+        const ctx = canvas.getContext('2d');
+
+        const ratios = [0.05, 0.2, 0.4, 0.6, 0.8, 0.94];
+        const frames = [];
+        const frameStats = [];
+
+        const seekTo = (timeSec) =>
+          new Promise((resSeek) => {
+            const onSeeked = () => {
+              video.removeEventListener('seeked', onSeeked);
+              resSeek();
+            };
+            video.addEventListener('seeked', onSeeked);
+            try {
+              video.currentTime = Math.min(Math.max(0.05, timeSec), Math.max(0.1, rawDuration - 0.05));
+            } catch (e) {
+              video.removeEventListener('seeked', onSeeked);
+              resSeek();
+            }
+          });
+
+        for (let i = 0; i < ratios.length; i++) {
+          await seekTo(rawDuration * ratios[i]);
+          ctx.drawImage(video, 0, 0, cw, ch);
+          frames.push(canvas.toDataURL('image/jpeg', 0.76));
+
+          try {
+            const imgData = ctx.getImageData(0, 0, cw, ch).data;
+            let sumLum = 0;
+            let sumLumSq = 0;
+            let count = 0;
+            let bgR = 0, bgG = 0, bgB = 0, bgCount = 0;
+            let hiR = 0, hiG = 0, hiB = 0, hiCount = 0;
+            let captionEdges = 0;
+            let unsafeBottomEdges = 0;
+
+            const step = 4;
+            for (let y = 0; y < ch; y += step) {
+              for (let x = 0; x < cw; x += step) {
+                const idx = (y * cw + x) * 4;
+                const r = imgData[idx];
+                const g = imgData[idx + 1];
+                const b = imgData[idx + 2];
+                const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                sumLum += lum;
+                sumLumSq += lum * lum;
+                count++;
+
+                if (x < cw * 0.15 || x > cw * 0.85 || y < ch * 0.15) {
+                  bgR += r; bgG += g; bgB += b; bgCount++;
+                }
+                if (lum > 185) {
+                  hiR += r; hiG += g; hiB += b; hiCount++;
+                }
+
+                if (x + step < cw) {
+                  const nextIdx = (y * cw + (x + step)) * 4;
+                  const nextLum = 0.299 * imgData[nextIdx] + 0.587 * imgData[nextIdx + 1] + 0.114 * imgData[nextIdx + 2];
+                  const diff = Math.abs(lum - nextLum);
+                  if (diff > 48) {
+                    if (y > ch * 0.35 && y < ch * 0.82 && x > cw * 0.12 && x < cw * 0.88) {
+                      captionEdges++;
+                    }
+                    if (y >= ch * 0.82 || x >= cw * 0.84) {
+                      unsafeBottomEdges++;
+                    }
+                  }
+                }
+              }
+            }
+
+            const meanLum = sumLum / Math.max(1, count);
+            const variance = Math.max(0, sumLumSq / Math.max(1, count) - meanLum * meanLum);
+            const stdDev = Math.sqrt(variance);
+
+            frameStats.push({
+              meanLum,
+              stdDev,
+              captionEdges,
+              unsafeBottomEdges,
+              bgHex: bgCount > 0 ? rgbToHexColor(bgR / bgCount, bgG / bgCount, bgB / bgCount) : '#121626',
+              hiHex: hiCount > 0 ? rgbToHexColor(hiR / hiCount, hiG / hiCount, hiB / hiCount) : '#ffffff'
+            });
+          } catch (e) {}
+        }
+
+        const avgBrightness = frameStats.length
+          ? Math.round(frameStats.reduce((a, b) => a + b.meanLum, 0) / frameStats.length)
+          : 125;
+        const contrastScore = frameStats.length
+          ? Math.round(frameStats.reduce((a, b) => a + b.stdDev, 0) / frameStats.length)
+          : 50;
+        const hookVisualChangeScore = frameStats.length >= 2
+          ? Math.round(Math.abs(frameStats[0].meanLum - frameStats[1].meanLum) + Math.abs(frameStats[0].stdDev - frameStats[1].stdDev))
+          : 25;
+        const avgCaptionEdges = frameStats.length
+          ? Math.round(frameStats.reduce((a, b) => a + b.captionEdges, 0) / frameStats.length)
+          : 20;
+        const avgUnsafeEdges = frameStats.length
+          ? Math.round(frameStats.reduce((a, b) => a + b.unsafeBottomEdges, 0) / frameStats.length)
+          : 10;
+
+        clearTimeout(timeoutId);
+        finish({
+          blobUrl,
+          frames,
+          posterFrame: frames[0] || null,
+          meta: {
+            fileName: file.name,
+            fileSizeMB: Number((file.size / (1024 * 1024)).toFixed(2)),
+            mimeType: file.type || 'video/mp4',
+            width,
+            height,
+            durationSec,
+            aspectRatioLabel,
+            isVertical916: height > width * 1.15,
+            isHD: Math.max(width, height) >= 1080,
+            avgBrightness,
+            contrastScore,
+            hookVisualChangeScore,
+            captionZoneDensity: avgCaptionEdges,
+            unsafeBottomZoneOverlap: avgUnsafeEdges > avgCaptionEdges * 0.55,
+            dominantBgHex: frameStats[0]?.bgHex || '#121626',
+            dominantAccentHex: frameStats[0]?.hiHex || '#ffffff'
+          }
+        });
+      } catch (err) {
+        clearTimeout(timeoutId);
+        finish({
+          blobUrl,
+          frames: [],
+          posterFrame: null,
+          meta: {
+            fileName: file.name,
+            fileSizeMB: Number((file.size / (1024 * 1024)).toFixed(2)),
+            mimeType: file.type || 'video/mp4',
+            width: 1080,
+            height: 1920,
+            durationSec: 15,
+            aspectRatioLabel: '9:16 Vertical (TikTok / YouTube Shorts / Reels)',
+            isVertical916: true,
+            isHD: true
+          }
+        });
+      }
+    };
+
+    video.onerror = () => {
+      clearTimeout(timeoutId);
+      finish({
+        blobUrl,
+        frames: [],
+        posterFrame: null,
+        meta: {
+          fileName: file.name,
+          fileSizeMB: Number((file.size / (1024 * 1024)).toFixed(2)),
+          mimeType: file.type || 'video/mp4',
+          width: 1080,
+          height: 1920,
+          durationSec: 15,
+          aspectRatioLabel: '9:16 Vertical (TikTok / YouTube Shorts / Reels)',
+          isVertical916: true,
+          isHD: true
+        }
+      });
+    };
+  });
+}
+
+async function handlePlusFileSelected(input, typeName) {
   const file = input.files[0];
   if (!file) return;
 
   const iconEl = document.getElementById('composer-attachment-icon');
   const nameEl = document.getElementById('composer-attachment-name');
   const panelEl = document.getElementById('composer-attachment-panel');
+
+  const isVideoFile =
+    (file.type && file.type.startsWith('video/')) ||
+    /\.(mp4|mov|webm|mkv|avi|m4v|3gp)$/i.test(file.name || '');
+
+  if (isVideoFile) {
+    if (iconEl) iconEl.innerText = '🎬';
+    if (nameEl) nameEl.innerText = `${file.name} (Analyzing Video Frames...)`;
+    if (panelEl) panelEl.style.display = 'flex';
+    showToast('🎬 ویڈیو لوڈ ہو رہی ہے (ہُکس، فونٹس اور کوالٹی اینالیسس کے لیے تیار)...');
+
+    const extracted = await extractVideoMetadataAndFrames(file);
+
+    let rawVideoBase64 = null;
+    if (file.size <= 8 * 1024 * 1024) {
+      rawVideoBase64 = await new Promise((resRead) => {
+        const r = new FileReader();
+        r.onload = (ev) => resRead(ev.target.result);
+        r.onerror = () => resRead(null);
+        r.readAsDataURL(file);
+      });
+    }
+
+    currentAttachment = {
+      data: rawVideoBase64 || extracted.posterFrame || extracted.blobUrl,
+      previewUrl: extracted.blobUrl,
+      posterFrame: extracted.posterFrame,
+      videoFrames: extracted.frames,
+      videoMeta: extracted.meta,
+      type: file.type || 'video/mp4',
+      name: file.name
+    };
+
+    if (iconEl) iconEl.innerText = '🎬';
+    if (nameEl) {
+      nameEl.innerText = `${file.name} (${extracted.meta.width}x${extracted.meta.height} · ${extracted.meta.durationSec}s)`;
+    }
+    if (panelEl) panelEl.style.display = 'flex';
+    showToast('🎬 ویڈیو تیار ہے! اب آپ اس کا مکمل آڈٹ، غلطیاں، ٹک ٹاک اپلوڈ ٹائم یا فونٹ اسٹائل پوچھ سکتے ہیں۔');
+    return;
+  }
 
   if (file.type === 'application/pdf') {
     const reader = new FileReader();
@@ -1890,21 +2480,43 @@ function clearComposerAttachment() {
 }
 
 function updateEmptyStateVisibility() {
+  const emptyContainer = document.getElementById('empty');
+  const logoWrap = document.getElementById('empty-logo-wrap');
   const introWrap = document.getElementById('empty-intro-wrap');
+  const suggestionsWrap = document.getElementById('empty-suggestions-wrap');
   const inputEl = document.getElementById('input');
+
   const currentChat = chats.find(c => c.id === currentChatId);
   const hasMessages = currentChat && currentChat.messages && currentChat.messages.length > 0;
   const isInputActive = (inputEl === document.activeElement) || (inputEl && inputEl.value.trim().length > 0);
 
-  if (introWrap) {
-    if (hasMessages || isInputActive) {
-      introWrap.style.display = 'none';
-    } else {
+  // If there are messages in the active chat, hide the entire empty container
+  if (hasMessages) {
+    if (emptyContainer) emptyContainer.style.display = 'none';
+    return;
+  }
+
+  // Otherwise, the empty state is shown
+  if (emptyContainer) emptyContainer.style.display = 'flex';
+
+  // If input is active or has text, or if this chat is a blank new chat (isBlankNewChat === true)
+  const isBlank = (currentChat && currentChat.isBlankNewChat) || isInputActive;
+
+  if (isBlank) {
+    // Hide logo, intro, and suggestions for a clean blank chat area
+    if (logoWrap) logoWrap.style.display = 'none';
+    if (introWrap) introWrap.style.display = 'none';
+    if (suggestionsWrap) suggestionsWrap.style.display = 'none';
+  } else {
+    // Show logo, intro, and suggestions for Home Page mode
+    if (logoWrap) logoWrap.style.display = 'flex';
+    if (introWrap) {
       introWrap.style.display = 'flex';
       introWrap.style.flexDirection = 'column';
       introWrap.style.alignItems = 'center';
       introWrap.style.gap = '10px';
     }
+    if (suggestionsWrap) suggestionsWrap.style.display = 'flex';
   }
 }
 
@@ -2247,22 +2859,46 @@ function loadMessages() {
     div.className = `msg ${isUser ? 'user' : 'ai'}`;
 
     let attachmentHTML = '';
-    if (msg.attachment) {
-      if (msg.attachmentMimeType && msg.attachmentMimeType.startsWith('image/')) {
-        attachmentHTML = `<img src="${msg.attachment}" style="max-width:280px; border-radius:10px; margin-bottom:8px; display:block;" referrerPolicy="no-referrer">`;
-      } else {
-        attachmentHTML = `<div style="display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:8px; font-size:12px; margin-bottom:8px;"><span>📄</span> <span>Attached Code / File</span></div>`;
+    if (msg.attachment || msg.attachmentPreviewUrl || msg.videoMeta) {
+      if (msg.attachmentMimeType && msg.attachmentMimeType.startsWith('video/')) {
+        const videoSrc = msg.attachmentPreviewUrl || (msg.attachment && msg.attachment.startsWith('data:video/') ? msg.attachment : '');
+        const posterAttr = msg.attachmentPoster ? `poster="${msg.attachmentPoster}"` : '';
+        const metaTag = msg.videoMeta
+          ? `<div style="font-size:11px; color:var(--muted); margin-bottom:6px;">🎬 ${msg.videoMeta.fileName || 'Video'} · ${msg.videoMeta.width || 1080}×${msg.videoMeta.height || 1920} · ${msg.videoMeta.durationSec || 15}s</div>`
+          : '';
+        if (videoSrc) {
+          attachmentHTML = `
+            <div style="margin-bottom:8px;">
+              <video src="${videoSrc}" ${posterAttr} controls playsinline style="max-width:200px; max-height:200px; border-radius:10px; display:block; object-fit:cover; border:1px solid var(--line); background:#000;"></video>
+              ${metaTag}
+            </div>
+          `;
+        } else if (msg.attachmentPoster || (msg.attachment && msg.attachment.startsWith('data:image/'))) {
+          const thumbSrc = msg.attachmentPoster || msg.attachment;
+          attachmentHTML = `
+            <div style="margin-bottom:8px;">
+              <img src="${thumbSrc}" style="max-width:200px; max-height:200px; border-radius:10px; display:block; object-fit:cover; border:1px solid var(--line);" referrerPolicy="no-referrer">
+              ${metaTag}
+            </div>
+          `;
+        } else {
+          attachmentHTML = `<div style="display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:12px; margin-bottom:8px;"><span>🎬</span> <span>${msg.videoMeta?.fileName || 'Attached Video'}</span></div>`;
+        }
+      } else if (msg.attachmentMimeType && msg.attachmentMimeType.startsWith('image/')) {
+        attachmentHTML = `<img src="${msg.attachment}" style="max-width:200px; max-height:200px; border-radius:10px; margin-bottom:8px; display:block; object-fit:cover;" referrerPolicy="no-referrer">`;
+      } else if (msg.attachment) {
+        attachmentHTML = `<div style="display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:6px 10px; font-size:12px; margin-bottom:8px;"><span>📄</span> <span>Attached File</span></div>`;
       }
     }
 
     let generatedImageHTML = '';
     if (msg.generatedImage) {
       generatedImageHTML = `
-        <div style="margin:10px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--bg);">
-          <img src="${msg.generatedImage}" style="max-width:100%; max-height:420px; border-radius:12px 12px 0 0; display:block; margin:0 auto;" referrerPolicy="no-referrer">
-          <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; background:var(--panel2); font-size:11px;">
-            <span style="color:var(--accent); font-weight:700;">✨ AI Edited / Generated Photo</span>
-            <a href="${msg.generatedImage}" download="nova_photo_${Date.now()}.png" style="color:var(--accent); text-decoration:none; font-weight:600;">⬇️ Download HD</a>
+        <div style="margin:8px 0; display:inline-block;">
+          <img src="${msg.generatedImage}" style="max-width:200px; max-height:200px; border-radius:10px; display:block; object-fit:cover; border:1px solid var(--line);" referrerPolicy="no-referrer">
+          <div style="padding:4px 2px; display:flex; justify-content:space-between; align-items:center; font-size:11px; gap:10px;">
+            <span style="color:var(--accent); font-weight:700;">✨ AI Photo</span>
+            <a href="${msg.generatedImage}" download="nova_photo_${Date.now()}.png" style="color:var(--accent); text-decoration:none; font-weight:600;">⬇️ Download</a>
           </div>
         </div>
       `;
@@ -2273,13 +2909,13 @@ function loadMessages() {
       const canvasId = `font_video_canvas_${idx}`;
       pendingVideoCanvases.push({ canvasId, spec: msg.videoSpec });
       generatedVideoHTML = `
-        <div style="margin:10px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#090d1a;">
-          <canvas id="${canvasId}" width="960" height="540" style="width:100%; max-width:600px; aspect-ratio:16/9; display:block;"></canvas>
+        <div style="margin:10px 0; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#090d1a; max-width:360px;">
+          <canvas id="${canvasId}" width="960" height="540" style="width:100%; aspect-ratio:16/9; display:block;"></canvas>
           <div style="padding:8px 12px; display:flex; justify-content:space-between; align-items:center; background:var(--panel2); font-size:11px; gap:10px; flex-wrap:wrap;">
-            <span style="color:var(--accent); font-weight:700;">🎬 Font-Matched Video (${msg.videoSpec.fontName || 'Typography'})</span>
+            <span style="color:var(--accent); font-weight:700;">🎬 ${msg.videoSpec.fontName || 'Video'}</span>
             <div style="display:flex; gap:10px;">
               <button onclick="replayFontVideo('${canvasId}', ${idx})" style="background:none; border:none; color:var(--text); font-weight:600; cursor:pointer; font-size:11px;">▶️ Replay</button>
-              <button onclick="downloadFontVideoWebM('${canvasId}', ${idx})" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">⬇️ Download Video</button>
+              <button onclick="downloadFontVideoWebM('${canvasId}', ${idx})" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">⬇️ Download</button>
             </div>
           </div>
         </div>
@@ -2287,21 +2923,17 @@ function loadMessages() {
     }
 
     const cleanHTML = formatMarkdown(msg.text);
+    const likedClass = msg.feedback === 'up' ? 'active-feedback' : '';
+    const dislikedClass = msg.feedback === 'down' ? 'active-feedback' : '';
 
     div.innerHTML = `
+      <div class="msg-role-label">${isUser ? '👤 You' : '✨ NOVA AI'}</div>
       <div class="bubble">
         ${attachmentHTML}
         <div>${cleanHTML}</div>
         ${generatedImageHTML}
         ${generatedVideoHTML}
       </div>
-      ${isUser ? '' : `
-        <div style="display:flex; align-items:center; gap:12px; margin:4px 0 0 10px; font-size:11px; color:var(--muted); font-weight:600;">
-          <button onclick="copyProseTextByIndex(${idx})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;">📋 Copy</button>
-          <span>·</span>
-          <button class="btn-speaker-toggle" data-index="${idx}" onclick="handleSpeakerButtonClick(${idx})" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:0;">🔊 Listen</button>
-        </div>
-      `}
     `;
     messagesList.appendChild(div);
   });
@@ -2322,18 +2954,32 @@ async function send() {
   const currentChat = chats.find(c => c.id === currentChatId);
   if (!currentChat) return;
 
+  const isVideoUploadedNow = !!(
+    currentAttachment &&
+    ((currentAttachment.type && currentAttachment.type.startsWith('video/')) || currentAttachment.videoMeta)
+  );
+
+  const defaultPromptForAttachment = isVideoUploadedNow
+    ? 'اس ویڈیو کو مکمل اینالائز کرو: اس میں ہُکس، فونٹس، کیپشنز اور کوالٹی کی چھوٹی سے چھوٹی اور بڑی سے بڑی غلطیاں اور ان کو ٹھیک کرنے کا طریقہ ایک ہی چارٹ میں بتاؤ، کیا یہ ٹک ٹاک اور یوٹیوب پر اپلوڈ کرنے کے قابل ہے، کن لوگوں کے لیے سب سے بیسٹ ہے، اپلوڈ کرنے کا بہترین ٹائم، ٹاپک اور ہیش ٹیگز بتاؤ، اور اس طرح کی ایڈیٹنگ، فونٹس کے نام اور بیک گراؤنڈز کہاں سے ملیں گے یہ بھی مکمل بتاؤ۔'
+    : 'Analyzed file.';
+
   const userMsg = { 
     role: 'user', 
-    text: text || 'Analyzed file.', 
+    text: text || defaultPromptForAttachment, 
     attachment: currentAttachment ? currentAttachment.data : null,
+    attachmentPreviewUrl: currentAttachment ? (currentAttachment.previewUrl || null) : null,
+    attachmentPoster: currentAttachment ? (currentAttachment.posterFrame || null) : null,
+    videoFrames: currentAttachment ? (currentAttachment.videoFrames || null) : null,
+    videoMeta: currentAttachment ? (currentAttachment.videoMeta || null) : null,
     attachmentMimeType: currentAttachment ? currentAttachment.type : null,
     timestamp: Date.now()
   };
 
   currentChat.messages.push(userMsg);
   
-  if (currentChat.messages.length === 1 && text) {
-    currentChat.title = text.substring(0, 26) + (text.length > 26 ? '...' : '');
+  if (currentChat.messages.length === 1 && (text || isVideoUploadedNow)) {
+    const baseTitle = text || (currentAttachment?.name ? `🎬 ${currentAttachment.name}` : 'Video Analysis');
+    currentChat.title = baseTitle.substring(0, 26) + (baseTitle.length > 26 ? '...' : '');
   }
 
   saveChats();
@@ -2351,7 +2997,7 @@ async function send() {
   loader.innerHTML = `
     <div class="bubble" style="color:var(--muted); font-style:italic; display:flex; align-items:center; gap:8px;">
       <div style="width:12px; height:12px; border:2px solid var(--line); border-top:2px solid var(--accent); border-radius:50%; animation: spin 1s infinite linear;"></div>
-      <span id="ai-typing-status-text">NOVA AI is analyzing...</span>
+      <span id="ai-typing-status-text">${isVideoUploadedNow ? '🎬 ویڈیو کے فریمز، ہُکس، فونٹس، کیپشنز اور ٹک ٹاک/یوٹیوب معیار کو اینالائز کیا جا رہا ہے...' : 'NOVA AI is analyzing...'}</span>
     </div>
   `;
   messagesList.appendChild(loader);
@@ -2362,27 +3008,41 @@ async function send() {
 
   const lower = (text || '').toLowerCase();
   const hasImageAttachment = !!(attachmentData && attachmentData.type && attachmentData.type.startsWith('image/'));
+  const hasVideoAttachment = !!(
+    attachmentData &&
+    ((attachmentData.type && attachmentData.type.startsWith('video/')) || attachmentData.videoMeta)
+  );
+  const hasVideoInRecentChat = currentChat.messages.some(
+    (m) => (m.attachmentMimeType && m.attachmentMimeType.startsWith('video/')) || m.videoMeta
+  );
 
-  // 1. Detect Font-Aware Video Generation Request
+  // 1. Detect Font-Aware Video Generation Request (Only when no video/image is attached or being audited)
   const isFontVideoRequest =
-    !hasImageAttachment && (
+    !hasImageAttachment &&
+    !hasVideoAttachment &&
+    !hasVideoInRecentChat && (
       (lower.includes('text:') && (
         lower.includes('georgia') || lower.includes('serif') || lower.includes('sans') ||
         lower.includes('script') || lower.includes('bold') || lower.includes('regular') ||
         lower.includes('light') || lower.includes('formal') || lower.includes('elegant') ||
         lower.includes('playful') || lower.includes('font') || lower.includes('style')
       )) ||
-      lower.includes('font-aware video') ||
-      lower.includes('video generation') ||
-      lower.includes('create video') ||
-      lower.includes('generate video') ||
-      lower.includes('ویڈیو بناؤ') ||
-      lower.includes('video banao')
+      lower.includes('font-aware video')
     );
+
+  const isAnalysisOrVideoInquiry =
+    lower.includes('اینالائز') || lower.includes('analyze') || lower.includes('دیکھو') ||
+    lower.includes('مسئلہ') || lower.includes('غلطی') || lower.includes('mistake') || lower.includes('error') ||
+    lower.includes('ٹک ٹاک') || lower.includes('tiktok') || lower.includes('یوٹیوب') || lower.includes('youtube') ||
+    lower.includes('اپلوڈ') || lower.includes('upload') || lower.includes('ہیش ٹیگ') || lower.includes('hashtag') ||
+    lower.includes('فونٹ') || lower.includes('font') || lower.includes('کیپشن') || lower.includes('caption') ||
+    lower.includes('کہاں سے') || lower.includes('نام ہے') || lower.includes('ویڈیو') || lower.includes('video');
 
   // 2. Detect Intelligent Photo Editing Request (Whenever an image is uploaded with an edit instruction in Urdu/English)
   const isPhotoEditRequest =
-    hasImageAttachment && (
+    hasImageAttachment &&
+    !hasVideoAttachment &&
+    !isAnalysisOrVideoInquiry && (
       lower.includes('background') || lower.includes('بیک گراؤنڈ') || lower.includes('پس منظر') || lower.includes('bg') ||
       lower.includes('تبدیل') || lower.includes('change') || lower.includes('replace') || lower.includes('بدل') ||
       lower.includes('white') || lower.includes('سفید') || lower.includes('safed') ||
@@ -2395,12 +3055,15 @@ async function send() {
       lower.includes('resize') || lower.includes('move') || lower.includes('add') || lower.includes('شامل') ||
       lower.includes('color') || lower.includes('رنگ') || lower.includes('style') ||
       lower.includes('edit') || lower.includes('ایڈٹ') || lower.includes('modify') ||
-      lower.includes('کرو') || lower.includes('کر دو') || lower.includes('kar do') || lower.includes('karo')
+      lower.includes('کر دو') || lower.includes('kar do')
     );
 
-  // 3. Detect New Photo Generation Request (No uploaded image)
+  // 3. Detect New Photo Generation Request (No uploaded image or video)
   const isPhotoGenRequest = 
-    !hasImageAttachment && (
+    !hasImageAttachment &&
+    !hasVideoAttachment &&
+    !hasVideoInRecentChat &&
+    !isAnalysisOrVideoInquiry && (
       lower.includes('photo banao') || lower.includes('tasveer banao') || lower.includes('تصویر بناؤ') ||
       lower.includes('generate photo') || lower.includes('generate image') || lower.includes('create photo') || lower.includes('draw photo') ||
       lower.includes('image featuring') || lower.includes('high-resolution image') || lower.includes('high resolution image') ||
@@ -2500,7 +3163,45 @@ async function send() {
       }
     }
 
+    const langNames = {
+      'ur-PK': 'Urdu',
+      'en-US': 'English',
+      'zh-CN': 'Chinese',
+      'ja-JP': 'Japanese',
+      'ar-SA': 'Arabic',
+      'hi-IN': 'Hindi',
+      'es-ES': 'Spanish',
+      'fr-FR': 'French',
+      'de-DE': 'German',
+      'pt-PT': 'Portuguese',
+      'ru-RU': 'Russian',
+      'th-TH': 'Thai',
+      'vi-VN': 'Vietnamese',
+      'id-ID': 'Indonesian',
+      'tl-PH': 'Filipino',
+      'ko-KR': 'Korean',
+      'tr-TR': 'Turkish',
+      'fa-IR': 'Persian',
+      'af-ZA': 'Afrikaans',
+      'el-GR': 'Greek'
+    };
+    const selectedLangCode = document.getElementById('micLanguageSelector')?.value || 'ur-PK';
+    const selectedLangName = langNames[selectedLangCode] || 'Urdu';
+
     const selectedModel = currentChat.model || 'gemini-3.8-flash';
+
+    const latestVideoMsg = [...currentChat.messages]
+      .reverse()
+      .find((m) => m.videoMeta || (m.attachmentMimeType && m.attachmentMimeType.startsWith('video/')));
+
+    const activeVideoFrames =
+      (attachmentData && attachmentData.videoFrames) ||
+      (latestVideoMsg && latestVideoMsg.videoFrames) ||
+      null;
+    const activeVideoMeta =
+      (attachmentData && attachmentData.videoMeta) ||
+      (latestVideoMsg && latestVideoMsg.videoMeta) ||
+      null;
 
     const res = await fetch('/api/chat', {
       method: 'POST',
@@ -2512,7 +3213,10 @@ async function send() {
         model: selectedModel,
         image: (attachmentData && attachmentData.type !== 'url') ? attachmentData.data : null,
         mimeType: (attachmentData && attachmentData.type !== 'url') ? attachmentData.type : null,
+        videoFrames: activeVideoFrames,
+        videoMeta: activeVideoMeta,
         attachedUrl: (attachmentData && attachmentData.type === 'url') ? attachmentData.data : null,
+        language: selectedLangName,
         history: currentChat.messages
       })
     });
@@ -2609,206 +3313,362 @@ async function checkMicrophonePermission() {
   return 'prompt';
 }
 
+// ============================================================================
+// COMPLETE WEB SPEECH API VOICE-TO-TEXT ENGINE (REAL-TIME INTERIM + FINAL)
+// ============================================================================
 let dictationBaseText = '';
+let waveformAnimId = null;
+let waveformPhase = 0;
 
-async function toggleVoiceDictation() {
-  const btn = document.getElementById('btn-mic-dictate');
+// 1. Search bar को सही तरीके से खोजे (Targets "Ask NOVA anything..." textarea & all search inputs)
+function findSearchInput() {
+  const searchInput = document.querySelector(
+    '#input, textarea[placeholder*="Ask"], textarea[placeholder*="ask"], [placeholder*="Ask"], [placeholder*="ask"], input[type="text"]:not(#modal-link-input), input[type="search"], #search, .search-input, textarea'
+  );
+  if (!searchInput) {
+    console.error('[NOVA Mic] Search input field not found in DOM!');
+  }
+  return searchInput;
+}
 
-  if (dictationActive) {
+// 2. Microphone button को सही तरीके से खोजे
+function findMicButton() {
+  return (
+    document.getElementById('btn-mic-dictate') ||
+    document.querySelector('button[title*="Microphone" i], button[aria-label*="Microphone" i], #mic-btn, .mic-btn') ||
+    Array.from(document.querySelectorAll('button')).find((b) => {
+      const txt = (b.innerText || b.textContent || '').trim();
+      return txt.includes('🎙') || txt.includes('🎤');
+    })
+  );
+}
+
+// 3. Search bar में real-time text insert करे
+function updateSearchBar(text) {
+  const searchInput = findSearchInput();
+  if (!searchInput) return;
+
+  const proto =
+    searchInput.tagName === 'TEXTAREA'
+      ? window.HTMLTextAreaElement.prototype
+      : window.HTMLInputElement.prototype;
+  const nativeSetter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+
+  if (nativeSetter) {
+    nativeSetter.call(searchInput, text);
+  } else {
+    searchInput.value = text;
+  }
+
+  const isRTL = /[\u0600-\u06FF]/.test(text);
+  searchInput.style.direction = isRTL ? 'rtl' : 'ltr';
+  searchInput.style.textAlign = isRTL ? 'right' : 'left';
+
+  searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+  searchInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+  if (typeof adjustTextareaHeight === 'function') {
+    adjustTextareaHeight(searchInput);
+  }
+  if (typeof updateEmptyStateVisibility === 'function') {
+    updateEmptyStateVisibility();
+  }
+
+  console.log('[NOVA Mic] ✅ Search bar updated:', text);
+}
+
+// 4. Waveform Canvas Animation
+function drawWaveform() {
+  const canvas = document.getElementById('waveformCanvas');
+  if (!canvas || !dictationActive) return;
+
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  waveformPhase += 0.22;
+  const bars = 12;
+  const spacing = w / bars;
+  const barWidth = 3;
+
+  for (let i = 0; i < bars; i++) {
+    const wave = Math.abs(Math.sin(waveformPhase + i * 0.6));
+    const barHeight = Math.max(4, Math.min(h - 4, wave * (h - 6) + 4));
+    const x = i * spacing + (spacing - barWidth) / 2;
+    const y = (h - barHeight) / 2;
+
+    ctx.fillStyle = '#7c5cff';
+    ctx.fillRect(x, y, barWidth, barHeight);
+  }
+
+  waveformAnimId = requestAnimationFrame(drawWaveform);
+}
+
+let fallbackInterval = null;
+
+// 5. Automatic Live Audio Stream Transcription (Used when iframe aborts Web Speech API)
+async function startIframeAudioStream(lang) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     stopVoiceDictation();
-    return;
-  }
-
-  hideMicErrorBanner();
-
-  const selectedLang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
-  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-  // PRIMARY ENGINE: 100% FREE Browser Web Speech API (Works on Android Chrome, Desktop Chrome, Edge, Safari — NO API KEY REQUIRED & NO MediaRecorder mic lock conflict!)
-  if (Speech) {
-    try {
-      const txtarea = document.getElementById('input');
-      dictationBaseText = txtarea ? txtarea.value.trim() : '';
-      if (dictationBaseText) dictationBaseText += ' ';
-
-      recognition = new Speech();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = selectedLang;
-
-      dictationActive = true;
-      speechRecognizedInSession = false;
-      if (btn) btn.classList.add('mic-pulsing');
-
-      showToast(`🎙️ مائیک آن ہے (${selectedLang}) — اب بولیں، آپ کی آواز فوری ٹیکسٹ میں لکھتی جائے گی!`);
-
-      recognition.onresult = (e) => {
-        let interimTranscript = '';
-        for (let i = e.resultIndex; i < e.results.length; ++i) {
-          const chunk = e.results[i][0].transcript;
-          if (e.results[i].isFinal) {
-            dictationBaseText += chunk.trim() + ' ';
-            speechRecognizedInSession = true;
-          } else {
-            interimTranscript += chunk;
-            speechRecognizedInSession = true;
-          }
-        }
-        if (txtarea) {
-          txtarea.value = (dictationBaseText + interimTranscript).trim();
-          adjustTextareaHeight(txtarea);
-          updateEmptyStateVisibility();
-        }
-      };
-
-      recognition.onerror = (e) => {
-        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          dictationActive = false;
-          if (btn) btn.classList.remove('mic-pulsing');
-          showMicErrorBanner('⚠️ Permission Denied: براہ کرم براؤزر کے ایڈریس بار (🔒) میں جا کر Microphone کو Allow کریں۔');
-        }
-      };
-
-      recognition.onend = () => {
-        // Keep listening continuously on Android Chrome until user taps mic to stop
-        if (dictationActive && recognition) {
-          try {
-            recognition.start();
-          } catch (restartErr) {}
-        }
-      };
-
-      recognition.start();
-      return;
-    } catch (speechErr) {
-      console.warn('Web Speech start fallback:', speechErr);
-    }
-  }
-
-  // FALLBACK ENGINE (Only for browsers without Web Speech API):
-  const permState = await checkMicrophonePermission();
-  if (permState === 'denied' || permState === 'unsupported') {
     return;
   }
 
   try {
     activeMicStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      }
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
     });
-  } catch (permErr) {
-    const errName = permErr?.name || '';
-    const errMsg = permErr?.message || '';
-    if (errName === 'NotAllowedError' || errName === 'PermissionDeniedError' || errMsg.toLowerCase().includes('permission denied')) {
-      showMicErrorBanner('⚠️ Permission Denied: مائیکروفون کی اجازت نہیں دی گئی۔ براہ کرم براؤزر سیٹنگز میں مائیک کو Allow کریں۔');
-    } else {
-      showMicErrorBanner('⚠️ مائیکروفون چلانے میں مسئلہ پیش آیا۔');
+    dictationActive = true;
+
+    const micBtn = findMicButton();
+    const canvas = document.getElementById('waveformCanvas');
+    if (micBtn) micBtn.classList.add('mic-pulsing');
+    if (canvas) {
+      canvas.style.display = 'block';
+      if (waveformAnimId) cancelAnimationFrame(waveformAnimId);
+      drawWaveform();
     }
-    dictationActive = false;
-    if (btn) btn.classList.remove('mic-pulsing');
-    return;
-  }
 
-  speechRecognizedInSession = false;
-  dictationActive = true;
-  if (btn) btn.classList.add('mic-pulsing');
-  showToast(`🎙️ مائیک آن ہے (${selectedLang}) - اب بولیں!`);
-  startDirectMediaRecorderWithStream(btn, activeMicStream);
-}
-
-function startDirectMediaRecorderWithStream(btn, stream) {
-  try {
-    recordedAudioChunks = [];
     let mimeType = 'audio/webm';
     if (typeof MediaRecorder !== 'undefined') {
-      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-        mimeType = 'audio/webm;codecs=opus';
-      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-        mimeType = 'audio/webm';
-      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-        mimeType = 'audio/mp4';
-      }
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+      else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
     }
 
-    mediaRecorderInstance = new MediaRecorder(stream, { mimeType });
+    const recordSegment = () => {
+      if (!dictationActive || !activeMicStream) return;
+      const chunks = [];
+      const rec = new MediaRecorder(activeMicStream, { mimeType });
+      mediaRecorderInstance = rec;
 
-    mediaRecorderInstance.ondataavailable = e => {
-      if (e.data && e.data.size > 0) {
-        recordedAudioChunks.push(e.data);
-      }
-    };
+      rec.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
 
-    mediaRecorderInstance.onstop = async () => {
-      if (speechRecognizedInSession) {
-        showToast('✅ آواز ٹیکسٹ میں تبدیل ہو گئی!');
-        return;
-      }
+      rec.onstop = () => {
+        if (chunks.length === 0) return;
+        const blob = new Blob(chunks, { type: mimeType });
+        if (blob.size < 800) return;
 
-      const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
-      if (audioBlob.size > 500) {
-        showToast('⏳ آپ کی آواز کو الفاظ میں تبدیل کیا جا رہا ہے...');
         const reader = new FileReader();
-        reader.onload = async (e) => {
-          const base64Data = e.target.result;
+        reader.onload = async (ev) => {
           try {
             const res = await fetch('/api/transcribe', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                audioData: base64Data,
+                audioData: ev.target.result,
                 mimeType: mimeType.split(';')[0],
-                language: localStorage.getItem('nova_speech_lang') || 'ur-PK'
+                language: lang
               })
             });
             const data = await res.json();
-            if (data.transcript) {
-              const txtarea = document.getElementById('input');
-              txtarea.value = (txtarea.value + ' ' + data.transcript).trim();
-              adjustTextareaHeight(txtarea);
-              updateEmptyStateVisibility();
-              showToast('✅ آپ کی آواز میسج میں لکھ دی گئی ہے!');
-            } else {
-              showToast('ℹ️ براہ کرم وائس ٹو ٹیکسٹ کے لیے Chrome یا Edge براؤزر استعمال کریں۔');
+            if (data && data.transcript && data.transcript.trim()) {
+              dictationBaseText = (dictationBaseText + ' ' + data.transcript.trim()).trim() + ' ';
+              updateSearchBar(dictationBaseText.trim());
             }
           } catch (err) {
-            showToast('ℹ️ براہ کرم وائس ٹو ٹیکسٹ کے لیے Chrome یا Edge براؤزر استعمال کریں۔');
+            console.log('[NOVA Mic] Transcribe request info:', err.message);
           }
         };
-        reader.readAsDataURL(audioBlob);
-      }
+        reader.readAsDataURL(blob);
+      };
+
+      rec.start();
     };
 
-    mediaRecorderInstance.start(250);
-  } catch (e) {
-    console.error('MediaRecorder error:', e);
+    recordSegment();
+
+    if (fallbackInterval) clearInterval(fallbackInterval);
+    fallbackInterval = setInterval(() => {
+      if (!dictationActive) return;
+      if (mediaRecorderInstance && mediaRecorderInstance.state === 'recording') {
+        try {
+          mediaRecorderInstance.stop();
+        } catch (e) {}
+        recordSegment();
+      }
+    }, 2200);
+
+    console.log('[NOVA Mic] 🎙️ Live audio stream active — speak now!');
+  } catch (err) {
+    console.log('[NOVA Mic] Microphone access info:', err.message);
+    stopVoiceDictation();
   }
 }
 
+// 6. Voice Recognition Setup & Toggle
+function startTranscription() {
+  const searchInput = findSearchInput();
+  const micBtn = findMicButton();
+  const canvas = document.getElementById('waveformCanvas');
+
+  if (dictationActive) {
+    console.log('[NOVA Mic] ⏹ Stopping voice recognition...');
+    stopVoiceDictation();
+    return;
+  }
+
+  dictationBaseText = searchInput ? (searchInput.value || '').trim() : '';
+  if (dictationBaseText) dictationBaseText += ' ';
+
+  const selectedLang =
+    document.getElementById('micLanguageSelector')?.value ||
+    localStorage.getItem('nova_speech_lang') ||
+    'ur-PK';
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    startIframeAudioStream(selectedLang);
+    return;
+  }
+
+  if (recognition) {
+    try {
+      recognition.onend = null;
+      recognition.onerror = null;
+      recognition.onresult = null;
+      recognition.abort();
+    } catch (e) {}
+    recognition = null;
+  }
+
+  const rec = new SpeechRecognition();
+  recognition = rec;
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  rec.lang = selectedLang;
+
+  dictationActive = true;
+
+  rec.onstart = () => {
+    console.log('[NOVA Mic] 🎙️ Listening started! Language:', rec.lang);
+    if (micBtn) micBtn.classList.add('mic-pulsing');
+    if (canvas) {
+      canvas.style.display = 'block';
+      if (waveformAnimId) cancelAnimationFrame(waveformAnimId);
+      drawWaveform();
+    }
+  };
+
+  // Interim और final दोनों results handle करे
+  rec.onresult = (event) => {
+    let interimTranscript = '';
+    let finalTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcriptPiece = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcriptPiece.trim() + ' ';
+        console.log('[NOVA Mic] 🗣️ Final result:', transcriptPiece);
+      } else {
+        interimTranscript += transcriptPiece;
+        console.log('[NOVA Mic] 💬 Interim result:', transcriptPiece);
+      }
+    }
+
+    if (finalTranscript) {
+      dictationBaseText += finalTranscript;
+    }
+
+    const combinedText = (dictationBaseText + interimTranscript).trim();
+    updateSearchBar(combinedText);
+  };
+
+  // Handle errors cleanly without triggering console.error crash banners
+  rec.onerror = (event) => {
+    const errCode = event ? event.error : 'unknown';
+    console.log('[NOVA Mic] Speech recognition notice:', errCode);
+
+    if (errCode === 'language-not-supported' && rec.lang !== 'en-US') {
+      rec.lang = 'en-US';
+      return;
+    }
+
+    // If browser/iframe aborts SpeechRecognition, seamlessly switch to live audio stream transcription
+    if (errCode === 'aborted' || errCode === 'not-allowed' || errCode === 'service-not-allowed' || errCode === 'network') {
+      if (recognition === rec) {
+        recognition = null;
+        try {
+          rec.onend = null;
+          rec.stop();
+        } catch (e) {}
+      }
+      startIframeAudioStream(selectedLang);
+    }
+  };
+
+  rec.onend = () => {
+    if (dictationActive && recognition === rec) {
+      setTimeout(() => {
+        if (dictationActive && recognition === rec) {
+          try {
+            rec.start();
+          } catch (err) {}
+        }
+      }, 150);
+    }
+  };
+
+  try {
+    rec.start();
+  } catch (err) {
+    startIframeAudioStream(selectedLang);
+  }
+}
+
+function toggleVoiceDictation() {
+  startTranscription();
+}
+
 function stopVoiceDictation() {
-  const btn = document.getElementById('btn-mic-dictate');
   dictationActive = false;
-  if (btn) btn.classList.remove('mic-pulsing');
+
+  if (fallbackInterval) {
+    clearInterval(fallbackInterval);
+    fallbackInterval = null;
+  }
+
+  const micBtn = findMicButton();
+  const canvas = document.getElementById('waveformCanvas');
+
+  if (micBtn) micBtn.classList.remove('mic-pulsing');
+
+  if (waveformAnimId) {
+    cancelAnimationFrame(waveformAnimId);
+    waveformAnimId = null;
+  }
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.display = 'none';
+  }
 
   if (recognition) {
     const activeRec = recognition;
     recognition = null;
-    try { activeRec.stop(); } catch (e) {}
-    showToast('✅ آواز ٹیکسٹ میں تبدیل ہو گئی!');
+    try {
+      activeRec.onend = null;
+      activeRec.onerror = null;
+      activeRec.stop();
+    } catch (e) {}
   }
 
   if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
-    try { mediaRecorderInstance.stop(); } catch (e) {}
+    try {
+      mediaRecorderInstance.stop();
+    } catch (e) {}
   }
 
   if (activeMicStream) {
     try {
-      activeMicStream.getTracks().forEach(track => track.stop());
+      activeMicStream.getTracks().forEach((track) => track.stop());
     } catch (e) {}
     activeMicStream = null;
   }
+
+  console.log('[NOVA Mic] ✅ Voice recognition stopped. Text saved.');
 }
 
 // ============================================================================
@@ -3091,18 +3951,25 @@ window.addEventListener('DOMContentLoaded', () => {
     document.body.dataset.theme = 'dark';
   }
 
-  const savedMicLang = localStorage.getItem('nova_speech_lang');
-  if (savedMicLang) {
-    if (document.getElementById('micLanguageSelector')) {
-      document.getElementById('micLanguageSelector').value = savedMicLang;
-    }
-    if (document.getElementById('modalMicLanguageSelector')) {
-      document.getElementById('modalMicLanguageSelector').value = savedMicLang;
-    }
+  const savedMicLang = localStorage.getItem('nova_speech_lang') || 'ur-PK';
+  if (document.getElementById('micLanguageSelector')) {
+    document.getElementById('micLanguageSelector').value = savedMicLang;
+  }
+  if (document.getElementById('modalMicLanguageSelector')) {
+    document.getElementById('modalMicLanguageSelector').value = savedMicLang;
+  }
+  applyLanguageDirection(savedMicLang);
+
+  const initialSpeechRate = getSpeechSynthesisRate().toFixed(1);
+  if (document.getElementById('modalSpeechRateSlider')) {
+    document.getElementById('modalSpeechRateSlider').value = initialSpeechRate;
+  }
+  if (document.getElementById('speechRateValueLabel')) {
+    document.getElementById('speechRateValueLabel').innerText = `${initialSpeechRate}x`;
   }
 
   if (chats.length === 0) {
-    newChat();
+    newChat(true); // Open the Home Page by default on initial launch
   } else if (!currentChatId || !chats.find(c => c.id === currentChatId)) {
     currentChatId = chats[chats.length - 1].id;
     saveChats();

@@ -40,11 +40,21 @@ IMPORTANT RULES:
 ✓ Don't modify what user didn't ask for`;
 
 function getServerApiKey() {
-  const key = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '').trim();
-  if (key === 'MY_GOOGLE_API_KEY' || key === 'MY_GEMINI_API_KEY' || key === 'dummy') {
-    return '';
+  const candidates = [
+    process.env.GEMINI_API_KEY,
+    process.env.GOOGLE_API_KEY,
+    process.env.API_KEY,
+    process.env.VITE_GEMINI_API_KEY
+  ];
+  for (const c of candidates) {
+    if (c && typeof c === 'string') {
+      const t = c.trim();
+      if (t.length > 10 && t !== 'MY_GOOGLE_API_KEY' && t !== 'MY_GEMINI_API_KEY' && t !== 'dummy') {
+        return t;
+      }
+    }
   }
-  return key;
+  return '';
 }
 
 function parsePhotoEditSpec(rawPrompt) {
