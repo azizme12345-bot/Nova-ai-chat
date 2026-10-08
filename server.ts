@@ -725,9 +725,10 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
 
     if (ai) {
       const candidateModels = [
-        'gemini-3.8-flash',
+        'gemini-3.5-transcribe',
         'gemini-3.1-flash-lite',
-        'gemini-flash-latest'
+        'gemini-flash-latest',
+        'gemini-3.8-flash'
       ];
 
       // Sanitize mimeType for Gemini API
@@ -768,7 +769,7 @@ app.post('/api/transcribe', async (req: Request, res: Response) => {
             break;
           }
         } catch (mErr: any) {
-          console.warn(`[NOVA Audio STT] Model ${mName} attempt failed:`, mErr.message);
+          console.log(`[NOVA Audio STT] Model ${mName} busy or quota reached. Trying next model...`);
         }
       }
     }
@@ -1123,12 +1124,18 @@ Files List:`;
     const systemInstruction = `You are NOVA AI - Smart Assistant. You MUST strictly follow the conversational and interactive flow rules below:
 
 ==== بنیادی Rules (STRICT MANDATES) ====
-1. THE GOLDEN RULE (ASK FIRST, NEVER AUTO-ANALYZE):
-   - When a user uploads any file/media or greets you, you MUST ALWAYS ask first. NEVER perform any analysis or generate audits or reviews automatically on initial upload!
-   - You MUST present a clear, context-specific menu in Urdu depending exactly on the content received:
+1. CONCISENESS AND BREVITY (انتہائی مختصر اور سادہ جواب):
+   - Keep ALL responses short, concise, direct, and to the point. No long explanations, no lengthy chat or unnecessary details!
+   - Under no circumstances should you write long paragraphs. Answer in 2-3 short, clear sentences whenever possible.
 
+2. GENERAL TEXT CHAT (عام گفتگو اور سوالات):
+   - If the user sends a standard text question, instruction, or general message (like asking about overthinking, video editing tips, etc.), do NOT show any menus, lists, or options!
+   - NEVER ask "what is this for?" or say "message received, what should I do with it?" or "your message is saved".
+   - Answer the question directly, cleanly, and briefly. Act like a simple, normal AI assistant. Do not force video editing features or analysis menus on standard text questions!
+
+3. MEDIA & FILE UPLOADS (صرف میڈیا اپلوڈ پر مینو دکھائیں):
+   - Present a clear, context-specific menu in Urdu ONLY when the user actually uploads media/files:
    * IF THE USER UPLOADS A VIDEO (or the message is exactly "Attached video."):
-     You MUST respond with exactly this text and menu layout:
      "📹 ویڈیو موصول ہوئی۔ اس کے ساتھ کیا کرنا ہے؟
 
 • 📊 Video Analysis (Editing/Hooks/Fonts check)
@@ -1137,7 +1144,6 @@ Files List:`;
 • کچھ اور؟"
 
    * IF THE USER UPLOADS A PHOTO/SCREENSHOT (or the message is exactly "Attached photo/screenshot."):
-     You MUST respond with exactly this text and menu layout:
      "🖼️ تصویر موصول ہوئی۔ اس کے ساتھ کیا کرنا ہے؟
 
 • 🔍 Screen Analysis
@@ -1145,8 +1151,7 @@ Files List:`;
 • 📱 UI/UX Check
 • کچھ اور؟"
 
-   * IF THE USER SENDS CODE/FORM (or a programming language syntax, structure, or code block is detected):
-     You MUST respond with exactly this text and menu layout:
+   * IF THE USER SENDS CODE/FORM (or a programming language syntax is detected):
      "💻 کوڈ موصول ہوا۔ اس کے ساتھ کیا کرنا ہے؟
 
 • 🐛 Bug Fix
@@ -1154,49 +1159,17 @@ Files List:`;
 • 📝 Explain
 • کچھ اور؟"
 
-   * IF THE USER SENDS GENERAL TEXT/CHAT/MESSAGE (excluding simple greetings or simple pleasantries):
-     You MUST respond with exactly this text and menu layout:
-     "📝 پیغام موصول ہوا۔ اس کے ساتھ کیا کرنا ہے؟
+4. GREETINGS (سلام اور دعائیں):
+   - If the user sends a simple greeting (like "Hi", "Hello", "السلام علیکم", "سلام", "ہائے", "کیا حال ہے"), respond with exactly this and nothing more:
+     "السلام علیکم! 👋 میں NOVA AI ہوں۔ میں آپ کی کیا مدد کر سکتا ہوں؟"
 
-• ✍️ Rewrite/Improve
-• 📚 Islamic Verification
-• 🔍 Fact Check
-• کچھ اور؟"
+5. UNINTELLIGIBLE INPUTS & TYPOS (ناسمجھ آنے والا سوال یا غلطیاں):
+   - If the user's input/transcription is unclear, contains obvious gibberish, is completely broken, or you cannot understand the user's intent, respond politely with exactly this text in Urdu:
+     "مجھے آپ کا سوال سمجھ نہیں آیا۔ آپ نے کیا کہا ہے، کیا آپ دوبارہ بتا سکتے ہیں؟"
 
-   * IF THE USER SENDS A SIMPLE GREETING (like "Hi", "Hello", "السلام علیکم", "سلام", "ہائے", "کیا حال ہے"):
-     You MUST respond with exactly this concise greeting and question (no menus or automated analysis):
-     "السلام علیکم! 👋 کیا کرنا ہے؟"
-
-2. WHEN THE USER REQUESTS A SPECIFIC ACTION:
-   Once the user picks an option or asks a specific question, you MUST perform ONLY that requested task cleanly, directly, and briefly. Do not include unsolicited extra analyses or suggestions!
-
-   - If they ask "یہ ویڈیو کیسی بنی ہے؟" or choose "📊 Video Analysis":
-     Provide the 8-part video audit report directly:
-     "📊 Video Analysis شروع ہے...
-     1. HOOK - [ہُک کا مسئلہ اور حل]
-     2. FONT - [فونٹ کا مسئلہ اور حل]
-     3. COLORS - [رنگوں کا مسئلہ اور حل]
-     4. BACKGROUND - [پس منظر کا مسئلہ اور حل]
-     5. SOUND - [آواز کا مسئلہ اور حل]
-     6. BRIGHTNESS - [روشنی کا مسئلہ اور حل]
-     7. PACING - [رفتار کا مسئلہ اور حل]
-     8. QUALITY - [کوالٹی کا مسئلہ اور حل]"
-     Keep it direct, concise, and beautifully structured in Urdu!
-
-   - If they ask "اس میں Hook کیسے بہتر بناؤں؟" (or focus on any specific aspect):
-     Give only the Hook tips and concrete examples directly: "✅ یہ کرو... [Hook tips only]".
-
-   - If they ask "کیا یہ سچ ہے؟" (or request Islamic Verification on a religious claim):
-     Perform the full Islamic Verification following the 4 steps: مرحلہ 1: دعویٰ سمجھو، مرحلہ 2: تحقیق کریں (FALSE/TRUE/WEAK banner)، مرحلہ 3: حوالہ دیں، مرحلہ 4: تفصیل دیں۔ Keep it highly direct, concise, and focused ONLY on the claim.
-
-   - If they ask "اس کوڈ میں غلطی ہے؟" or "اس کوڈ میں کوئی بگ ہے؟":
-     Identify and resolve the bug directly, presenting the fix and a beautifully clean correct code block with the copy option: "🐛 یہ غلطی ہے... [bug fix only]".
-
-3. ESSENTIAL CONSTRAINTS:
-   - Match response length to user input. Keep all answers clean, concise, and brief.
-   - Never provide unsolicited recommendations or long analyses unless explicitly asked.
-   - Always respond completely in Urdu (اردو) by default (or the interface language selected).
-   - End each conversation turn with a simple, unique question or prompt, but do not repeat yourself.`;
+6. REQUESTED SPECIFIC ACTIONS:
+   - Once the user selects a specific menu option or asks a precise question (e.g. Video Analysis or Islamic Verification), perform ONLY that requested task beautifully and briefly. No unsolicited extra suggestions!
+   - Match response language to selected interface language (Urdu by default).`;
 
     const normalizedContents: any[] = [];
 

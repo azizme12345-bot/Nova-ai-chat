@@ -568,6 +568,24 @@ body.is-standalone-pwa .website-only-logo {
 
         <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
           <div>
+            <div style="font-size:13px; font-weight:700;">🔊 Auto Voice Feedback (آٹو آواز کا جواب)</div>
+            <div style="font-size:11px; color:var(--muted);">Automatically speak out AI responses when received</div>
+          </div>
+          <label style="display:inline-flex; align-items:center; cursor:pointer; position:relative;">
+            <input type="checkbox" id="autoVoiceFeedbackCheckbox" onchange="toggleAutoVoiceFeedback(this.checked)" style="width:20px; height:20px; accent-color:var(--accent);">
+          </label>
+        </div>
+
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px;">
+          <label style="font-size:12px; font-weight:700; display:block; margin-bottom:6px; color:var(--accent);">🎙️ Speaker Voice (آواز کا کردار):</label>
+          <select id="modalVoiceGenderSelector" onchange="saveVoiceGender(this.value)" style="width:100%; background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:10px; font-size:13px; outline:none;">
+            <option value="female" selected>👧 Female Voice - لڑکی کی آواز (Natural)</option>
+            <option value="male">👦 Male Voice - لڑکے کی آواز (Natural)</option>
+          </select>
+        </div>
+
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
             <div style="font-size:13px; font-weight:700;">◐ Dark / Light Theme</div>
             <div style="font-size:11px; color:var(--muted);">Switch app appearance</div>
           </div>
@@ -589,6 +607,38 @@ body.is-standalone-pwa .website-only-logo {
         <button onclick="triggerPwaInstall()" id="settings-pwa-install-btn" class="side-btn" style="background:var(--accent); color:#ffffff; justify-content:center; font-weight:700;">
           <span>📲</span> <span>Install NOVA AI App (PWA)</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HTML DESIGN PREVIEW MODAL -->
+  <div class="modal-overlay" id="designPreviewModal" style="z-index: 1000;">
+    <div class="modal-card" style="max-width: 95vw; width: 1200px; height: 90vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; background: var(--bg); border: 1px solid var(--line);">
+      <!-- Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel2);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">🎨</span>
+          <div>
+            <h3 style="margin: 0; font-size: 14px; font-weight: 800; color: var(--text);">NOVA UI Design Live Preview</h3>
+            <span style="font-size: 11px; color: var(--muted); font-weight: 600;">مکمل فعال اور ورکنگ ڈیزائن کا لائیو پریویو</span>
+          </div>
+        </div>
+        <!-- Device Toggles -->
+        <div style="display: flex; gap: 6px; background: var(--panel); border: 1px solid var(--line); padding: 4px; border-radius: 8px;">
+          <button id="btn-prev-mobile" onclick="setPreviewDevice('mobile')" style="border: none; background: none; color: var(--text); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">📱 Mobile</button>
+          <button id="btn-prev-tablet" onclick="setPreviewDevice('tablet')" style="border: none; background: none; color: var(--text); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">📟 Tablet</button>
+          <button id="btn-prev-desktop" onclick="setPreviewDevice('desktop')" style="border: none; background: var(--accent); color: white; padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">💻 Desktop</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="btn-prev-download" class="side-btn" style="background: var(--accent); color: white; padding: 8px 14px; font-size: 12px; font-weight: 700; border-radius: 8px;">📥 Download HTML</button>
+          <button onclick="closeDesignPreviewModal()" class="icon-btn" style="width: 36px; height: 36px;">✕</button>
+        </div>
+      </div>
+      <!-- Frame Container -->
+      <div style="flex: 1; background: #0c0f1d; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: hidden; position: relative;">
+        <div id="previewFrameWrapper" style="width: 100%; height: 100%; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center;">
+          <iframe id="designPreviewIframe" style="width: 100%; height: 100%; border: none; background: white; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: block;" sandbox="allow-scripts allow-modals allow-same-origin"></iframe>
+        </div>
       </div>
     </div>
   </div>
@@ -958,8 +1008,6 @@ Try کر کے بتا!</pre>
     </div>
   </main>
 </div>
-
-<script src="/javascript-voice-section.js"></script>
 
 <script>
 let chats = [];
@@ -1569,6 +1617,16 @@ function updateSpeechRate(val) {
   }
 }
 
+function toggleAutoVoiceFeedback(checked) {
+  localStorage.setItem('nova_auto_voice', checked ? 'true' : 'false');
+  showToast(checked ? '✓ آٹو آواز کا جواب فعال کر دیا گیا (Auto Voice On)' : 'آٹو آواز کا جواب بند کر دیا گیا (Auto Voice Off)');
+}
+
+function saveVoiceGender(val) {
+  localStorage.setItem('nova_voice_gender', val);
+  showToast(val === 'female' ? '👧 لڑکی کی آواز منتخب کر لی گئی (Female Voice)' : '👦 لڑکے کی آواز منتخب کر لی گئی (Male Voice)');
+}
+
 function openSettingsModal() {
   const sideModel = document.getElementById('modelSelector');
   const modalModel = document.getElementById('modalModelSelector');
@@ -1583,6 +1641,14 @@ function openSettingsModal() {
   const rateLabel = document.getElementById('speechRateValueLabel');
   if (rateSlider) rateSlider.value = savedRate;
   if (rateLabel) rateLabel.innerText = `${savedRate}x`;
+
+  const savedAutoVoice = localStorage.getItem('nova_auto_voice') === 'true';
+  const autoVoiceCheckbox = document.getElementById('autoVoiceFeedbackCheckbox');
+  if (autoVoiceCheckbox) autoVoiceCheckbox.checked = savedAutoVoice;
+
+  const savedVoiceGender = localStorage.getItem('nova_voice_gender') || 'female';
+  const voiceGenderSelector = document.getElementById('modalVoiceGenderSelector');
+  if (voiceGenderSelector) voiceGenderSelector.value = savedVoiceGender;
 
   document.getElementById('settingsModal').classList.add('active');
   closeSidebar();
@@ -1742,6 +1808,25 @@ function submitHomeSuggestion(topic) {
   send();
 }
 
+function submitMenuSelection(topic) {
+  const inputEl = document.getElementById('input');
+  if (!inputEl) return;
+
+  const currentChat = chats.find(c => c.id === currentChatId);
+  if (currentChat) {
+    currentChat.isBlankNewChat = false;
+  }
+
+  // Clean the topic name (remove • and emojis if desired, but we can also just clean the bullet prefix)
+  let cleanTopic = topic.replace(/^[•\-\*\s]+/, '').trim();
+
+  inputEl.value = cleanTopic;
+  adjustTextareaHeight(inputEl);
+  updateEmptyStateVisibility();
+  inputEl.focus();
+  send();
+}
+
 function saveChats() {
   try {
     localStorage.setItem('nova_current_chat_id', currentChatId || '');
@@ -1890,7 +1975,6 @@ function deleteChatSession(e, id) {
   renderHistory();
   loadMessages();
 }
-
 function formatMarkdown(text) {
   if (!text) return '';
   let html = text
@@ -1899,14 +1983,27 @@ function formatMarkdown(text) {
     .replace(/>/g, '&gt;');
 
   // Multi-line code blocks with copy & download buttons
-  html = html.replace(/```([a-zA-Z0-9_\-#+]*)\n([\s\S]*?)\n```/g, (match, lang, code) => {
+  html = html.replace(/```([a-zA-Z0-9_\-#+]*)\s*\r?\n([\s\S]*?)\r?\n\s*```/g, (match, lang, code) => {
     const id = 'code_' + Math.floor(Math.random() * 1000000);
     const displayLang = lang || 'code';
+    const displayLangLower = displayLang.toLowerCase();
+    const codeTrimmedLower = code.trim().toLowerCase();
+    
+    const isHtml = displayLangLower === 'html' || 
+                   displayLangLower === 'xml' || 
+                   displayLangLower === 'svg' || 
+                   codeTrimmedLower.startsWith('&lt;!doctype html') ||
+                   codeTrimmedLower.startsWith('&lt;html') ||
+                   codeTrimmedLower.startsWith('&lt;svg') ||
+                   /&lt;(doctype html|html|body|head|div|button|svg|script|style)/i.test(codeTrimmedLower.substring(0, 400));
+                   
+    const previewBtn = isHtml ? `<button onclick="previewHTMLDesign('${id}')" style="background:none; border:none; color:#10b981; font-weight:700; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; gap:4px;">👁️ لائیو ڈیزائن (Live Preview)</button>` : '';
     return `
       <div style="border: 1px solid var(--line); border-radius:10px; background:var(--bg); margin:12px 0; overflow:hidden;">
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--panel2); padding:6px 14px; font-size:11px; border-bottom:1px solid var(--line); color:var(--muted); font-family:monospace;">
           <span style="font-weight:700; color:var(--accent); text-transform:uppercase;">${displayLang}</span>
           <div style="display:flex; align-items:center; gap:12px;">
+            ${previewBtn}
             <button onclick="copyPreCodeBlock('${id}', this)" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">📋 کاپی کریں</button>
             <button onclick="downloadPreCodeBlock('${id}', '${displayLang.toLowerCase()}')" style="background:none; border:none; color:var(--accent); font-weight:700; cursor:pointer; font-size:11px;">💾 ڈاؤن لوڈ کریں</button>
           </div>
@@ -1915,7 +2012,6 @@ function formatMarkdown(text) {
       </div>
     `;
   });
-
   // Markdown Tables
   html = html.replace(/\n(\|.+?\|\n\|[-:\s|]+?\|\n(?:\|.+?\|\n?)+)/g, (match, tableContent) => {
     const lines = tableContent.trim().split('\n');
@@ -1926,6 +2022,23 @@ function formatMarkdown(text) {
       return `<tr>${cells}</tr>`;
     }).join('');
     return `<table class="md-table"><thead><tr>${headerRow}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+  });
+
+  // Parse bullet points starting with • into beautiful interactive options buttons
+  html = html.replace(/^\s*•\s*(.+)$/gm, (match, itemText) => {
+    const cleanArg = itemText
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '&quot;');
+    return `
+      <div style="margin: 4px 6px 4px 0; display: inline-block;">
+        <button onclick="submitMenuSelection('${cleanArg}')" style="background: var(--panel2); color: var(--accent); border: 1px solid var(--line); padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='white';" onmouseout="this.style.background='var(--panel2)'; this.style.color='var(--accent)';">
+          ${itemText}
+        </button>
+      </div>
+    `;
   });
 
   html = html.replace(/`([^`\n]+)`/g, '<code style="background:var(--panel2); border:1px solid var(--line); padding:2px 6px; border-radius:5px; font-family:monospace; font-size:12px; color:var(--accent);">$1</code>');
@@ -2004,23 +2117,108 @@ function stopSpeechPlayback(showNotice = false) {
 function testSpeakerVoice() {
   stopSpeechPlayback(false);
   const rate = getSpeechSynthesisRate();
+  const text = 'نووا اے آئی آواز کا ٹیسٹ۔ اب مائیک اور آواز کا نظام بالکل تیار ہے۔';
   showToast(`🔊 Playing speaker test audio (${rate.toFixed(1)}x)...`);
+  
+  const success = playNaturalSpeech(text, true, null);
+  if (!success) {
+    try {
+      const audio = new Audio('/api/tts?text=' + encodeURIComponent(text) + '&lang=ur');
+      audio.playbackRate = rate;
+      currentAudioPlayer = audio;
+      audio.play();
+    } catch (e) {
+      showToast('Speaker test failed');
+    }
+  }
+}
+
+function playNaturalSpeech(cleanText, isUrdu, idx) {
+  if (!('speechSynthesis' in window)) {
+    return false;
+  }
+  
   try {
-    const audio = new Audio('/api/tts?text=' + encodeURIComponent('NOVA AI speaker is active and speaking clearly.') + '&lang=en');
-    audio.playbackRate = rate;
-    currentAudioPlayer = audio;
-    audio.onplay = () => {
-      try { audio.playbackRate = getSpeechSynthesisRate(); } catch (e) {}
-    };
-    audio.play().catch(() => {
-      if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance('NOVA AI speaker is fully working.');
-        u.rate = getSpeechSynthesisRate();
-        window.speechSynthesis.speak(u);
+    window.speechSynthesis.cancel();
+    
+    // Split long texts into shorter fragments for natural flow and no truncation
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = getSpeechSynthesisRate();
+    
+    // Find natural voices
+    const voices = window.speechSynthesis.getVoices();
+    const gender = localStorage.getItem('nova_voice_gender') || 'female';
+    
+    let bestVoice = null;
+    
+    if (isUrdu) {
+      // Find Urdu voices (ur-PK, ur-IN)
+      const urduVoices = voices.filter(v => v.lang.toLowerCase().startsWith('ur') || v.lang.toLowerCase().includes('pk'));
+      if (urduVoices.length > 0) {
+        // Try to match gender by voice name
+        const match = urduVoices.find(v => {
+          const name = v.name.toLowerCase();
+          if (gender === 'female') {
+            return name.includes('uzma') || name.includes('female') || name.includes('zira') || name.includes('samantha') || name.includes('girl') || name.includes('yasmin');
+          } else {
+            return name.includes('guy') || name.includes('male') || name.includes('david') || name.includes('boy') || name.includes('naeem') || name.includes('raza');
+          }
+        });
+        bestVoice = match || urduVoices[0];
       }
-    });
-  } catch(e) {
-    showToast('Speaker test failed');
+    } else {
+      // Find English voices (en-US, en-GB, etc.)
+      const englishVoices = voices.filter(v => v.lang.toLowerCase().startsWith('en'));
+      if (englishVoices.length > 0) {
+        // Try to match gender
+        const match = englishVoices.find(v => {
+          const name = v.name.toLowerCase();
+          if (gender === 'female') {
+            return name.includes('zira') || name.includes('samantha') || name.includes('female') || name.includes('aria') || name.includes('hazel') || name.includes('susan') || name.includes('girl');
+          } else {
+            return name.includes('david') || name.includes('guy') || name.includes('male') || name.includes('george') || name.includes('boy');
+          }
+        });
+        bestVoice = match || englishVoices[0];
+      }
+    }
+    
+    if (bestVoice) {
+      console.log('[NOVA Speech] Selected voice character:', bestVoice.name, '(', bestVoice.lang, ')');
+      utterance.voice = bestVoice;
+    } else {
+      if (isUrdu) {
+        console.warn('[NOVA Speech] No native Urdu voice installed in browser. Falling back to Premium Server-side TTS.');
+        return false;
+      }
+      utterance.lang = 'en-US';
+    }
+    
+    if (idx !== null) {
+      activeSpeakingMsgIndex = idx;
+      updateSpeechButtons();
+    }
+    
+    utterance.onend = () => {
+      if (idx !== null) {
+        activeSpeakingMsgIndex = null;
+        updateSpeechButtons();
+      }
+    };
+    
+    utterance.onerror = (e) => {
+      console.warn('[NOVA Speech] Web Speech synthesis warning:', e);
+      if (idx !== null) {
+        activeSpeakingMsgIndex = null;
+        updateSpeechButtons();
+      }
+    };
+    
+    window.speechSynthesis.speak(utterance);
+    return true;
+  } catch (err) {
+    console.warn('[NOVA Speech] Web Speech engine exception:', err);
+    return false;
   }
 }
 
@@ -2043,14 +2241,21 @@ async function handleSpeakerButtonClick(idx) {
 
   stopSpeechPlayback(false);
 
-  activeSpeakingMsgIndex = idx;
-  updateSpeechButtons();
-
   const isUrdu = /[\u0600-\u06FF]/.test(cleanText);
   const langCode = isUrdu ? 'ur' : 'en';
   const rate = getSpeechSynthesisRate();
 
   showToast(`🔊 Speaking response (${rate.toFixed(1)}x)...`);
+
+  // Try natural client-side Web Speech synthesis first
+  const success = playNaturalSpeech(cleanText, isUrdu, idx);
+  if (success) {
+    return;
+  }
+
+  // Fallback to server-side Google TTS
+  activeSpeakingMsgIndex = idx;
+  updateSpeechButtons();
 
   try {
     const streamUrl = `/api/tts?text=${encodeURIComponent(cleanText.substring(0, 400))}&lang=${langCode}`;
@@ -2081,28 +2286,8 @@ async function handleSpeakerButtonClick(idx) {
 }
 
 function fallbackToWebSpeech(cleanText, isUrdu, idx) {
-  if (!('speechSynthesis' in window)) {
-    activeSpeakingMsgIndex = null;
-    updateSpeechButtons();
-    return;
-  }
-  try {
-    if (window.speechSynthesis.paused) {
-      window.speechSynthesis.resume();
-    }
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = isUrdu ? 'ur-PK' : 'en-US';
-    utterance.rate = getSpeechSynthesisRate();
-    utterance.onend = () => {
-      activeSpeakingMsgIndex = null;
-      updateSpeechButtons();
-    };
-    utterance.onerror = () => {
-      activeSpeakingMsgIndex = null;
-      updateSpeechButtons();
-    };
-    window.speechSynthesis.speak(utterance);
-  } catch (e) {
+  const success = playNaturalSpeech(cleanText, isUrdu, idx);
+  if (!success) {
     activeSpeakingMsgIndex = null;
     updateSpeechButtons();
   }
@@ -3549,6 +3734,13 @@ async function send() {
     saveChats();
     loadMessages();
 
+    if (localStorage.getItem('nova_auto_voice') === 'true') {
+      const lastIdx = currentChat.messages.length - 1;
+      setTimeout(() => {
+        handleSpeakerButtonClick(lastIdx);
+      }, 100);
+    }
+
   } catch (err) {
     console.error(err);
     clearInterval(scrollInterval);
@@ -4339,6 +4531,91 @@ window.addEventListener('appinstalled', () => {
   if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
 });
 
+let currentPreviewCodeId = null;
+
+function previewHTMLDesign(codeId) {
+  const codeEl = document.getElementById(codeId);
+  if (!codeEl) {
+    showToast('⚠️ کوڈ نہیں مل سکا!');
+    return;
+  }
+  const code = codeEl.innerText;
+  currentPreviewCodeId = codeId;
+
+  // Open the modal
+  const modal = document.getElementById('designPreviewModal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+
+  // Set the source of the iframe
+  const iframe = document.getElementById('designPreviewIframe');
+  if (iframe) {
+    iframe.srcdoc = code;
+  }
+
+  // Bind download button
+  const downloadBtn = document.getElementById('btn-prev-download');
+  if (downloadBtn) {
+    downloadBtn.onclick = () => {
+      downloadPreCodeBlock(codeId, 'html');
+    };
+  }
+
+  showToast('👁️ لائیو پریویو لوڈ ہو رہا ہے...');
+}
+
+function closeDesignPreviewModal() {
+  const modal = document.getElementById('designPreviewModal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+  const iframe = document.getElementById('designPreviewIframe');
+  if (iframe) {
+    iframe.srcdoc = '';
+  }
+}
+
+function setPreviewDevice(device) {
+  const wrapper = document.getElementById('previewFrameWrapper');
+  const iframe = document.getElementById('designPreviewIframe');
+  if (!wrapper || !iframe) return;
+
+  // Reset button active states
+  ['mobile', 'tablet', 'desktop'].forEach(d => {
+    const btn = document.getElementById(`btn-prev-${d}`);
+    if (btn) {
+      if (d === device) {
+        btn.style.background = 'var(--accent)';
+        btn.style.color = 'white';
+      } else {
+        btn.style.background = 'none';
+        btn.style.color = 'var(--text)';
+      }
+    }
+  });
+
+  if (device === 'mobile') {
+    wrapper.style.width = '375px';
+    wrapper.style.maxWidth = '100%';
+    wrapper.style.height = '667px';
+    iframe.style.border = '4px solid var(--line)';
+    iframe.style.borderRadius = '24px';
+  } else if (device === 'tablet') {
+    wrapper.style.width = '768px';
+    wrapper.style.maxWidth = '100%';
+    wrapper.style.height = '1024px';
+    iframe.style.border = '4px solid var(--line)';
+    iframe.style.borderRadius = '16px';
+  } else {
+    wrapper.style.width = '100%';
+    wrapper.style.maxWidth = '100%';
+    wrapper.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.borderRadius = '8px';
+  }
+}
+
 // Register offline Service Worker for full PWA offline support
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -4391,6 +4668,11 @@ window.addEventListener('DOMContentLoaded', () => {
   renderHistory();
   loadMessages();
   
+  // Initialize Auto Voice Feedback
+  const savedAutoVoice = localStorage.getItem('nova_auto_voice') === 'true';
+  const autoVoiceCheckbox = document.getElementById('autoVoiceFeedbackCheckbox');
+  if (autoVoiceCheckbox) autoVoiceCheckbox.checked = savedAutoVoice;
+
   // Verify API Key configured status on backend on load
   checkApiKeyStatus();
 
@@ -4405,5 +4687,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<script src="/javascript-voice-section.js"></script>
 </body>
 </html>

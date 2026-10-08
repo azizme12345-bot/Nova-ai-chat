@@ -12,7 +12,7 @@
 // ============================================================================
 // 1. MULTILINGUAL UI DICTIONARY (15 LANGUAGES)
 // ============================================================================
-const APP_TRANSLATIONS = {
+var APP_TRANSLATIONS = {
   'ur-PK': {
     brandName: "نووا اے آئی (NOVA AI)",
     placeholder: "نووا سے کچھ بھی پوچھیں...",
@@ -888,8 +888,6 @@ class WebVoiceAssistant {
     this.mediaRecorder = null;
     this.recordedChunks = [];
     this.audioStream = null;
-    this.audioContext = null;
-    this.analyser = null;
     this.waveformAnimationId = null;
     this.waveformPhase = 0;
 
@@ -950,56 +948,66 @@ class WebVoiceAssistant {
     const inputEl = document.getElementById(this.targetInputId);
     this.baseTextBeforeListening = inputEl ? (inputEl.value || '').trim() : '';
 
-    console.log(`[NOVA Voice Engine] 🎙️ Starting Voice Engine in language: "${this.currentLang}" with Google AI Studio Key`);
+    console.log(`[NOVA Voice Engine] 🎙️ Starting Voice Engine in language: "${this.currentLang}"`);
 
-    // 2. Request microphone stream with studio noise suppression & echo cancellation
+    // 2. Try to capture microphone stream for high-fidelity server STT
+    let streamSuccess = false;
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        console.log('[NOVA Voice Engine] 🎙️ Opening microphone with noise suppression...');
-        try {
-          this.audioStream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-              channelCount: 1
+        console.log('[NOVA Voice Engine] 🎙️ Opening microphone stream...');
+        this.audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            channelCount: 1
+          }
+        }).catch(async (e) => {
+          console.warn('[NOVA Voice Engine] Constraint audio capture failed, retrying basic...');
+          return await navigator.mediaDevices.getUserMedia({ audio: true });
+        });
+
+        if (this.audioStream) {
+          streamSuccess = true;
+          console.log('[NOVA Voice Engine] ✓ Microphone audio stream active.');
+
+          // Configure MediaRecorder for backend Gemini transcription
+          let mimeType = 'audio/webm';
+          if (typeof MediaRecorder !== 'undefined') {
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+            else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+            else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+            else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+
+            try {
+              this.mediaRecorder = new MediaRecorder(this.audioStream, { mimeType });
+              this.mediaRecorder.ondataavailable = (e) => {
+                if (e.data && e.data.size > 0) {
+                  this.recordedChunks.push(e.data);
+                }
+              };
+              this.mediaRecorder.start(200);
+              console.log(`[NOVA Voice Engine] 📡 MediaRecorder started (${mimeType}) in background.`);
+            } catch (recErr) {
+              console.error('[NOVA Voice Engine] Failed to initialize MediaRecorder:', recErr);
             }
-          });
-          console.log('[NOVA Voice Engine] ✓ Studio-grade microphone active.');
-        } catch (constraintErr) {
-          console.log('[NOVA Voice Engine] Retrying with basic audio constraints...');
-          this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          console.log('[NOVA Voice Engine] ✓ Basic audio microphone stream active.');
-        }
-
-        // Start MediaRecorder for Google AI Studio API
-        let mimeType = 'audio/webm';
-        if (typeof MediaRecorder !== 'undefined') {
-          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
-          else if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
-          else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
-          else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
-
-          try {
-            this.mediaRecorder = new MediaRecorder(this.audioStream, { mimeType });
-            this.mediaRecorder.ondataavailable = (e) => {
-              if (e.data && e.data.size > 0) this.recordedChunks.push(e.data);
-            };
-            this.mediaRecorder.start(200);
-            console.log(`[NOVA Voice Engine] 📡 MediaRecorder started (${mimeType}) for Google AI Studio.`);
-          } catch (recErr) {
-            console.warn('[NOVA Voice Engine] MediaRecorder notice:', recErr.message);
           }
         }
       }
     } catch (micErr) {
-      console.warn('[NOVA Voice Engine] Microphone stream setup notice:', micErr.message);
+      console.error('[NOVA Voice Engine] Microphone capture error:', micErr);
     }
 
-    // 3. Start Web Speech API for instant real-time live typing
+    // 3. Start Web Speech API for real-time live-typing feedback
     const SpeechClass = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechClass) {
-      this.startWebSpeechRecognition(SpeechClass);
+      try {
+        this.startWebSpeechRecognition(SpeechClass);
+      } catch (recErr) {
+        console.error('[NOVA Voice Engine] Web Speech API initialization error:', recErr);
+      }
+    } else {
+      console.warn('[NOVA Voice Engine] Web Speech API not supported. Relying solely on Server-side Gemini STT.');
     }
 
     this.isListening = true;
@@ -1011,108 +1019,120 @@ class WebVoiceAssistant {
   }
 
   startWebSpeechRecognition(SpeechClass) {
-    try {
-      if (this.recognition) {
-        try {
-          this.recognition.onstart = null;
-          this.recognition.onresult = null;
-          this.recognition.onerror = null;
-          this.recognition.onend = null;
-          this.recognition.abort();
-        } catch (e) {}
-        this.recognition = null;
+    if (this.recognition) {
+      try {
+        this.recognition.onstart = null;
+        this.recognition.onresult = null;
+        this.recognition.onerror = null;
+        this.recognition.onend = null;
+        this.recognition.abort();
+      } catch (e) {}
+      this.recognition = null;
+    }
+
+    const rec = new SpeechClass();
+    this.recognition = rec;
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    rec.lang = this.currentLang;
+
+    rec.onstart = () => {
+      console.log(`[NOVA Voice Engine] 🟢 Web Speech engine active (Language: ${rec.lang})`);
+    };
+
+    rec.onspeechstart = () => {
+      console.log('[NOVA Voice Engine] 🗣️ User speech detected by browser engine.');
+      this.hasDetectedSpeech = true;
+    };
+
+    rec.onresult = (event) => {
+      let interimText = '';
+      let newFinalText = '';
+
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const res = event.results[i];
+        const transcript = res[0] ? res[0].transcript : '';
+
+        if (res.isFinal) {
+          newFinalText += transcript + ' ';
+          console.log(`[NOVA Voice Engine] ✅ Browser word detected: "${transcript.trim()}"`);
+        } else {
+          interimText += transcript;
+        }
       }
 
-      const rec = new SpeechClass();
-      this.recognition = rec;
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.maxAlternatives = 3;
-      rec.lang = this.currentLang;
-
-      rec.onstart = () => {
-        console.log(`[NOVA Voice Engine] 🟢 Web Speech engine active (Language: ${rec.lang})`);
-      };
-
-      rec.onspeechstart = () => {
-        console.log('[NOVA Voice Engine] 🗣️ User speech detected!');
+      if (newFinalText) {
+        this.finalTranscriptAccumulated += newFinalText;
         this.hasDetectedSpeech = true;
-      };
+      }
+      this.interimTranscriptCurrent = interimText;
 
-      rec.onspeechend = () => {
-        console.log('[NOVA Voice Engine] 🔇 Speech pause detected.');
-      };
+      const totalRecognized = (this.finalTranscriptAccumulated + this.interimTranscriptCurrent).trim();
+      if (totalRecognized) {
+        const fullInputText = this.baseTextBeforeListening
+          ? `${this.baseTextBeforeListening} ${totalRecognized}`
+          : totalRecognized;
+        this.writeToInputField(fullInputText);
+      }
+    };
 
-      rec.onresult = (event) => {
-        let interimText = '';
-        let newFinalText = '';
+    rec.onerror = (event) => {
+      let error = event && event.error ? String(event.error).toLowerCase().trim() : 'unknown';
+      error = error.replace(/^["']|["']$/g, ''); // Remove quotes if present
 
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const res = event.results[i];
-          const transcript = res[0] ? res[0].transcript : '';
-          const confidence = res[0] ? (res[0].confidence * 100).toFixed(1) : '100';
+      if (error === 'aborted' || error.includes('abort')) {
+        console.log('[NOVA Voice Engine] Speech recognition aborted (intended or browser-managed stop).');
+        return;
+      }
 
-          if (res.isFinal) {
-            newFinalText += transcript + ' ';
-            console.log(`[NOVA Voice Engine] ✅ Word detected: "${transcript.trim()}" (${confidence}%)`);
-          } else {
-            interimText += transcript;
-            console.log(`[NOVA Voice Engine] 💬 Live interim: "${transcript}"`);
-          }
-        }
+      console.error(`[NOVA Voice Engine] ❌ Speech Recognition Error: "${error}"`);
 
-        if (newFinalText) {
-          this.finalTranscriptAccumulated += newFinalText;
-          this.hasDetectedSpeech = true;
-        }
-        this.interimTranscriptCurrent = interimText;
+      if (error === 'not-allowed' || error === 'service-not-allowed') {
+        console.warn('[NOVA Voice Engine] Microphone blocked or not allowed in Web Speech API.');
+        showToast(this.currentLang.startsWith('ur') ? '⚠️ مائیکروفون کی اجازت مسترد ہے! براہ کرم براؤزر سیٹنگز سے چالو کریں۔' : '⚠️ Microphone permission denied! Please allow access in browser settings.');
+        return;
+      }
 
-        const totalRecognized = (this.finalTranscriptAccumulated + this.interimTranscriptCurrent).trim();
-        if (totalRecognized) {
-          const fullInputText = this.baseTextBeforeListening
-            ? `${this.baseTextBeforeListening} ${totalRecognized}`
-            : totalRecognized;
-          this.writeToInputField(fullInputText);
-        }
-      };
-
-      rec.onerror = (event) => {
-        const error = event ? event.error : 'unknown';
-        console.log(`[NOVA Voice Engine] ℹ️ Live recognition status: "${error}"`);
-
-        if (error === 'aborted' || error === 'no-speech') return;
-
-        if (error === 'network') {
-          if (this.isListening && this.retryCount < this.maxRetries) {
-            this.retryCount++;
-            console.log(`[NOVA Voice Engine] Auto-retrying speech session (Attempt ${this.retryCount}/${this.maxRetries})...`);
-            setTimeout(() => {
-              if (this.isListening && this.recognition) {
-                try { this.recognition.start(); } catch (e) {}
-              }
-            }, 250);
-          }
-        }
-      };
-
-      rec.onend = () => {
-        if (this.isListening) {
+      // Retry on transient errors like network or silence to keep session active
+      if (error === 'no-speech' || error === 'network') {
+        if (this.isListening && this.retryCount < this.maxRetries) {
+          this.retryCount++;
+          console.log(`[NOVA Voice Engine] Retrying Web Speech API (Attempt ${this.retryCount}/${this.maxRetries}) due to: "${error}"`);
           setTimeout(() => {
-            if (this.isListening && this.recognition) {
-              try { this.recognition.start(); } catch (e) {}
+            if (this.isListening && this.recognition === rec) {
+              try {
+                rec.abort();
+                rec.start();
+              } catch (e) {
+                console.warn('[NOVA Voice Engine] Retry start failed:', e.message);
+              }
             }
-          }, 100);
+          }, 400);
         }
-      };
+      }
+    };
 
+    rec.onend = () => {
+      console.log('[NOVA Voice Engine] Web Speech API session ended.');
+      if (this.isListening && this.recognition === rec) {
+        setTimeout(() => {
+          if (this.isListening && this.recognition === rec) {
+            try { rec.start(); } catch (e) {}
+          }
+        }, 150);
+      }
+    };
+
+    try {
       rec.start();
     } catch (err) {
-      console.warn('[NOVA Voice Engine] Web Speech start notice:', err.message);
+      console.error('[NOVA Voice Engine] Failed to start SpeechRecognition:', err.message);
     }
   }
 
   stop() {
-    console.log('[NOVA Voice Engine] ⏹️ Stop requested. Finalizing transcription with Google AI Studio...');
+    console.log('[NOVA Voice Engine] ⏹️ Stop requested. Finalizing transcription...');
     this.isListening = false;
     this.isStarting = false;
     this.updateUIState(false);
@@ -1121,6 +1141,7 @@ class WebVoiceAssistant {
     if (this.recognition) {
       try {
         this.recognition.onend = null;
+        this.recognition.onerror = null;
         this.recognition.stop();
       } catch (e) {}
     }
@@ -1128,7 +1149,7 @@ class WebVoiceAssistant {
     const currentLang = this.getEffectiveLanguage();
     const userStoredKey = localStorage.getItem('nova_user_gemini_key') || '';
 
-    // Send high-fidelity audio to Google AI Studio Gemini API STT on server
+    // Handle high-fidelity audio transcription using Gemini backend
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       try {
         const recorder = this.mediaRecorder;
@@ -1137,12 +1158,17 @@ class WebVoiceAssistant {
         }
 
         recorder.onstop = async () => {
-          if (this.recordedChunks.length === 0) return;
-          const blob = new Blob(this.recordedChunks, { type: recorder.mimeType || 'audio/webm' });
-          console.log(`[NOVA Voice Engine] 📤 Sending ${blob.size} bytes audio to Google AI Studio (Gemini 3.8 Flash)...`);
+          if (this.recordedChunks.length === 0) {
+            console.warn('[NOVA Voice Engine] No audio segments recorded.');
+            return;
+          }
 
-          // If speech was already recognized in real-time, we keep it, but also refine with Gemini
-          if (!this.finalTranscriptAccumulated) {
+          const blob = new Blob(this.recordedChunks, { type: recorder.mimeType || 'audio/webm' });
+          console.log(`[NOVA Voice Engine] 📤 Sending ${blob.size} bytes audio to server for Gemini STT transcription...`);
+
+          // Only show transcribing toast if real-time engine hasn't written anything substantial yet
+          const liveText = (this.finalTranscriptAccumulated + this.interimTranscriptCurrent).trim();
+          if (!liveText) {
             showToast(currentLang.startsWith('ur') ? '⏳ گوگل اے آئی سے آواز تبدیل کی جا رہی ہے...' : '⏳ Transcribing with Google AI...');
           }
 
@@ -1159,25 +1185,41 @@ class WebVoiceAssistant {
                   customApiKey: userStoredKey
                 })
               });
+
               if (res.ok) {
                 const data = await res.json();
-                console.log('[NOVA Voice Engine] 📥 Google AI Studio STT response:', data);
-                if (data && data.transcript && data.transcript.trim()) {
-                  const text = data.transcript.trim();
-                  console.log(`[NOVA Voice Engine] ✅ Google AI Studio Transcript: "${text}"`);
-                  const combined = this.baseTextBeforeListening ? `${this.baseTextBeforeListening} ${text}` : text;
+                console.log('[NOVA Voice Engine] 📥 Server STT Response:', data);
+
+                if (data && data.success && data.transcript && data.transcript.trim()) {
+                  const verifiedText = data.transcript.trim();
+                  console.log(`[NOVA Voice Engine] ✅ Google AI Studio Verified Transcript: "${verifiedText}"`);
+                  
+                  const combined = this.baseTextBeforeListening 
+                    ? `${this.baseTextBeforeListening} ${verifiedText}` 
+                    : verifiedText;
+                  
                   this.writeToInputField(combined);
                   showToast(currentLang.startsWith('ur') ? '✓ آواز کامیابی سے لکھی گئی!' : '✓ Speech transcribed successfully!');
+                } else {
+                  console.warn('[NOVA Voice Engine] Server returned unsuccessful transcription. Falling back to local browser text.');
+                  if (liveText) {
+                    showToast(currentLang.startsWith('ur') ? '✓ آواز لکھی گئی (لوکل انجن)' : '✓ Transcribed (local engine)');
+                  }
                 }
+              } else {
+                console.warn('[NOVA Voice Engine] Server transcription endpoint error. Fallback active.');
               }
             } catch (err) {
-              console.warn('[NOVA Voice Engine] Google AI Studio transcribe notice:', err.message);
+              console.error('[NOVA Voice Engine] Failed to transcribe with server:', err);
             }
           };
           reader.readAsDataURL(blob);
         };
+
         recorder.stop();
-      } catch (e) {}
+      } catch (e) {
+        console.error('[NOVA Voice Engine] Error stopping MediaRecorder:', e);
+      }
     }
 
     if (this.audioStream) {
@@ -1187,20 +1229,14 @@ class WebVoiceAssistant {
       this.audioStream = null;
     }
 
-    if (this.audioStream) {
-      try {
-        this.audioStream.getTracks().forEach(t => t.stop());
-      } catch (e) {}
-      this.audioStream = null;
-    }
-
-    if (this.finalTranscriptAccumulated || this.interimTranscriptCurrent) {
+    const liveText = (this.finalTranscriptAccumulated + this.interimTranscriptCurrent).trim();
+    if (liveText) {
       showToast(currentLang.startsWith('ur') ? '✓ آواز کامیابی سے لکھی گئی!' : '✓ Speech transcribed successfully!');
     }
   }
 
   toggle() {
-    console.log(`[NOVA Voice Engine] 🔘 Toggle button tapped. Current listening state: ${this.isListening}`);
+    console.log(`[NOVA Voice Engine] 🔘 Microphone button toggled. State: isListening=${this.isListening}`);
     if (this.isListening) {
       this.stop();
     } else {
@@ -1214,7 +1250,7 @@ class WebVoiceAssistant {
 
     inputEl.value = text;
 
-    // Set text direction automatically
+    // Set text direction automatically based on characters (RTL / LTR)
     const isRTL = /[\u0600-\u06FF]/.test(text);
     inputEl.style.direction = isRTL ? 'rtl' : 'ltr';
     inputEl.style.textAlign = isRTL ? 'right' : 'left';
